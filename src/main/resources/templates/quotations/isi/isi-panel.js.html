@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="isi-panel-script" th:inline="none">
+  let isiEditingRevisionId = null;
+  function openIsiEditPanel(leadId, quotationType, companyName, revisionId) {
+    if ((quotationType || '').trim().toLowerCase() !== 'bis-isi certification') return;
+    document.getElementById('isiLeadIdInput').value = leadId;
+    isiEditingRevisionId = revisionId || null;
+    document.getElementById('isiQuotationForm').reset();
+    document.getElementById('isiReferenceNoInput').value = 'REF-' + leadId;
+    if (!document.getElementById('isiQuotationDateInput').value) {
+      document.getElementById('isiQuotationDateInput').value = new Date().toISOString().slice(0, 10);
+    }
+    openModal('isiEditModal');
+    loadIsiQuotation(leadId, companyName, revisionId);
+  }
+
+  function setIsiFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value != null ? value : '';
+  }
+
+  function renderIsiRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('isiRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      button.textContent = 'R' + (index + 1);
+      button.onclick = function (event) { event.preventDefault(); event.stopPropagation(); closeModal('isiEditModal'); setTimeout(function () { openIsiEditPanel(leadId, 'BIS-ISI Certification', '', item.id); }, 50); };
+      box.appendChild(button);
+    });
+  }
+
+  function loadIsiQuotation(leadId, companyName, revisionId) {
+    fetch('/leads/' + leadId + '/isi-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) return;
+        const quotation = data.quotation || {};
+        const lead = data.lead || {};
+        isiEditingRevisionId = quotation.id || null;
+        renderIsiRevisions(data.quotations, leadId, quotation.id || null);
+        if (!quotation.id) { setIsiFieldValue('isiCompanyNameInput', companyName || lead.companyName || ''); return; }
+        setIsiFieldValue('isiReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
+        setIsiFieldValue('isiQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
+        setIsiFieldValue('isiCompanyNameInput', quotation.companyName || companyName || lead.companyName || '');
+        setIsiFieldValue('isiCertificateNameInput', quotation.certificateName || lead.mcatName || '');
+        setIsiFieldValue('isiClientNameInput', quotation.clientName || lead.isName || '');
+        setIsiFieldValue('isiCommercialAlias1', quotation.commercialAlias1 || '');
+        setIsiFieldValue('isiCommercialValue1', quotation.commercialValue1 || '1000');
+        setIsiFieldValue('isiCommercialAlias2', quotation.commercialAlias2 || '');
+        setIsiFieldValue('isiCommercialValue2', quotation.commercialValue2 || '7000');
+        setIsiFieldValue('isiCommercialAlias3', quotation.commercialAlias3 || '');
+        setIsiFieldValue('isiCommercialValue3', quotation.commercialValue3 || '0.00');
+        setIsiFieldValue('isiCommercialAlias4', quotation.commercialAlias4 || '');
+        setIsiFieldValue('isiCommercialValue4', quotation.commercialValue4 || '1000');
+        setIsiFieldValue('isiCommercialAlias5', quotation.commercialAlias5 || '');
+        setIsiFieldValue('isiCommercialValue5', quotation.commercialValue5 || '0');
+        setIsiFieldValue('isiConsultancyCharge', quotation.consultancyCharge || 'Consultancy charge for entire contract');
+        setIsiFieldValue('isiConsultancyAlias1', quotation.consultancyAlias1 || '');
+        setIsiFieldValue('isiConsultancyValue1', quotation.consultancyValue1 || '45000');
+        setIsiFieldValue('isiCalibrationFees', quotation.consultancyFees || 'Engineer visit travel and food');
+        setIsiFieldValue('isiConsultancyAlias2', quotation.consultancyAlias2 || '');
+        setIsiFieldValue('isiConsultancyValue2', quotation.consultancyValue2 || '');
+        setIsiFieldValue('isiOtherExpense', quotation.otherExpense || 'Other expenses BIS Officer');
+        setIsiFieldValue('isiConsultancyAlias3', quotation.consultancyAlias3 || '');
+        setIsiFieldValue('isiConsultancyValue3', quotation.consultancyValue3 || '');
+        setIsiFieldValue('isiLabSetupCost', quotation.labSetupCost || '');
+        setIsiFieldValue('isiLabTime', quotation.leadTime || '');
+        document.getElementById('isiAsPerMsme').checked = quotation.asPerMsme !== false;
+        setIsiFieldValue('isiAdvanceFee', quotation.advanceFee || '');
+        setIsiFieldValue('isiRegistrationFee', quotation.registrationFee || '');
+        setIsiFieldValue('isiInspectionFee', quotation.inspectionFee || '');
+        setIsiFieldValue('isiGrantingFee', quotation.grantingFee || '');
+        setIsiFieldValue('isiNotes', quotation.notes || '');
+        updateIsiCommercialValue3();
+      })
+      .catch(function () {
+        setIsiFieldValue('isiCompanyNameInput', companyName || '');
+        updateIsiCommercialValue3();
+      });
+  }
+
+  function updateIsiCommercialValue3() {
+    const alias3 = parseFloat(document.getElementById('isiCommercialAlias3').value) || 0;
+    const checkbox80 = document.getElementById('isiCheckbox80');
+    const checkbox50 = document.getElementById('isiCheckbox50');
+    const checkbox20 = document.getElementById('isiCheckbox20');
+    const value3 = document.getElementById('isiCommercialValue3');
+    let deduction = 0;
+    if (checkbox80.checked) deduction = alias3 * 0.8;
+    else if (checkbox50.checked) deduction = alias3 * 0.5;
+    else if (checkbox20.checked) {
+      const stored = localStorage.getItem('isiConcession20');
+      if (stored === '1') deduction = alias3 * 0.2;
+    }
+    value3.value = (alias3 - deduction).toFixed(2);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const alias3 = document.getElementById('isiCommercialAlias3');
+    const boxes = document.querySelectorAll('.isiConcessionCheckbox');
+    if (!alias3 || !boxes.length) return;
+    boxes.forEach(function (box) {
+      box.addEventListener('change', function () {
+        boxes.forEach(function (b) { if (b !== box) b.checked = false; });
+        if (box.id === 'isiCheckbox20' && box.checked) {
+          document.getElementById('isiCustom20Modal').classList.add('open');
+        }
+        if (!box.checked) localStorage.removeItem('isiConcession20');
+        updateIsiCommercialValue3();
+      });
+    });
+    alias3.addEventListener('input', updateIsiCommercialValue3);
+  });
+
+  function submitIsiConcession() {
+    const val = document.getElementById('isiScaleMediumInput').value;
+    if (!val) { alert('Concession for Medium (20%) is required'); return; }
+    localStorage.setItem('isiConcession20', val);
+    document.getElementById('isiCustom20Modal').classList.remove('open');
+    updateIsiCommercialValue3();
+  }
+
+  function saveIsiQuotation() {
+    const leadId = document.getElementById('isiLeadIdInput').value;
+    if (!leadId) return;
+    const payload = {
+      referenceNo: document.getElementById('isiReferenceNoInput').value,
+      quotationDate: document.getElementById('isiQuotationDateInput').value || null,
+      companyName: document.getElementById('isiCompanyNameInput').value,
+      certificateName: document.getElementById('isiCertificateNameInput').value,
+      clientName: document.getElementById('isiClientNameInput').value,
+      commercialAlias1: document.getElementById('isiCommercialAlias1').value,
+      commercialValue1: document.getElementById('isiCommercialValue1').value,
+      commercialAlias2: document.getElementById('isiCommercialAlias2').value,
+      commercialValue2: document.getElementById('isiCommercialValue2').value,
+      commercialAlias3: document.getElementById('isiCommercialAlias3').value,
+      commercialValue3: document.getElementById('isiCommercialValue3').value,
+      commercialAlias4: document.getElementById('isiCommercialAlias4').value,
+      commercialValue4: document.getElementById('isiCommercialValue4').value,
+      commercialAlias5: document.getElementById('isiCommercialAlias5').value,
+      commercialValue5: document.getElementById('isiCommercialValue5').value,
+      consultancyCharge: document.getElementById('isiConsultancyCharge').value,
+      consultancyAlias1: document.getElementById('isiConsultancyAlias1').value,
+      consultancyValue1: document.getElementById('isiConsultancyValue1').value,
+      consultancyFees: document.getElementById('isiCalibrationFees').value,
+      consultancyAlias2: document.getElementById('isiConsultancyAlias2').value,
+      consultancyValue2: document.getElementById('isiConsultancyValue2').value,
+      otherExpense: document.getElementById('isiOtherExpense').value,
+      consultancyAlias3: document.getElementById('isiConsultancyAlias3').value,
+      consultancyValue3: document.getElementById('isiConsultancyValue3').value,
+      labSetupCost: document.getElementById('isiLabSetupCost').value,
+      leadTime: document.getElementById('isiLabTime').value,
+      asPerMsme: document.getElementById('isiAsPerMsme').checked,
+      advanceFee: document.getElementById('isiAdvanceFee').value,
+      registrationFee: document.getElementById('isiRegistrationFee').value,
+      inspectionFee: document.getElementById('isiInspectionFee').value,
+      grantingFee: document.getElementById('isiGrantingFee').value,
+      notes: document.getElementById('isiNotes').value
+    };
+    payload.id = isiEditingRevisionId;
+    fetch('/leads/' + leadId + '/isi-quotation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', [document.querySelector('meta[name="_csrf_header"]')?.content]: document.querySelector('meta[name="_csrf"]')?.content },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          alert('Failed to save BIS-ISI quotation: ' + ((data && data.message) || 'Unknown error'));
+          return;
+        }
+        showLeadToast('BIS-ISI quotation saved successfully');
+        closeModal('isiEditModal');
+      })
+      .catch(function () {
+        alert('Something went wrong while saving the BIS-ISI quotation.');
+      });
+  }
+
+  function downloadIsiQuotationPdf() {
+    const leadId = document.getElementById('isiLeadIdInput').value;
+    if (!leadId || !isiEditingRevisionId) {
+      alert('Save the ISI quotation first before downloading its PDF.');
+      return;
+    }
+    window.open('/leads/' + encodeURIComponent(leadId) + '/isi-quotation/' + encodeURIComponent(isiEditingRevisionId) + '/pdf', '_blank');
+  }
+</script>
+</body>
+</html>

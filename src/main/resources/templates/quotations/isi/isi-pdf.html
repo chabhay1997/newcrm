@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    .text-justify { text-align: justify !important; }
+
+    .b-none {
+      border: none !important;
+      outline: none;
+    }
+
+    .logo1 {
+      position: fixed;
+      width: 103%;
+      height: 102%;
+      border: 1px solid lightgray;
+      top: -20px;
+      left: 0;
+      z-index: -1;
+      page-break-after: always;
+      margin-top: 20px;
+      margin-left: -10px;
+    }
+
+    .logo2 {
+      position: fixed;
+      width: 100%;
+      top: 35%;
+      left: 5%;
+      opacity: 0.1;
+      z-index: 0;
+      display: block;
+    }
+
+    .pdf-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .table1, .table2, .table3, .table4, .table5, .table6, .table7, .table8, .table10 {
+      width: 103%;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid lightgray;
+      left: 1px;
+      border-collapse: collapse;
+      border-radius: 0px;
+      margin-left: -10px;
+      page-break-inside: avoid;
+    }
+
+    .table3 tbody td, .table4 tbody td, .table5 tbody td, .table6 tbody td, .table7 tbody td, .table8 tbody td {
+      padding: 3px;
+      font-size: 12px;
+      border: 1px solid lightgrey !important;
+    }
+
+    .table1 th, .table1 td { padding: 0; color: black; font-size: 13px; }
+    .table1 th { font-weight: 600; }
+    .table1 td { font-weight: 400; font-family: sans-serif; }
+    .table1 { position: relative; top: 110px; }
+
+    .table10 th, .table10 td { padding: 0; color: black; font-size: 13px; }
+    .table10 th { font-weight: 600; }
+    .table10 td { font-weight: 400; font-family: sans-serif; }
+    .table10 { position: relative; top: 110px; }
+
+    .table2 { position: relative; top: 119px; padding: 4px; text-align: center !important; }
+
+    .table8 { border-spacing: 0px !important; position: relative; top: 119px; }
+    .table3 { border-spacing: 0px !important; position: relative; top: 0px; }
+    .table5 { margin-top: 40px; }
+
+    .bg-grey { background-color: #E5E4E2 !important; }
+    .bg-info { background-color: #115D88 !important; }
+    .left-align { text-align: left; }
+    .grey { color: black; font-weight: 400; }
+
+    .font-12 { font-size: 12px !important; }
+    .font-14 { font-size: 14px !important; }
+    .font-15 { font-size: 15px !important; }
+    .font-16 { font-size: 16px !important; }
+    .font-17 { font-size: 17px; }
+    .font-18 { font-size: 18px; }
+
+    .text-center { text-align: center !important; font-size: 14px; }
+    .bold { font-weight: bold; }
+    .fixed-width { padding: 5px !important; width: 50px; }
+
+    .bg-black { padding: 4px; background-color: black !important; color: white !important; }
+
+    .page-break { page-break-before: always; }
+    .page-break-inside { page-break-inside: avoid; }
+    .ml-20 { margin-left: 20px; }
+
+    .border-th { color: white; border: 1px solid darkgrey; }
+
+    .text-left { text-align: left !important; font-size: 14px; }
+    .text-right { text-align: right !important; font-size: 14px; }
+
+    .ul-none { list-style-type: none; }
+    .p10 { padding: 10px !important; }
+    .p20 { padding: 20px !important; }
+    .p30 { padding: 30px !important; }
+    .f20 { width: 5% !important; }
+    .mt2 { margin-top: 2px; }
+    .c-red { color: red; }
+    .w-95 { width: 95%; }
+    .w60px { width: 60px; }
+    .w150px { width: 150px; }
+    .li-left { margin-left: -10px; }
+    .li-left2 { margin-left: -15px; }
+    .h-40 { height: 40px !important; }
+    .h-30 { height: 30px !important; }
+    .ml-25 { margin-left: 25px; }
+    .h25 { height: 25px; }
+    .h20 { height: 20px; }
+    .ml-10 { margin-left: 10px; }
+
+    .stamp { margin-top: -115px; margin-left: 60px; width: 38%; opacity: 0.6; }
+
+    .table1 th { white-space: nowrap; }
+    .table1 th + td { white-space: nowrap; width: 4%; }
+    .table10 th { white-space: nowrap; }
+    .table10 th + td { white-space: nowrap; width: 4%; }
+
+    .pl10 { padding-left: 10px !important; }
+    .pr10 { padding-right: 10px !important; }
+  </style>
+</head>
+<body>
+
+  <img class="logo1" th:src="${letterheadDataUri}" alt="" />
+  <img class="logo2" th:src="${watermarkDataUri}" alt="watermark" />
+
+  <div class="pdf-content">
+  <table class="table1 b-none b1 text-justify" style="margin-top:15px;">
+    <thead>
+      <tr>
+        <th class="pl10 font-15" style="text-align: left; width: 11%;">Reference No:</th>
+        <td class="font-15" style="text-align: left; width: 20%;" th:text="${quotation.referenceNo}">REF-6-R2</td>
+        <th class="font-15" style="text-align: right;">Kind Attention: </th>
+        <td class="pr10 font-15" style="text-align: right;" th:text="${quotation.clientName}">Client</td>
+      </tr>
+    </thead>
+  </table>
+
+  <table class="table10 b-none b1 text-justify">
+    <thead>
+      <tr>
+        <th class="left-align grey pl10 font-15" style="width: 0px;">Date :</th>
+        <td class="left-align font-15" style="width:20%!important;" th:text="${quotationDate}">08-09-2026</td>
+        <th class="grey text-right font-15">Company Name :</th>
+        <td class="text-right pr10 font-15"
+            th:text="${'M/S ' + (quotation.companyName != null ? quotation.companyName : lead.companyName) + '/Confidential'}">
+          M/S Company/Confidential
+        </td>
+      </tr>
+    </thead>
+  </table>
+
+  <table class="table2 bg-grey b-none b1 text-justify" style="margin-top: 10px;">
+    <small class="font-14 bold text-justify" style="font-family:sans-serif;color:#115D88;">
+      PROPOSAL LETTER FOR <span>BIS-ISI CERTIFICATION</span>
+    </small>
+  </table>
+
+  <table class="table8" style="margin-left:0px; width:103%;margin-left: -10px;">
+    <thead>
+      <tr>
+        <th style="border-right: 1px solid grey;height:30px;width:170px;">Name of Product &amp; standard</th>
+        <td th:text="${quotation.certificateName}">Product and standard</td>
+      </tr>
+    </thead>
+  </table>
+
+  <p class="font-14 text-justify ml-10" style="margin-top:125px !important;">We are happy to provide you with our
+    product certification consulting services under the following conditions.</p>
+
+  <p class="font-17 bold text-justify ml-10" style="margin-top: -10px;">Part 1 Functional Scope: -</p>
+
+  <h6 class="font-15 text-justify ml-10" style="margin-top: -12px;"> We shall offer the following services as part
+    of our agreement–</h6>
+
+  <ul style="margin-top:-30px;" class="font-14 text-justify">
+    <li class="li-left">First stage entire paperwork related to the certification.</li>
+    <li class="li-left">Second stage development of samples as per standards.</li>
+    <li class="li-left">Third stage sample to be tested in BIS authorized laboratory.</li>
+    <li class="li-left">Training of QCI and other preparation for inspection (Collection of all documents as per
+      the standard to submit the application).</li>
+    <li class="li-left">Fourth stage inspection by the certification body.</li>
+    <li class="li-left">Fifth-stage licenses to be awarded from the certification body.</li>
+  </ul>
+  <p class="font-14 text-justify ml-10" style="margin-top: -10px;"> The above work shall be carried out in close
+    cooperation with your top management and other personnel who will be required to devote time and attention
+    during development of sample.</p>
+
+  <p class="font-14 bold text-justify ml-10" style="margin-top:-13px;">Part 2 Commercial Scope BIS Fee
+    structure:-</p>
+
+  <table class="table3 b1 text-justify">
+    <thead>
+      <tr class="bg-info">
+        <th class="border-th w60px text-center h25">SI No.</th>
+        <th class="border-th text-center">Expense</th>
+        <th class="border-th w150px text-center">Value</th>
+      </tr>
+    </thead>
+    <tbody class="text-center">
+      <tr th:each="item, stat : ${commercialItems}">
+        <td class="font-15" th:text="${stat.count}">1</td>
+        <td class="text-left font-14">
+          <span th:text="${item.expense}">BIS application fee</span>
+          <span th:if="${item.alias != null and !#strings.isEmpty(item.alias)}" th:text="${' (' + item.alias + ')'}"></span>
+        </td>
+        <td class="font-14" th:text="${item.value != null and !#strings.isEmpty(item.value) ? item.value + ' INR/-' : '-'}">1,000 INR/-</td>
+      </tr>
+      <tr class="bg-info text-white">
+        <td></td>
+        <td class="text-left h20" style="font-size: 15px;"><b>Total Fees + GST</b></td>
+        <td class="font-15" th:text="${commercialTotal + ' INR/-'}"><b>0 INR/-</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="font-14 bold text-justify ml-10" style="margin-top: 5px;">Consultancy Fee structure:</p>
+
+  <table class="table4 text-justify" style="margin-top: -5px;">
+    <thead>
+      <tr class="bg-info">
+        <th class="border-th w60px text-center h25">SI No.</th>
+        <th class="border-th text-center">Expense</th>
+        <th class="border-th w150px text-center">Value</th>
+      </tr>
+    </thead>
+    <tbody class="text-center">
+      <tr th:each="item, stat : ${consultancyItems}">
+        <td class="font-15" th:text="${stat.count}">1</td>
+        <td class="text-left font-14">
+          <span th:text="${item.expense}">Consultancy charge for entire contract</span>
+          <span th:if="${item.alias != null and !#strings.isEmpty(item.alias)}" th:text="${' (' + item.alias + ')'}"></span>
+        </td>
+        <td class="font-14" th:text="${item.value != null and !#strings.isEmpty(item.value) ? item.value + ' INR/-' : '-'}">45,000 INR/-</td>
+      </tr>
+      <tr class="bg-info text-white">
+        <td></td>
+        <td class="text-left h20 font-15"><b>Total Fees</b></td>
+        <td class="font-15" th:text="${consultancyTotal + ' INR/-'}"><b>0 INR/-</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="font-14 text-justify ml-10">Note:18% GST Extra (Where applicable)</p>
+  <p class="font-15 text-justify ml-10" style="margin-top:-10px;page-break-after:always;font-weight:600;">
+    Lab setup cost:-
+    <span style="white-space:nowrap;" th:text="${quotation.labSetupCost != null ? quotation.labSetupCost : 'N/A'}">N/A</span>,
+    Validity License :- 5 Year (Production Data Every Year Required)
+  </p>
+
+  <p class="font-14 text-justify" style="padding-top: 100px;margin-left:22px;font-weight: 600;">Checklist for ISI
+    Certificates:-</p>
+  <ul style="margin-top:-5px;" class="font-14 ul-none text-justify">
+    <li class="li-left2">1. Copy of GST Certificate / PAN Card of company or authorized signatory.</li>
+    <li class="li-left2">2. Copy of Partnership Deed / MOA (for Private Limited Co.)</li>
+    <li class="li-left2">3. MSME Certificate</li>
+    <li class="li-left2">4. List of Machinery in the following format:</li>
+  </ul>
+
+  <table class="table5 text-justify text-center" style="margin-top: 10px;">
+    <thead>
+      <tr class="bg-info">
+        <th class="border-th h-40" style="width: 50px;">SI No</th>
+        <th class="border-th h-40">Machinery</th>
+        <th class="border-th h-40">Make</th>
+        <th class="border-th h-40">Capicity</th>
+        <th class="border-th h-40">Number</th>
+        <th class="border-th h-40">Remarks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="p20"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p class="font-14 text-justify ml-25">5. List of Raw Material in the following format</p>
+
+  <table class="table6 text-justify text-center">
+    <thead>
+      <tr class="bg-info">
+        <th class="border-th h-40" style="width: 50px;">SI No</th>
+        <th class="border-th h-40">Raw Material</th>
+        <th class="border-th h-40">Name Of Supplier</th>
+        <th class="border-th h-40">With or Without BIS Certification mark</th>
+        <th class="border-th h-40">Test Certificate of the supplier</th>
+        <th class="border-th h-40">How Received Batches/ Lots Nature of Package</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="p20"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p class="font-14 text-justify ml-25">6. List of Equipment Quotation's in the following format: (WITH MAKE)</p>
+
+  <table class="table7 text-justify text-center">
+    <thead>
+      <tr class="bg-info text-white">
+        <th class="border-th h-40" style="width: 50px;">SI No</th>
+        <th class="border-th h-40">Test Equipment/Chemicals and Identification</th>
+        <th class="border-th h-40">Numbers(Where applicable) Least Count &amp; Range (Where applicable)</th>
+        <th class="border-th h-40">Valid Calibration (Were required) Yes/No</th>
+        <th class="border-th h-40">Test Used in with Clause Reference</th>
+        <th class="border-th h-40">Remarks(Indicate number of Equipment)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="p30"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <ul class="font-14 ul-none text-justify" style="margin-top:20px;page-break-after:always;">
+    <li class="mt2 li-left2">7. Unit of production per day and per annum and price.</li>
+    <li class="mt2 li-left2">8. Process Flow Chart &amp; Detailed Production Process Description.</li>
+    <li class="mt2 li-left2">9. Brand Name to be covered.</li>
+    <li class="mt2 li-left2">10. Layout Plan with lab dimension.</li>
+    <li class="mt2 li-left2">11. Location Plan.</li>
+    <li class="mt2 li-left2">12. Weekly Off.</li>
+    <li class="mt2 li-left2">13. Appointment letter of QCI along with his qualification certificate and Id.</li>
+    <li class="mt2 li-left2">14. Office &amp; Factory Address with City District State and Area PIN Code.</li>
+    <li class="mt2 li-left2">15. Calibration Certificate of Equipment Quotation.</li>
+    <li class="mt2 li-left2">16. Raw material test certificate with relevant IS.</li>
+    <li class="mt2 li-left2">17. Factory test Report.</li>
+    <li class="mt2 li-left2">18. Designation of all members of top management with E-mail address and permanent
+      contact number.</li>
+    <li class="mt2 li-left2">19. Quantity per package.</li>
+    <li class="mt2 li-left2">20. Nature of packing of product.</li>
+    <li class="mt2 li-left2">21. Nature of Printing on the product</li>
+  </ul>
+
+  <p class="font-18 text-justify ml-10" style="margin-top: 110px;"><u>Payment Terms and Conditions :-</u></p>
+
+  <ul class="font-14 ul-none text-justify">
+    <li class="li-left2">All Payments to be made in the name of "EMPHATIC VANS AND TESTING LABS PRIVATE LIMITED"
+      New Delhi, India.</li>
+    <li class="li-left2">GST 18% extra (Where Applicable).</li>
+    <li class="li-left2">Lead-time :<span th:text="${quotation.leadTime != null ? quotation.leadTime : '-'}">-</span> Days to completes.</li>
+
+    <li class="li-left2" style="margin-top: 10px;"
+        th:if="${quotation.asPerMsme == true}">The payment of our consultancy shall be payable as follows:</li>
+
+    <li class="li-left2" th:if="${quotation.asPerMsme == true and quotation.advanceFee != null and !#strings.isEmpty(quotation.advanceFee)}">
+      You are requested to pay an advance of <b th:text="${quotation.advanceFee}">-</b>
+    </li>
+    <li class="li-left2" th:if="${quotation.asPerMsme == true and quotation.registrationFee != null and !#strings.isEmpty(quotation.registrationFee)}">
+      During registration of your application. <b th:text="${quotation.registrationFee}">-</b>
+    </li>
+    <li class="li-left2" th:if="${quotation.asPerMsme == true and quotation.inspectionFee != null and !#strings.isEmpty(quotation.inspectionFee)}">
+      At the inspection stage. <b th:text="${quotation.inspectionFee}">-</b>
+    </li>
+    <li class="li-left2" th:if="${quotation.asPerMsme == true and quotation.grantingFee != null and !#strings.isEmpty(quotation.grantingFee)}">
+      At the granting stage of license. <b th:text="${quotation.grantingFee}">-</b>
+    </li>
+
+    <li class="li-left2" th:if="${quotation.asPerMsme != true or (quotation.advanceFee == null and quotation.registrationFee == null and quotation.inspectionFee == null and quotation.grantingFee == null)}">
+      50% advance payment upon signing of the project.</li>
+    <li class="li-left2" th:if="${quotation.asPerMsme != true or (quotation.advanceFee == null and quotation.registrationFee == null and quotation.inspectionFee == null and quotation.grantingFee == null)}">
+      30% payment after the inspection date.</li>
+    <li class="li-left2" th:if="${quotation.asPerMsme != true or (quotation.advanceFee == null and quotation.registrationFee == null and quotation.inspectionFee == null and quotation.grantingFee == null)}">
+      20% payment after the grant of the license.</li>
+  </ul>
+
+  <ul class="font-15 ul-none text-justify" style="margin-top:40px;">
+    <li class="li-left2">We enjoy the trust and confidence of our clients, who remained steadfastly with us over
+      the years because of the quality and reliability of services that we render. Needless to add, we maintain
+      excellent accessibility and relations in BIS office hierarchy, which help us in seamless functioning and
+      faster accomplishment of our assignments in a time-bound manner. We are renowned for maintaining
+      confidentiality of client information. Finally, we have a proven track record of efficient and reliable
+      services, which we provide with complete integrity and confidentiality. We would, therefore, request you to
+      provide us an opportunity to associate with your organization.
+    </li>
+  </ul>
+
+  <p style="margin-top:30px;">
+    <span class="ml-10">Please visit for more details.</span>
+    <a href="http://www.evtlindia.com" class="font-16">www.evtlindia.com</a>
+    <br /><br />
+    <span class="bold ml-10">Thanking You,</span>
+    <br /><br />
+    <span class="bold ml-10">Yours Sincerely,</span>
+    <br /><br />
+    <span class="bold ml-10">For Emphatic Vans Testing &amp; Labs Pvt. Ltd.</span>
+    <br /><br />
+    <span class="bold ml-10">(Authorized Signatory)</span>
+  </p>
+
+  </div>
+
+</body>
+</html>
