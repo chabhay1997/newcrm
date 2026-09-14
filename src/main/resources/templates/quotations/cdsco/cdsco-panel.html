@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="cdsco-panel" id="cdscoEditModal" class="modal-overlay" onclick="closeModal('cdscoEditModal')">
+  <div class="modal-box glass cdsco-modal-box" onclick="event.stopPropagation()" style="backdrop-filter:blur(20px);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 32px rgba(31,38,135,.15);">
+    <style>
+      #cdscoEditModal .cdsco-modal-box{width:1120px;max-width:96vw;max-height:90vh;overflow-y:auto;padding:24px;border-radius:16px;color:#171923}
+      #cdscoEditModal .cdsco-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+      #cdscoEditModal .cdsco-grid-wide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
+      #cdscoEditModal .cdsco-label{display:block;font-size:11.5px;font-weight:700;color:#3A4B63;margin-bottom:6px}
+      #cdscoEditModal .cdsco-input,#cdscoEditModal .cdsco-select{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;font-size:13px;color:#171923;background:rgba(255,255,255,.75);outline:none}
+      #cdscoEditModal .cdsco-input:focus,#cdscoEditModal .cdsco-select:focus{border-color:#8A5CF6;box-shadow:0 0 0 3px rgba(138,92,246,.12)}
+      #cdscoEditModal .cdsco-section{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:22px 0 9px}
+      #cdscoEditModal .cdsco-title{font-size:13px;font-weight:800;color:#171923;margin:0}
+      #cdscoEditModal .cdsco-table-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.08);border-radius:12px;margin-bottom:22px}
+      #cdscoEditModal .cdsco-table{width:100%;min-width:760px;border-collapse:collapse;font-size:12px;color:#3A4B63}
+      #cdscoEditModal .cdsco-table th{background:#5B8DEF;color:#fff;text-align:left;font-size:11px;font-weight:800;padding:11px 12px;white-space:nowrap}
+      #cdscoEditModal .cdsco-table td{padding:8px 12px;border-top:1px solid rgba(0,0,0,.06);vertical-align:middle;line-height:1.35}
+      #cdscoEditModal .cdsco-table tbody tr:nth-child(even){background:#FAFBFE}
+      #cdscoEditModal .cdsco-row-label{font-weight:600;color:#3A4B63}
+      #cdscoEditModal .cdsco-amount{width:100%;min-width:130px;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:9px;font-size:12px;background:rgba(255,255,255,.8)}
+      #cdscoEditModal .cdsco-currency{display:flex;gap:12px;margin-top:6px;font-size:11px;color:#64748B}
+      #cdscoEditModal .cdsco-currency label{display:flex;align-items:center;gap:4px;cursor:pointer}
+      #cdscoEditModal .cdsco-add{border:0;border-radius:999px;padding:7px 12px;background:#EAF7F0;color:#238552;font-size:11px;font-weight:800;cursor:pointer}
+      #cdscoEditModal .cdsco-remove{border:0;border-radius:8px;padding:6px 9px;background:#FFF0F0;color:#D64545;font-size:11px;cursor:pointer}
+      #cdscoEditModal .cdsco-footer{display:flex;gap:8px;margin-top:24px}
+      @media(max-width:760px){#cdscoEditModal .cdsco-grid,#cdscoEditModal .cdsco-grid-wide{grid-template-columns:1fr}#cdscoEditModal .cdsco-modal-box{padding:18px;max-width:94vw}}
+    </style>
+    <div class="flex items-center justify-between mb-5"><p class="text-[16px] font-bold text-[#171923]">CDSCO Registration &mdash; Quotation Details</p><button type="button" onclick="closeModal('cdscoEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">&#10005;</button></div>
+    <form onsubmit="return false;">
+      <input type="hidden" id="cdscoLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="cdscoRevisionButtons" class="quotation-revision-buttons"></div></div>
+      <div class="cdsco-grid">
+        <div><label class="cdsco-label">Quotation No.</label><input id="cdscoReferenceNoInput" readonly class="cdsco-input" style="background:#F3F5F8"></div>
+        <div><label class="cdsco-label">Certificate Type</label><input value="CDSCO Registration" readonly class="cdsco-input" style="background:#F3F5F8"></div>
+        <div><label class="cdsco-label">Date</label><input id="cdscoQuotationDateInput" type="date" class="cdsco-input"></div>
+      </div>
+      <div class="cdsco-grid">
+        <div><label class="cdsco-label">Client Name</label><input id="cdscoClientNameInput" placeholder="Enter client name" class="cdsco-input"></div>
+        <div><label class="cdsco-label">Product Name</label><input id="cdscoProductNameInput" placeholder="Enter product name" class="cdsco-input"></div>
+        <div><label class="cdsco-label">Category/Class</label><input id="cdscoProductCategoryClassInput" placeholder="Enter category or class" class="cdsco-input"></div>
+      </div>
+      <div class="cdsco-grid-wide">
+        <div><label class="cdsco-label">Company Name</label><input id="cdscoCompanyNameInput" readonly class="cdsco-input" style="background:#F3F5F8"></div>
+        <div><label class="cdsco-label">Custom Heading (Optional)</label><input id="cdscoCertificateNameInput" placeholder="Example: Proposal for CDSCO Medical Device Registration" class="cdsco-input"></div>
+        <div><label class="cdsco-label">Manufacturing Location</label><input id="cdscoManufacturingLocationInput" placeholder="Enter manufacturing location" class="cdsco-input"></div>
+        <div><label class="cdsco-label">Model(s)</label><input id="cdscoProductModelsInput" placeholder="Enter model names" class="cdsco-input"></div>
+      </div>
+
+      <div class="cdsco-section"><p class="cdsco-title">Commercial Details</p><select id="cdscoCommercialSetInput" class="cdsco-select" style="width:auto"><option value="base">General Commercial</option><option value="md1213">MD-12/13 Commercial</option><option value="md35">MD-3/5 Commercial</option><option value="md79">MD-7/9 Commercial</option><option value="md46">MD-4/6 Commercial</option><option value="md810">MD-8/10 Commercial</option><option value="md42">MD-41/42 Commercial</option><option value="md14/15">MD-14/15 Commercial</option></select></div>
+      <div class="cdsco-table-wrap"><table class="cdsco-table"><thead><tr><th style="width:8%">S. No.</th><th>Particulars</th><th style="width:28%">Amount</th><th style="width:10%">Action</th></tr></thead><tbody>
+        <tr><td>1</td><td><input id="cdscoCommercialAlias5Input" class="cdsco-input cdsco-row-label" value="Govt. fee per product for class A"></td><td><input id="cdscoCommercialValue5" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency5" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency5" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias5','commercialValue5')">Clear</button></td></tr>
+        <tr><td>2</td><td><input id="cdscoConsultancyAlias1Input" class="cdsco-input cdsco-row-label" value="Govt. fee per product for class B"></td><td><input id="cdscoConsultancyValue1" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrencyConsultancy1" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrencyConsultancy1" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('consultancyAlias1','consultancyValue1')">Clear</button></td></tr>
+        <tr><td>3</td><td><input id="cdscoConsultancyAlias2Input" class="cdsco-input cdsco-row-label" value="Govt. fee per product for class C"></td><td><input id="cdscoConsultancyValue2" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrencyConsultancy2" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrencyConsultancy2" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('consultancyAlias2','consultancyValue2')">Clear</button></td></tr>
+        <tr><td>4</td><td><input id="cdscoConsultancyAlias3Input" class="cdsco-input cdsco-row-label" value="Govt. fee per product for class D"></td><td><input id="cdscoConsultancyValue3" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrencyConsultancy3" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrencyConsultancy3" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('consultancyAlias3','consultancyValue3')">Clear</button></td></tr>
+        <tr><td>5</td><td><input id="cdscoCommercialAlias1Input" class="cdsco-input cdsco-row-label" value="Govt. fee site registration for class A"></td><td><input id="cdscoCommercialValue1" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency1" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency1" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias1','commercialValue1')">Clear</button></td></tr>
+        <tr><td>6</td><td><input id="cdscoCommercialAlias2Input" class="cdsco-input cdsco-row-label" value="Govt. fee site registration for class B"></td><td><input id="cdscoCommercialValue2" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency2" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency2" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias2','commercialValue2')">Clear</button></td></tr>
+        <tr><td>7</td><td><input id="cdscoCommercialAlias9Input" class="cdsco-input cdsco-row-label" value="Govt. fee site registration for class C"></td><td><input id="cdscoCommercialValue9" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency9" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency9" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias9','commercialValue9')">Clear</button></td></tr>
+        <tr><td>8</td><td><input id="cdscoCommercialAlias3Input" class="cdsco-input cdsco-row-label" value="Govt. fee site registration for class D"></td><td><input id="cdscoCommercialValue3" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency3" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency3" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias3','commercialValue3')">Clear</button></td></tr>
+        <tr><td>9</td><td><input id="cdscoCommercialAlias6Input" class="cdsco-input cdsco-row-label" value="Import License for MD-15"></td><td><input id="cdscoCommercialValue6" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency6" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency6" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias6','commercialValue6')">Clear</button></td></tr>
+        <tr><td>10</td><td><input id="cdscoCommercialAlias4Input" class="cdsco-input cdsco-row-label" value="Total Cost + GST (18%)"></td><td><input id="cdscoCommercialValue4" class="cdsco-amount" placeholder="Enter amount"><div class="cdsco-currency"><label><input type="radio" name="cdscoCurrency4" value="INR" checked> INR</label><label><input type="radio" name="cdscoCurrency4" value="USD"> USD</label></div></td><td><button type="button" class="cdsco-remove" onclick="clearCdscoField('commercialAlias4','commercialValue4')">Clear</button></td></tr>
+      </tbody></table></div>
+
+      <div class="cdsco-section"><p class="cdsco-title">Timeline</p><button type="button" class="cdsco-add" onclick="addCdscoTimelineRow()">+ Add Timeline</button></div>
+      <div class="cdsco-table-wrap"><table class="cdsco-table"><thead><tr><th style="width:8%">S. No.</th><th>Timeline</th><th style="width:10%">Action</th></tr></thead><tbody id="cdscoTimelineBody"></tbody></table></div>
+
+      <div class="cdsco-section"><p class="cdsco-title">List of Required Documents</p><select id="cdscoDocsSetInput" class="cdsco-select" style="width:auto"><option value="md1213">MD-12/13 Docs</option><option value="md35">MD-3/5 Docs</option><option value="md79">MD-7/9 Docs</option><option value="md46">MD-4/6 Docs</option><option value="md810">MD-8/10 Docs</option><option value="md42">MD-41/42 Docs</option><option value="md14/15">MD-14/15 Docs</option></select></div>
+      <div class="cdsco-table-wrap"><table class="cdsco-table"><thead><tr><th style="width:8%">S. No.</th><th>Document Name</th><th style="width:10%">Action</th></tr></thead><tbody id="cdscoDocumentsBody"></tbody></table></div>
+      <div class="cdsco-footer"><button type="button" onclick="closeModal('cdscoEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold bg-white border border-black/10">Cancel</button><button type="button" onclick="saveCdscoQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button></div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

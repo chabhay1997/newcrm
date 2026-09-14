@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspection</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- MAIN -->
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+
+    <!-- TOPBAR -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <!-- CONTENT -->
+    <main class="flex-1 px-8 pt-3 pb-8 space-y-8">
+
+      <div id="graphSections">
+      <!-- PAGE HEADER -->
+      <div class="flex items-center justify-end">
+        <div class="flex items-center gap-2">
+          <span class="flex items-center gap-1 text-[11px] font-semibold text-[#3A4B63]"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Healthy</span>
+          <span class="flex items-center gap-1 text-[11px] font-semibold text-[#3A4B63]"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Backed up</span>
+          <span class="flex items-center gap-1 text-[11px] font-semibold text-[#3A4B63]"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Errored</span>
+        </div>
+      </div>
+
+      <!-- AUTOMATION PIPELINES -->
+      <div class="rounded-2xl bg-white border border-black/5 p-5">
+        <p class="text-[14px] font-extrabold text-[#17324F]">Automation Pipelines</p>
+        <p class="text-[11.5px] text-[#6B87A8] mb-4">End-to-end status across active flows - live</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- Order Fulfillment -->
+          <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 transition-all duration-200 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5">
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-[13px] font-bold text-[#17324F]">Order Fulfillment</p>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500 text-white shadow-sm shadow-emerald-500/30">Healthy</span>
+            </div>
+            <p class="text-[11px] text-[#6B87A8] mb-3">412 processed today - 98.1% pass</p>
+            <div class="flex items-center gap-1.5 mb-3">
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Order</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Inventory</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Fulfillment</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Notify</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F] mb-2">
+              <span>412</span><span>412</span><span>408</span><span>408</span>
+            </div>
+            <div class="flex items-center justify-between text-[10.5px] text-[#6B87A8] pt-2 border-t border-black/5">
+              <span>● 12 running now</span>
+              <span>Avg 1.4s</span>
+            </div>
+          </div>
+
+          <!-- Lead Routing -->
+          <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 transition-all duration-200 hover:bg-amber-50 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-0.5">
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-[13px] font-bold text-[#17324F]">Lead Routing</p>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/30">Backed up</span>
+            </div>
+            <p class="text-[11px] text-[#6B87A8] mb-3">218 processed today - 91.7% pass</p>
+            <div class="flex items-center gap-1.5 mb-3">
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Lead</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Score</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-amber-500 bg-slate-50 text-[#17324F]">Route</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">CRM</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F] mb-2">
+              <span>218</span><span>218</span><span>200</span><span>195</span>
+            </div>
+            <div class="flex items-center justify-between text-[10.5px] text-[#6B87A8] pt-2 border-t border-black/5">
+              <span>● 4 running now</span>
+              <span>Avg 2.1s</span>
+            </div>
+          </div>
+
+          <!-- Refund Processing -->
+          <div class="rounded-2xl border border-rose-100 bg-rose-50/60 p-4 transition-all duration-200 hover:bg-rose-50 hover:shadow-lg hover:shadow-rose-500/10 hover:-translate-y-0.5">
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-[13px] font-bold text-[#17324F]">Refund Processing</p>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-500 text-white shadow-sm shadow-rose-500/30">Action needed</span>
+            </div>
+            <p class="text-[11px] text-[#6B87A8] mb-3">47 processed today - 76.6% pass</p>
+            <div class="flex items-center gap-1.5 mb-3">
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-emerald-500 bg-slate-50 text-[#17324F]">Request</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-rose-500 bg-slate-50 text-[#17324F]">Verify</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-slate-300 bg-slate-50 text-slate-400">Process</span>
+              <span class="text-[#B8CDE8] text-[11px]">›</span>
+              <span class="flex items-center gap-1.5 text-[11px] font-bold pl-2 pr-2.5 py-1 rounded-lg border-l-[3px] border-slate-300 bg-slate-50 text-slate-400">Notify</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F] mb-2">
+              <span>47</span><span>36</span><span>0</span><span>0</span>
+            </div>
+            <div class="flex items-center justify-between text-[10.5px] text-[#6B87A8] pt-2 border-t border-black/5">
+              <span>● 1 running now</span>
+              <span>Avg 5.8s</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MIDDLE ROW: Sentiment / Funnel / Activities -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Customer Sentiment -->
+        <div class="rounded-2xl bg-white border border-black/5 p-5">
+          <p class="text-[14px] font-extrabold text-[#17324F]">Customer Sentiment</p>
+          <p class="text-[11.5px] text-[#6B87A8] mb-4">Aggregated from emails + chats</p>
+
+          <div class="flex flex-col items-center">
+            <svg width="200" height="110" viewBox="0 0 200 110">
+              <path d="M15 95 A85 85 0 0 1 185 95" fill="none" stroke="#EDEBFC" stroke-width="16" stroke-linecap="round" stroke-dasharray="4 5"/>
+              <path d="M15 95 A85 85 0 0 1 148 27" fill="none" stroke="#5B4CF5" stroke-width="16" stroke-linecap="round"/>
+            </svg>
+            <p class="text-[28px] font-extrabold text-[#17324F] -mt-3">4.6 <span class="text-[14px] font-semibold text-[#6B87A8]">/5.0</span></p>
+            <p class="text-[11px] text-[#6B87A8]">This month's score</p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div>
+              <p class="text-[10.5px] text-[#6B87A8]">● Positive</p>
+              <p class="text-[13px] font-bold text-[#17324F]">82%</p>
+            </div>
+            <div>
+              <p class="text-[10.5px] text-[#6B87A8]">● Neutral</p>
+              <p class="text-[13px] font-bold text-[#17324F]">11%</p>
+            </div>
+            <div>
+              <p class="text-[10.5px] text-[#6B87A8]">● Negative</p>
+              <p class="text-[13px] font-bold text-[#17324F]">5%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversion Funnel -->
+        <div class="rounded-2xl bg-white border border-black/5 p-5">
+          <p class="text-[14px] font-extrabold text-[#17324F]">Conversion Funnel</p>
+          <p class="text-[11.5px] text-[#6B87A8] mb-4">Track how users move through your business flow</p>
+
+          <div class="flex items-center gap-2 mb-4">
+            <button class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-[#5B4CF5] text-white">Marketplace</button>
+            <button class="text-[11px] font-semibold px-3 py-1.5 rounded-full text-[#6B87A8]">Website</button>
+            <button class="text-[11px] font-semibold px-3 py-1.5 rounded-full text-[#6B87A8]">Retails</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl bg-[#F3F6FB] p-3">
+              <p class="text-[10.5px] text-[#6B87A8] mb-1">Completed Orders</p>
+              <p class="text-[18px] font-extrabold text-[#17324F]">118</p>
+            </div>
+            <div class="rounded-xl bg-[#F3F6FB] p-3">
+              <p class="text-[10.5px] text-[#6B87A8] mb-1">Checkout Started</p>
+              <p class="text-[18px] font-extrabold text-[#17324F]">184</p>
+            </div>
+            <div class="rounded-xl bg-[#F3F6FB] p-3">
+              <p class="text-[10.5px] text-[#6B87A8] mb-1">Visitors</p>
+              <p class="text-[18px] font-extrabold text-[#17324F]">3,218</p>
+            </div>
+            <div class="rounded-xl bg-[#F3F6FB] p-3">
+              <p class="text-[10.5px] text-[#6B87A8] mb-1">Added to Cart</p>
+              <p class="text-[18px] font-extrabold text-[#17324F]">412</p>
+            </div>
+          </div>
+
+          <a href="#" class="flex items-center justify-between mt-3 text-[11.5px] font-semibold text-[#5B4CF5]">See monthly reports <span>›</span></a>
+        </div>
+
+        <!-- AI Chat (compact, dark) -->
+        <div class="rounded-2xl border p-5 flex flex-col" style="background:#12172B !important;border-color:rgba(255,255,255,0.08);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold" style="background:linear-gradient(135deg,#5B4CF5,#8A5CF6);color:#fff;">AI</span>
+            <p class="text-[14px] font-extrabold" style="color:#ffffff;">Business Assistant</p>
+            <span class="ml-auto flex items-center gap-1 text-[10px] font-semibold" style="color:#34D399;"><span class="w-1.5 h-1.5 rounded-full" style="background:#34D399;"></span>Online</span>
+          </div>
+          <p class="text-[11.5px] mb-4" style="color:rgba(255,255,255,0.55);">Ask anything about your business in real time</p>
+
+          <div class="space-y-3">
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 rounded-full mt-1 shrink-0" style="background:#8A5CF6;"></span>
+              <div>
+                <p class="text-[12px] font-medium" style="color:rgba(255,255,255,0.92);">AI generated a performance report for Sales Overview.</p>
+                <p class="text-[10.5px]" style="color:rgba(255,255,255,0.4);">2m ago</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 rounded-full mt-1 shrink-0" style="background:#60A5FA;"></span>
+              <div>
+                <p class="text-[12px] font-medium" style="color:rgba(255,255,255,0.92);">Mike Rowen changed the execution time in Sales.</p>
+                <p class="text-[10.5px]" style="color:rgba(255,255,255,0.4);">10m ago</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 rounded-full mt-1 shrink-0" style="background:#34D399;"></span>
+              <div>
+                <p class="text-[12px] font-medium" style="color:rgba(255,255,255,0.92);">Workflow Invoice Sync completed successfully.</p>
+                <p class="text-[10.5px]" style="color:rgba(255,255,255,0.4);">17m ago</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+                  class="mt-4 w-full flex items-center justify-center gap-2 text-[12px] font-bold px-4 py-2.5 rounded-xl transition"
+                  style="background:linear-gradient(90deg,#5B4CF5,#8A5CF6);color:#fff;border:none;cursor:pointer;">
+            Open AI Assistant ↗
+          </button>
+        </div>
+
+      </div>
+
+      <!-- AI Chat Modal (medium popup, static) -->
+      <div id="aiChatModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(15,23,42,0.15);backdrop-filter:blur(2px);padding:16px;">
+        <div class="rounded-2xl w-full flex flex-col overflow-hidden" style="background:linear-gradient(165deg,#161B33,#1E2444) !important;color:#fff;max-width:26rem;max-height:82vh;box-shadow:0 25px 70px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.06);">
+
+          <!-- Header -->
+          <div class="flex items-center gap-3 p-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);color:#fff;">AI</span>
+            <div class="flex-1">
+              <p class="text-[13.5px] font-bold leading-none" style="color:#fff;">Business Assistant</p>
+              <span class="flex items-center gap-1 text-[10.5px] font-medium mt-1" style="color:rgba(255,255,255,0.5);"><span class="w-1.5 h-1.5 rounded-full" style="background:#22C55E;"></span>Online · Replies instantly</span>
+            </div>
+            <button onclick="document.getElementById('aiChatModal').style.display='none'"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-[13px]"
+                    style="background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.6);cursor:pointer;">✕</button>
+          </div>
+
+          <!-- Messages -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+            <div class="flex items-start gap-2.5">
+              <span class="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-bold" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);color:#fff;">AI</span>
+              <div>
+                <div class="rounded-xl rounded-tl-sm px-3.5 py-2.5" style="background:rgba(255,255,255,0.06);max-width:19rem;">
+                  <p class="text-[12.5px] leading-relaxed" style="color:rgba(255,255,255,0.92);">I generated a performance report for Sales Overview.</p>
+                </div>
+                <p class="text-[10px] mt-1" style="color:rgba(255,255,255,0.35);">2m ago</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end">
+              <div class="rounded-xl rounded-tr-sm px-3.5 py-2.5" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);max-width:19rem;">
+                <p class="text-[12.5px] leading-relaxed" style="color:#ffffff;">Mike Rowen changed the execution time in Sales.</p>
+              </div>
+              <p class="text-[10px] mt-1" style="color:rgba(255,255,255,0.35);">10m ago</p>
+            </div>
+
+            <div class="flex items-start gap-2.5">
+              <span class="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-bold" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);color:#fff;">AI</span>
+              <div>
+                <div class="rounded-xl rounded-tl-sm px-3.5 py-2.5 flex items-center gap-1.5" style="background:rgba(34,197,94,0.12);max-width:19rem;">
+                  <span style="color:#4ADE80;">✓</span>
+                  <p class="text-[12.5px] leading-relaxed" style="color:rgba(255,255,255,0.92);">Workflow Invoice Sync completed successfully.</p>
+                </div>
+                <p class="text-[10px] mt-1" style="color:rgba(255,255,255,0.35);">17m ago</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2.5">
+              <span class="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-bold" style="background:linear-gradient(135deg,#F43F5E,#FB7185);color:#fff;">AI</span>
+              <div>
+                <div class="rounded-xl rounded-tl-sm px-3.5 py-2.5 flex items-center gap-1.5" style="background:rgba(244,63,94,0.12);max-width:19rem;">
+                  <span style="color:#FB7185;">!</span>
+                  <p class="text-[12.5px] leading-relaxed" style="color:rgba(255,255,255,0.92);">I flagged an anomaly in Monthly Revenue Trend.</p>
+                </div>
+                <p class="text-[10px] mt-1" style="color:rgba(255,255,255,0.35);">45m ago</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end">
+              <div class="rounded-xl rounded-tr-sm px-3.5 py-2.5" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);max-width:19rem;">
+                <p class="text-[12.5px] leading-relaxed" style="color:#ffffff;">Natalie set revenue gap up to 10% in Sales Automation.</p>
+              </div>
+              <p class="text-[10px] mt-1" style="color:rgba(255,255,255,0.35);">1h ago</p>
+            </div>
+
+          </div>
+
+          <!-- Input bar -->
+          <div class="p-3" style="border-top:1px solid rgba(255,255,255,0.08);">
+            <div class="flex items-center gap-2 rounded-xl px-3 py-2.5" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);">
+              <span class="text-[15px]" style="color:rgba(255,255,255,0.35);">＋</span>
+              <span class="text-[12.5px] flex-1" style="color:rgba(255,255,255,0.4);">Ask your AI assistant anything…</span>
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[12px]" style="background:linear-gradient(135deg,#6C5CE7,#8A5CF6);color:#fff;">➤</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button class="flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2 rounded-xl bg-white border border-black/5 text-[#17324F]">+ Create Automation</button>
+          <button class="flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2 rounded-xl bg-white border border-black/5 text-[#17324F]">Customize</button>
+        </div>
+        <button class="text-[12.5px] font-semibold px-4 py-2 rounded-xl bg-[#17324F] text-white">+ Add Notes</button>
+      </div>
+
+      <!-- STAT CARDS ROW -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <div class="stat-card stat-card-blue rounded-2xl p-4 border border-black/5">
+          <p class="text-[12px] font-semibold text-[#17324F] mb-1">Weekly Revenue</p>
+          <p class="text-[10.5px] text-[#6B87A8] mb-3">Across all active products</p>
+          <p class="text-[22px] font-extrabold text-[#17324F]">$12,450</p>
+          <p class="text-[11px] font-semibold text-emerald-600 mt-1">↑ 8.2% vs last week</p>
+        </div>
+
+        <div class="stat-card stat-card-purple rounded-2xl p-4 border border-black/5">
+          <p class="text-[12px] font-semibold text-[#17324F] mb-1">Automation Running</p>
+          <p class="text-[10.5px] text-[#6B87A8] mb-3">Actions currently being executed</p>
+          <p class="text-[22px] font-extrabold text-[#17324F]">86 <span class="text-[13px] font-semibold text-[#6B87A8]">runs</span></p>
+          <p class="text-[11px] text-[#6B87A8] mt-1">Recently added: Sheets ›</p>
+        </div>
+
+        <div class="stat-card stat-card-green rounded-2xl p-4 border border-black/5">
+          <p class="text-[12px] font-semibold text-[#17324F] mb-1">Orders Fulfilled</p>
+          <p class="text-[10.5px] text-[#6B87A8] mb-3">Across 3 sales channels</p>
+          <p class="text-[22px] font-extrabold text-[#17324F]">118 <span class="text-[13px] font-semibold text-[#6B87A8]">orders</span></p>
+          <p class="text-[11px] font-semibold text-emerald-600 mt-1">↑ 5% ahead of daily average</p>
+        </div>
+
+        <div class="rounded-2xl p-4 text-white" style="background:linear-gradient(120deg,#5B4CF5,#8A5CF6);">
+          <p class="text-[12px] font-semibold mb-1">Business Autonomous Reports</p>
+          <p class="text-[26px] font-extrabold">92% <span class="text-[13px] font-semibold">Efficiency</span></p>
+          <p class="text-[11px] font-semibold mt-1">↑ 24.2% vs last week</p>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM ROW: Traffic / Workflow Performance -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <!-- Business Traffic -->
+        <div class="rounded-2xl bg-white border border-black/5 p-5">
+          <p class="text-[14px] font-extrabold text-[#17324F]">Business Traffics</p>
+          <p class="text-[11.5px] text-[#6B87A8] mb-3">Keep an eye on your business orders</p>
+
+          <div class="flex items-baseline gap-2 mb-2">
+            <p class="text-[18px] font-extrabold text-[#17324F]">240K / 500K</p>
+            <p class="text-[11px] text-[#6B87A8]">M Traffic targets</p>
+            <p class="text-[11px] font-semibold text-emerald-600 ml-auto">↑ 5.2% vs yesterday</p>
+          </div>
+
+          <div class="flex items-end gap-1 h-14 mb-4">
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:55%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:70%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:40%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:85%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:60%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:75%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:45%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:65%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:90%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:50%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:70%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:35%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:80%"></span>
+            <span class="flex-1 rounded-sm bg-[#5B4CF5]" style="height:60%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:45%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:70%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:55%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:35%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:65%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:50%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:75%"></span>
+            <span class="flex-1 rounded-sm bg-[#C9CFF7]" style="height:40%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:60%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:85%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:50%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:95%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:70%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:80%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:55%"></span>
+            <span class="flex-1 rounded-sm bg-emerald-400" style="height:90%"></span>
+          </div>
+
+          <table class="w-full text-[12px]">
+            <thead>
+              <tr class="text-[#6B87A8] text-left">
+                <th class="font-semibold pb-2">Platforms</th>
+                <th class="font-semibold pb-2">Yesterday</th>
+                <th class="font-semibold pb-2">Today</th>
+                <th class="font-semibold pb-2"></th>
+              </tr>
+            </thead>
+            <tbody class="text-[#17324F] font-semibold">
+              <tr class="border-t border-black/5">
+                <td class="py-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Website</td>
+                <td>1,23K</td><td>10,24K</td>
+                <td class="text-emerald-600">↑ 34.7%</td>
+              </tr>
+              <tr class="border-t border-black/5">
+                <td class="py-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-500"></span>Marketplace</td>
+                <td>590</td><td>180K</td>
+                <td class="text-emerald-600">↑ 80.5%</td>
+              </tr>
+              <tr class="border-t border-black/5">
+                <td class="py-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Retail POS</td>
+                <td>986</td><td>598</td>
+                <td class="text-rose-500">↓ 15.6%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Workflow Performance -->
+        <div class="rounded-2xl bg-white border border-black/5 p-5">
+          <p class="text-[14px] font-extrabold text-[#17324F]">Workflow Performance</p>
+          <p class="text-[11.5px] text-[#6B87A8] mb-4">Performance of your active automations</p>
+
+          <div class="relative h-48 flex">
+            <div class="flex flex-col justify-between text-[10px] text-[#6B87A8] pr-2 py-1">
+              <span>100</span><span>60</span><span>20</span><span>0</span>
+            </div>
+            <div class="relative flex-1">
+              <svg viewBox="0 0 500 180" class="w-full h-full" preserveAspectRatio="none">
+                <line x1="0" y1="0" x2="500" y2="0" stroke="#EEF1F8" stroke-width="1"/>
+                <line x1="0" y1="70" x2="500" y2="70" stroke="#EEF1F8" stroke-width="1"/>
+                <line x1="0" y1="130" x2="500" y2="130" stroke="#EEF1F8" stroke-width="1"/>
+                <line x1="0" y1="180" x2="500" y2="180" stroke="#EEF1F8" stroke-width="1"/>
+                <polyline fill="none" stroke="#5B4CF5" stroke-width="2.5"
+                  points="0,150 70,150 70,110 210,110 210,150 280,150 280,30 420,30 420,60 500,60" />
+                <polygon fill="#5B4CF5" fill-opacity="0.08"
+                  points="0,150 70,150 70,110 210,110 210,150 280,150 280,30 420,30 420,60 500,60 500,180 0,180" />
+                <line x1="280" y1="0" x2="280" y2="180" stroke="#5B4CF5" stroke-width="1" stroke-dasharray="3 3"/>
+                <circle cx="280" cy="30" r="4" fill="#5B4CF5"/>
+              </svg>
+              <div class="absolute left-[52%] top-[2%] bg-white rounded-xl border border-black/5 shadow-md p-3 w-40">
+                <p class="text-[10.5px] font-semibold text-[#6B87A8] mb-1">05 December 25</p>
+                <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F]">
+                  <span>98% Success</span><span class="text-emerald-600">↑ 16.2%</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F]">
+                  <span>Automation</span><span class="text-rose-500">↓ 4.7%</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] font-bold text-[#17324F]">
+                  <span>Revenue</span><span class="text-emerald-600">↑ 20.9%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-[10.5px] text-[#6B87A8] mt-2 pl-6">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+        </div>
+
+      </div>
+      </div>
+
+      <!-- INSPECTION RECORDS TABLE -->
+      <div class="rounded-2xl bg-white border border-black/5 p-5">
+
+        <!-- Toolbar -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button class="text-[11.5px] font-bold px-3.5 py-2 rounded-lg" style="background:#22C55E;color:#fff;">⬇ Excel</button>
+            <button class="text-[11.5px] font-bold px-3.5 py-2 rounded-lg flex items-center gap-1" style="background:#3B82F6;color:#fff;">Show 25 rows ▾</button>
+            <button class="text-[11.5px] font-bold px-3.5 py-2 rounded-lg" style="background:#84CC16;color:#fff;">Final Audit Checklist</button>
+            <button class="text-[11.5px] font-bold px-3.5 py-2 rounded-lg" style="background:#F59E0B;color:#fff;">Show Pre Inspection Graph</button>
+            <button class="text-[11.5px] font-bold px-3.5 py-2 rounded-lg" style="background:#6366F1;color:#fff;">Select All</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="graphToggleBtn" onclick="toggleGraphSections()"
+                    class="text-[10.5px] font-bold px-2.5 py-1.5 rounded-md"
+                    style="background:#F59E0B;color:#fff;">Graph: ON</button>
+            <div class="flex items-center gap-2 rounded-xl px-3 py-2" style="background:#F3F6FB;">
+              <input type="text" placeholder="Search records..."
+                     class="text-[12px] bg-transparent"
+                     style="color:#17324F;width:100px;transition:width 0.3s ease;border:none;outline:none;box-shadow:none;"
+                     onfocus="this.style.width='240px'"
+                     onblur="if(!this.value) this.style.width='100px'">
+            </div>
+          </div>
+
+          <script>
+            function toggleGraphSections() {
+              const sections = document.getElementById('graphSections');
+              const btn = document.getElementById('graphToggleBtn');
+              const isHidden = sections.style.display === 'none';
+              sections.style.display = isHidden ? '' : 'none';
+              btn.textContent = isHidden ? 'Graph: ON' : 'Graph: OFF';
+            }
+          </script>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto rounded-xl" style="border:1px solid rgba(15,23,42,0.06);">
+          <table class="w-full" style="border-collapse:collapse;min-width:760px;">
+            <thead>
+              <tr style="background:#17324F;">
+                <th class="text-left text-[10.5px] font-bold uppercase tracking-wide py-3 px-4" style="color:#fff;border-right:1px solid rgba(255,255,255,0.12);">SN</th>
+                <th class="text-left text-[10.5px] font-bold uppercase tracking-wide py-3 px-4" style="color:#fff;border-right:1px solid rgba(255,255,255,0.12);">Created By</th>
+                <th class="text-left text-[10.5px] font-bold uppercase tracking-wide py-3 px-4" style="color:#fff;border-right:1px solid rgba(255,255,255,0.12);">Details of Project</th>
+                <th class="text-left text-[10.5px] font-bold uppercase tracking-wide py-3 px-4" style="color:#fff;">Inspection Status</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr th:each="row : ${#numbers.sequence(1, 15)}"
+                  style="border-top:1px solid rgba(15,23,42,0.08);">
+                <td class="py-3 px-4 align-top" style="border-right:1px solid rgba(15,23,42,0.06);">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold"
+                        style="background:#EEF2FF;color:#5B4CF5;" th:text="${row}">1</span>
+                </td>
+                <td class="py-3 px-4 align-top" style="border-right:1px solid rgba(15,23,42,0.06);">
+                  <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold" style="background:#E0E7FF;color:#5B4CF5;">S</span>
+                    <div>
+                      <p class="text-[12px] font-bold" style="color:#17324F;">SuperAdmin</p>
+                      <p class="text-[10.5px]" style="color:#94A3B8;">04-08-2026</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3 px-4 align-top" style="border-right:1px solid rgba(15,23,42,0.06);">
+                  <p class="text-[12.5px] font-normal" style="color:#3A4B63;" th:text="'12345' + ${row}">123456</p>
+                  <p class="text-[10.5px] mb-1" style="color:#94A3B8;">📍 N/A</p>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full" style="background:#ECFDF5;color:#16A34A;">Technical Inspection</span>
+                </td>
+                <td class="py-3 px-4 align-top">
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5" title="Visit: Done">
+                      <span class="w-2 h-2 rounded-full" style="background:#22C55E;"></span>
+                      <span class="text-[10.5px] font-semibold" style="color:#17324F;">Visit</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="Document: Done">
+                      <span class="w-2 h-2 rounded-full" style="background:#22C55E;"></span>
+                      <span class="text-[10.5px] font-semibold" style="color:#17324F;">Document</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="Final Inspection: Pending">
+                      <span class="w-2 h-2 rounded-full" style="background:#F59E0B;"></span>
+                      <span class="text-[10.5px] font-semibold" style="color:#17324F;">Final Insp.</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="License: Pending">
+                      <span class="w-2 h-2 rounded-full" style="background:#F59E0B;"></span>
+                      <span class="text-[10.5px] font-semibold" style="color:#17324F;">License</span>
+                    </div>
+                    <div class="flex items-center gap-1 pl-3" style="border-left:1px solid rgba(15,23,42,0.08);">
+                      <span class="text-[10.5px]" style="color:#94A3B8;">Shift</span>
+                      <span class="text-[10.5px] font-bold" style="color:#17324F;">04-08-2026</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between mt-4 flex-wrap gap-3">
+          <p class="text-[11.5px]" style="color:#6B87A8;">Showing 1 to 15 of 15 entries</p>
+          <div class="flex items-center gap-1.5">
+            <button class="text-[11.5px] font-semibold px-3 py-1.5 rounded-lg" style="background:#F1F5F9;color:#94A3B8;">Previous</button>
+            <button class="text-[11.5px] font-bold px-3 py-1.5 rounded-lg" style="background:#5B4CF5;color:#fff;">1</button>
+            <button class="text-[11.5px] font-semibold px-3 py-1.5 rounded-lg" style="background:#F1F5F9;color:#17324F;">Next</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

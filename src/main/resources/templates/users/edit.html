@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit User</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+<style>
+    .page-breadcrumb a {
+        color: #5B6FF0 !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+    }
+    .page-breadcrumb a:hover {
+        color: #4056d9 !important;
+    }
+    .page-breadcrumb .page-current {
+        color: #7B8192 !important;
+    }
+    .user-edit-field { width: 100%; border: 1px solid #D9DCE3; border-radius: 9px; background: #fff; padding: 10px 12px; font-size: 13px; color: #273142; }
+    .user-edit-field:focus { outline: none; border-color: #5B8DEF; box-shadow: 0 0 0 3px rgba(91, 141, 239, .16); }
+    .user-edit-label { display: block; margin-bottom: 6px; color: #3A4B63; font-size: 12px; font-weight: 700; }
+    .permissions-panel { grid-column: 1 / -1; margin-top: 12px; border: 1px solid #E1E4EA; border-radius: 14px; background: #fff; overflow: hidden; }
+    .permissions-heading { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #E1E4EA; }
+    .permission-group { padding: 18px 20px; border-bottom: 1px solid #EEF0F4; }
+    .permission-group:last-child { border-bottom: 0; }
+    .permission-group-header { display: flex; align-items: center; margin-bottom: 0; }
+    .permission-table { width: 100%; border-collapse: collapse; color: #3A4B63; }
+    .permission-table th, .permission-table td { padding: 12px 10px; border-bottom: 1px dashed #E1E8F3; text-align: center; }
+    .permission-table th:first-child, .permission-table td:first-child { width: 45%; text-align: left; }
+    .permission-table th { color: #40527B; font-size: 13px; font-weight: 700; }
+    .permission-table td:first-child { font-size: 13px; font-weight: 600; }
+    .permission-item { display: inline-flex; align-items: center; gap: 10px; color: #4B5563; font-size: 13px; font-weight: 600; }
+    .permission-item input, .permissions-check-all { width: 18px; height: 18px; accent-color: #1677F0; }
+    .password-wrap { display: flex; align-items: stretch; }
+    .password-wrap .user-edit-field { border-radius: 9px 0 0 9px; }
+    .password-button { border: 1px solid #D9DCE3; background: #fff; padding: 0 14px; color: #273142; font-size: 12px; font-weight: 700; }
+    .password-button:last-child { border-radius: 0 9px 9px 0; }
+    .password-button + .password-button { border-left: 0; }
+    .user-edit-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .user-edit-form .permissions-panel, .user-edit-form .form-actions { grid-column: 1 / -1; }
+    @media (max-width: 900px) { .permission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 700px) { .user-edit-form { grid-template-columns: 1fr; } .permission-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="min-h-screen flex flex-col pl-[6.5rem]">
+        <div th:replace="~{fragments/topbar :: topbar}"></div>
+        <main class="flex-1 px-8 pt-3 pb-8">
+            <div class="glass rounded-2xl p-6 w-full">
+                <div class="relative mb-6 flex items-center">
+                    <h1 class="text-[20px] font-extrabold tracking-[-0.04em] text-[#2B3D5B] leading-none" th:text="${user.id != null ? 'Edit User' : 'Add New User'}">Edit User</h1>
+                    <div class="page-breadcrumb absolute left-1/2 flex -translate-x-1/2 flex-nowrap items-center justify-center gap-2 whitespace-nowrap text-center text-[14px] font-semibold">
+                        <a th:href="@{/dashboard}" class="text-[#5B6FF0] font-bold transition-colors hover:text-[#4056d9]">Dashboard</a>
+                        <span class="text-[#8A90A6]">›</span>
+                        <a th:href="@{/users/index}" class="text-[#5B6FF0] font-bold transition-colors hover:text-[#4056d9]">Users</a>
+                        <span class="text-[#8A90A6]">›</span>
+                        <span class="page-current text-[#7B8192]" th:text="${user.id != null ? 'Edit User' : 'Add New User'}">Edit User</span>
+                    </div>
+                </div>
+                <form method="post" th:action="${user.id != null ? '/users/' + user.id + '/update' : '/users/create'}" class="user-edit-form">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <label><span class="user-edit-label">User Name <b class="text-red-500">*</b></span><input class="user-edit-field" type="text" name="name" required th:value="${user.name}"></label>
+                    <label><span class="user-edit-label">User Email <b class="text-red-500">*</b></span><input class="user-edit-field" type="email" name="email" required th:value="${user.email}"></label>
+                    <label><span class="user-edit-label">Role <b class="text-red-500">*</b></span>
+                        <select class="user-edit-field" name="roleId" required>
+                            <option value="" disabled>--Select role--</option>
+                            <option th:each="role : ${roles}" th:value="${role.id}" th:selected="${user.roleId == role.id}" th:text="${role.name}">Role</option>
+                        </select>
+                    </label>
+                    <label><span class="user-edit-label">Role Type <b class="text-red-500">*</b></span>
+                        <select class="user-edit-field" name="type_id" required>
+                            <option value="" disabled>--Select role type--</option>
+                            <option value="1" th:selected="${user.typeId == 1}">Admin</option>
+                            <option value="2" th:selected="${user.typeId == 2}">Employee</option>
+                        </select>
+                    </label>
+                    <label><span class="user-edit-label">DOB</span><input class="user-edit-field" type="date" name="dob" th:value="${user.dob}"></label>
+                    <label><span class="user-edit-label">Mobile No.</span><input class="user-edit-field" type="text" name="phone" th:value="${user.phone}"></label>
+                    <label><span class="user-edit-label">Password <small>(Leave blank to keep same)</small></span>
+                        <div class="password-wrap">
+                            <input id="userPassword" class="user-edit-field" type="password" name="password" placeholder="Leave blank to keep current password" autocomplete="new-password">
+                            <button type="button" class="password-button" onclick="toggleUserPassword()" title="Show password">&#128065;</button>
+                            <button type="button" class="password-button" onclick="generateUserPassword()">Generate</button>
+                        </div>
+                    </label>
+
+                    <label><span class="user-edit-label">Status <b class="text-red-500">*</b></span>
+                        <select class="user-edit-field" name="status">
+                            <option value="1" th:selected="${user.status != null and user.status == 1}">Active</option>
+                            <option value="0" th:selected="${user.status == null or user.status != 1}">Inactive</option>
+                        </select>
+                    </label>
+                    <div></div>
+
+                    <section class="permissions-panel">
+                        <div class="permissions-heading">
+                            <h2 class="m-0 text-[24px] font-bold text-[#171923]">Permissions</h2>
+                            <label class="permission-item"><input id="permissionsCheckAll" class="permissions-check-all" type="checkbox"> <span>Check All</span></label>
+                        </div>
+                        <div th:each="group : ${permissionGroups}" class="permission-group" th:attr="data-permission-group=${group.key}">
+                            <div class="permission-group-header">
+                                <h3 class="m-0 text-[16px] font-bold text-[#273142]" th:text="${group.key}">General Permissions</h3>
+                            </div>
+                            <table class="permission-table">
+                                <thead>
+                                    <tr><th>Module</th><th>Read</th><th>Write</th><th>Edit</th><th>Delete</th><th>Excel</th><th>All</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="permission : ${group.value}" class="permission-row">
+                                        <td th:text="${permission.value}">Users</td>
+                                        <td><input type="checkbox" name="permissions" th:value="${permission.key + '.read'}" th:checked="${selectedPermissions.contains(permission.key + '.read')}" class="permission-checkbox permission-action-checkbox"></td>
+                                        <td><input type="checkbox" name="permissions" th:value="${permission.key + '.write'}" th:checked="${selectedPermissions.contains(permission.key + '.write')}" class="permission-checkbox permission-action-checkbox"></td>
+                                        <td><input type="checkbox" name="permissions" th:value="${permission.key + '.edit'}" th:checked="${selectedPermissions.contains(permission.key + '.edit')}" class="permission-checkbox permission-action-checkbox"></td>
+                                        <td><input type="checkbox" name="permissions" th:value="${permission.key + '.delete'}" th:checked="${selectedPermissions.contains(permission.key + '.delete')}" class="permission-checkbox permission-action-checkbox"></td>
+                                        <td><input type="checkbox" name="permissions" th:value="${permission.key + '.excel'}" th:checked="${selectedPermissions.contains(permission.key + '.excel')}" class="permission-checkbox permission-action-checkbox"></td>
+                                        <td><input type="checkbox" class="permission-all-checkbox" aria-label="Select all module permissions"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <div class="form-actions flex items-center justify-end gap-3 pt-3">
+                        <a th:href="@{/users/index}" class="rounded-lg px-4 py-2 text-[12px] font-semibold text-[#3A4B63]">Cancel</a>
+                        <button type="submit" class="rounded-lg bg-[#5B8DEF] px-5 py-2 text-[12px] p-4 font-bold text-white shadow-sm" th:text="${user.id != null ? 'Save Changes' : 'Create User'}">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script>
+        function toggleUserPassword() {
+            const password = document.getElementById('userPassword');
+            password.type = password.type === 'password' ? 'text' : 'password';
+        }
+
+        function generateUserPassword() {
+            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+            let password = '';
+            for (let index = 0; index < 12; index++) {
+                password += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            const passwordInput = document.getElementById('userPassword');
+            passwordInput.value = password;
+            passwordInput.type = 'text';
+        }
+
+        document.querySelectorAll('.permission-row').forEach(function (row) {
+            const actionBoxes = Array.from(row.querySelectorAll('.permission-action-checkbox'));
+            const allBox = row.querySelector('.permission-all-checkbox');
+            allBox.addEventListener('change', function () { actionBoxes.forEach(function (box) { box.checked = allBox.checked; }); updatePermissionsCheckAll(); });
+            actionBoxes.forEach(function (box) { box.addEventListener('change', function () {
+                allBox.checked = actionBoxes.every(function (item) { return item.checked; });
+                updatePermissionsCheckAll();
+            }); });
+        });
+        function updatePermissionsCheckAll() {
+            const all = document.querySelectorAll('.permission-action-checkbox');
+            document.getElementById('permissionsCheckAll').checked = all.length > 0
+                && document.querySelectorAll('.permission-action-checkbox:checked').length === all.length;
+        }
+        document.getElementById('permissionsCheckAll').addEventListener('change', function () {
+            document.querySelectorAll('.permission-action-checkbox, .permission-all-checkbox').forEach(function (box) { box.checked = this.checked; }, this);
+        });
+        updatePermissionsCheckAll();
+    </script>
+</body>
+</html>
