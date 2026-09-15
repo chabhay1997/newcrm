@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+<style>
+  @keyframes floatCard { 0%, 100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
+  @keyframes floatCardBack { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-6px) rotate(-6deg); } }
+  @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(138,92,246,0.45); } 70% { box-shadow: 0 0 0 10px rgba(138,92,246,0); } 100% { box-shadow: 0 0 0 0 rgba(138,92,246,0); } }
+  @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .welcome-avatar { animation: pulseRing 2.5s ease-out infinite; }
+  .welcome-card-front { animation: floatCard 3.4s ease-in-out infinite; }
+  .welcome-card-back { animation: floatCardBack 3.4s ease-in-out infinite; }
+  .welcome-orb-ring { animation: spinSlow 12s linear infinite; }
+</style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- MAIN -->
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+
+    <!-- TOPBAR -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <!-- CONTENT -->
+    <main class="flex-1 px-8 pt-3 pb-8 space-y-5">
+
+      <!-- WELCOME BANNER -->
+      <div class="relative overflow-hidden rounded-2xl p-6 flex items-center justify-between gap-6" style="background:linear-gradient(120deg,#2A1F52 0%,#221B4A 55%,#2A1F52 100%);">
+        <div class="absolute inset-0 pointer-events-none opacity-10" style="background-image:radial-gradient(circle,#ffffff 1px,transparent 1px);background-size:18px 18px;"></div>
+
+        <div class="relative flex items-center gap-4">
+          <div class="welcome-avatar w-16 h-16 rounded-full flex items-center justify-center shrink-0 text-[24px] font-extrabold text-white shadow-lg shadow-purple-900/20" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">
+            A
+          </div>
+          <div>
+            <p class="text-[11px] font-bold tracking-wide text-white uppercase mb-1">Good to see you again</p>
+            <p class="text-[24px] font-extrabold text-white leading-tight">Welcome back, Admin! 👋</p>
+            <p class="text-[13px] text-white mt-1">Let's pick up where you left off and make today productive.</p>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+
+        <div class="stat-card stat-card-blue rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25" style="background-image:linear-gradient(135deg,#8CA6FF,#5D7DFA);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Users</span>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuUsers').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+              <div id="menuUsers" class="card-dropdown absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Active</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Inactive</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">86</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 4%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-purple rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#C6A2F8,#9B6DF2);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Leads</span>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuLeads').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+              <div id="menuLeads" class="card-dropdown absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">1 Month</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">3 Months</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">6 Months</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">129</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 2%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-green rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/25" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Operations</span>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuOperations').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+              <div id="menuOperations" class="card-dropdown absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Completed</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Not Completed</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">7</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">live right now</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-amber rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/25" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Accounts</span>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuAccounts').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+              <div id="menuAccounts" class="card-dropdown absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Invoices</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Purchase Orders</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">$1.4K</span>
+              <span class="text-[10px] font-semibold text-rose-600">↓ 4%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-blue rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25" style="background-image:linear-gradient(135deg,#7ED0F5,#3D9FDB);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Inspections</span>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuInspections').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+              <div id="menuInspections" class="card-dropdown absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Offline Insp</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Online Insp</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Not Done</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Pending Insp</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">23</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 6%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">this week</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REMINDERS & SCHEDULE -->
+      <div class="glass rounded-2xl p-4 flex flex-col lg:flex-row items-stretch gap-6">
+
+        <!-- FULL MONTH CALENDAR -->
+        <div class="lg:w-64 shrink-0">
+          <div class="flex items-center justify-between mb-4">
+            <button id="calPrevBtn" class="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#F3F5F8]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <p id="calMonthLabel" class="text-[13px] font-bold text-[#171923]">Loading...</p>
+            <button id="calNextBtn" class="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#F3F5F8]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="grid grid-cols-7 text-center mb-1">
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Su</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Mo</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Tu</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">We</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Th</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Fr</span>
+            <span class="text-[10px] font-semibold text-[#8C8FA3]">Sa</span>
+          </div>
+          <div id="calGrid" class="grid grid-cols-7 text-center gap-y-1"></div>
+        </div>
+
+        <div class="hidden lg:block w-px bg-black/5"></div>
+
+        <!-- REMINDERS (big cards) -->
+        <div class="flex-1 flex flex-col justify-center gap-2">
+          <div class="reminder-card reminder-card-purple rounded-xl border border-black/5 p-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A5CF6" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                <p class="text-[15px] font-semibold text-[#171923]">Mesh Weekly Meeting</p>
+              </div>
+              <div class="relative">
+                <button onclick="event.stopPropagation(); document.getElementById('menuMesh').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                </button>
+                <div id="menuMesh" class="card-dropdown absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Join Now</a>
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Reschedule</a>
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-rose-600 hover:bg-[#F3F6FB] transition">Cancel</a>
+                </div>
+              </div>
+            </div>
+            <p class="text-[12px] text-[#8C8FA3]">9.00 am - 10.00 am</p>
+            <div class="flex items-center justify-between mt-3">
+              <div class="flex -space-x-1.5">
+                <div class="w-6 h-6 rounded-full bg-[#F5A623] border-2 border-white"></div>
+                <div class="w-6 h-6 rounded-full bg-[#6D8CFF] border-2 border-white"></div>
+                <div class="w-6 h-6 rounded-full bg-[#8A5CF6] border-2 border-white flex items-center justify-center text-[9px] text-white font-bold">+7</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="event.stopPropagation(); openModal('remarkModal')" class="flex items-center gap-1 text-[11px] font-semibold text-[#3A4B63] bg-white border border-black/10 px-2.5 py-1 rounded-full hover:bg-[#F3F5F8] transition shrink-0">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Add Remark
+                </button>
+                <span class="text-[11px] font-semibold text-[#3A4B63] bg-[#F3F5F8] px-2.5 py-1 rounded-full">On Google Meet</span>
+              </div>
+            </div>
+          </div>
+          <div class="reminder-card reminder-card-green rounded-xl border border-black/5 p-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                <p class="text-[15px] font-semibold text-[#171923]">Gamification Demo</p>
+              </div>
+              <div class="relative">
+                <button onclick="event.stopPropagation(); document.getElementById('menuGamif').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                </button>
+                <div id="menuGamif" class="card-dropdown absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Join Now</a>
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Reschedule</a>
+                  <a href="#" class="block px-3 py-2 text-[12px] font-medium text-rose-600 hover:bg-[#F3F6FB] transition">Cancel</a>
+                </div>
+              </div>
+            </div>
+            <p class="text-[12px] text-[#8C8FA3]">10.45 am - 11.45 am</p>
+            <div class="flex items-center justify-between mt-3">
+              <div class="flex -space-x-1.5">
+                <div class="w-6 h-6 rounded-full bg-[#059669] border-2 border-white"></div>
+                <div class="w-6 h-6 rounded-full bg-[#F5A623] border-2 border-white"></div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="event.stopPropagation(); openModal('remarkModal')" class="flex items-center gap-1 text-[11px] font-semibold text-[#3A4B63] bg-white border border-black/10 px-2.5 py-1 rounded-full hover:bg-[#F3F5F8] transition shrink-0">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Add Remark
+                </button>
+                <span class="text-[11px] font-semibold text-[#3A4B63] bg-[#F3F5F8] px-2.5 py-1 rounded-full">On Slack</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLOCK + ACTION BUTTONS (stacked) -->
+        <div class="flex flex-col gap-4 shrink-0 self-start w-44">
+          <div class="rounded-2xl pl-3 pr-5 py-2 flex items-center gap-3" style="background:#E11D3C;">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-white/20">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <div class="flex flex-col">
+              <p id="liveClock" class="text-[12px] font-extrabold text-white leading-none tabular-nums">--:--:--</p>
+              <p id="liveDate" class="text-[10px] text-white font-bold mt-1">Loading...</p>
+            </div>
+          </div>
+          <button onclick="openModal('reminderModal')" class="flex items-center justify-center gap-1.5 text-[12px] font-semibold text-white px-3 py-2 rounded-full shadow-md shadow-purple-500/25 w-full" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add Reminder
+          </button>
+          <button onclick="openModal('meetingModal')" class="flex items-center justify-center gap-1.5 text-[12px] font-semibold text-[#171923] bg-white border border-black/10 px-3 py-2 rounded-full shadow-sm w-full">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Schedule Meeting
+          </button>
+          <button class="flex items-center justify-center gap-1.5 text-[12px] font-semibold text-[#171923] bg-white border border-black/10 px-3 py-2 rounded-full shadow-sm w-full">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call Someone
+          </button>
+          <button class="flex items-center justify-center gap-1.5 text-[12px] font-semibold text-[#171923] bg-white border border-black/10 px-3 py-2 rounded-full shadow-sm w-full">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+            Cancel Meeting
+          </button>
+        </div>
+
+      </div>
+      <!-- REVENUE CHART -->
+      <div class="glass rounded-2xl p-5">
+        <div class="relative flex items-start justify-between mb-1">
+          <div id="chartHoverBox" class="hidden absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 items-center gap-2 px-4 py-2 rounded-xl bg-white border border-black/5 shadow-md shadow-black/10 z-10">
+            <span id="chartHoverLabel" class="text-[10px] font-semibold text-[#8C8FA3]"></span>
+            <span id="chartHoverValue" class="text-[15px] font-extrabold text-[#171923]"></span>
+          </div>
+          <div>
+            <div class="relative w-fit">
+              <button onclick="document.getElementById('menuRevenue').classList.toggle('open')" class="text-[13px] font-semibold text-[#171923] flex items-center gap-1">Revenue
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div id="menuRevenue" class="card-dropdown absolute left-0 mt-2 w-44 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-visible z-[999]">
+                <div class="relative">
+                  <button onclick="event.stopPropagation(); document.getElementById('subInvoices').classList.toggle('open')" class="w-full flex items-center justify-between px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">
+                    Invoices
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                  <div id="subInvoices" class="card-dropdown absolute left-full top-0 ml-1 w-40 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden">
+                    <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Tax Invoice</a>
+                    <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Performa Invoice</a>
+                  </div>
+                </div>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Purchase Orders</a>
+              </div>
+            </div>
+            <p class="mt-2 flex items-baseline gap-2">
+              <span class="text-[22px] font-extrabold text-[#171923]">$32.209</span>
+              <span class="text-[11.5px] font-semibold text-emerald-600">+22% vs last month</span>
+            </p>
+          </div>
+          <div class="flex items-center gap-1 bg-[#F3F5F8] rounded-full p-1 text-[11px] font-semibold text-[#8C8FA3]">
+            <span class="px-2.5 py-1 rounded-full">1D</span>
+            <span class="px-2.5 py-1 rounded-full">1W</span>
+            <span class="px-2.5 py-1 rounded-full">1M</span>
+            <span class="px-2.5 py-1 rounded-full">6M</span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-[#171923] shadow-sm">1Y</span>
+            <span class="px-2.5 py-1 rounded-full">ALL</span>
+          </div>
+        </div>
+
+        <div class="mt-3" style="height:260px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <!-- LEADS MANAGEMENT + TOP COUNTRY + RETENTION -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- LEADS MANAGEMENT -->
+        <div class="glass rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-[13px] font-semibold text-[#171923]">Leads Management</p>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-center gap-1 bg-[#F3F5F8] rounded-full p-1 text-[11px] font-semibold text-[#8C8FA3] w-fit mb-5">
+            <span class="px-3 py-1.5 rounded-full bg-white text-[#171923] shadow-sm">Status</span>
+            <span class="px-3 py-1.5 rounded-full">Sources</span>
+            <span class="px-3 py-1.5 rounded-full">Qualification</span>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <p class="text-[12px] font-medium text-[#171923] mb-1.5">Qualified</p>
+              <div class="h-2.5 rounded-full bg-[#F0EEFB] overflow-hidden"><div class="h-full rounded-full" style="width:78%;background-image:linear-gradient(90deg,#B084F5,#8A5CF6);"></div></div>
+            </div>
+            <div>
+              <p class="text-[12px] font-medium text-[#171923] mb-1.5">Contacted</p>
+              <div class="h-2.5 rounded-full bg-[#F0EEFB] overflow-hidden"><div class="h-full rounded-full" style="width:45%;background-image:linear-gradient(90deg,#B084F5,#8A5CF6);"></div></div>
+            </div>
+            <div>
+              <p class="text-[12px] font-medium text-[#171923] mb-1.5">Lost</p>
+              <div class="h-2.5 rounded-full bg-[#F0EEFB] overflow-hidden"><div class="h-full rounded-full" style="width:15%;background-image:linear-gradient(90deg,#B084F5,#8A5CF6);"></div></div>
+            </div>
+            <div>
+              <p class="text-[12px] font-medium text-[#171923] mb-1.5">Won</p>
+              <div class="h-2.5 rounded-full bg-[#F0EEFB] overflow-hidden"><div class="h-full rounded-full" style="width:65%;background-image:linear-gradient(90deg,#B084F5,#8A5CF6);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEADS PIE CHART -->
+        <div class="glass rounded-2xl p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-[13px] font-semibold text-[#171923]">Leads Breakdown</p>
+              <p class="text-[11px] text-[#8C8FA3] mt-0.5">By source</p>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuPieFilter').classList.toggle('open')" class="flex items-center gap-1.5 bg-[#F3F5F8] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#3A4B63] hover:bg-[#EAECF1] transition">
+                This Month
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div id="menuPieFilter" class="card-dropdown absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">This Month</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Last Month</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">This Quarter</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">This Year</a>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="relative shrink-0" style="width:190px;height:190px;">
+              <canvas id="leadsPieChart"></canvas>
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span class="text-[20px] font-extrabold text-[#171923]">129</span>
+                <span class="text-[10px] text-[#8C8FA3] font-medium">Total Leads</span>
+              </div>
+            </div>
+            <div class="flex-1 w-full space-y-3">
+              <div class="flex items-center justify-between text-[12.5px]">
+                <span class="flex items-center gap-2 text-[#171923] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background-image:linear-gradient(135deg,#B084F5,#6D8CFF);"></span>Referral</span>
+                <span class="font-semibold text-[#171923]">38%</span>
+              </div>
+              <div class="flex items-center justify-between text-[12.5px]">
+                <span class="flex items-center gap-2 text-[#171923] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background-image:linear-gradient(135deg,#8A5CF6,#5B34C1);"></span>Website</span>
+                <span class="font-semibold text-[#171923]">27%</span>
+              </div>
+              <div class="flex items-center justify-between text-[12.5px]">
+                <span class="flex items-center gap-2 text-[#171923] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);"></span>Social Media</span>
+                <span class="font-semibold text-[#171923]">20%</span>
+              </div>
+              <div class="flex items-center justify-between text-[12.5px]">
+                <span class="flex items-center gap-2 text-[#171923] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);"></span>Cold Outreach</span>
+                <span class="font-semibold text-[#171923]">15%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- GLOBAL CLIENTS + INDIA CLIENTS MAPS -->
+      <div class="grid grid-cols-1 gap-5">
+
+        <!-- INDIA CLIENTS BY REGION (full width, top) -->
+        <div class="glass rounded-2xl p-6">
+          <p class="text-[13px] font-semibold text-[#171923]">India Clients</p>
+          <p class="text-[11px] text-[#8C8FA3] mt-0.5 mb-4">By region</p>
+          <div class="rounded-xl h-[28rem] mb-4 relative overflow-hidden z-0">
+            <div id="indiaMapMini" class="w-full h-full"></div>
+            <div class="absolute bottom-2 left-2 flex gap-1 z-[400]">
+              <button onclick="indiaMiniMap.zoomIn()" class="w-6 h-6 rounded-md bg-white text-[#171923] text-[13px] font-bold flex items-center justify-center shadow-sm">+</button>
+              <button onclick="indiaMiniMap.zoomOut()" class="w-6 h-6 rounded-md bg-white text-[#171923] text-[13px] font-bold flex items-center justify-center shadow-sm">−</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2.5">
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="text-[#171923] font-medium">North</span>
+              <span class="font-semibold text-[#171923]">34%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="text-[#171923] font-medium">South</span>
+              <span class="font-semibold text-[#171923]">29%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="text-[#171923] font-medium">West</span>
+              <span class="font-semibold text-[#171923]">22%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="text-[#171923] font-medium">East</span>
+              <span class="font-semibold text-[#171923]">15%</span>
+            </div>
+          </div>
+          <button onclick="openBigMap('india')" class="w-full mt-4 py-2 rounded-full border border-black/10 text-[12px] font-semibold text-[#171923] flex items-center justify-center gap-1.5 hover:bg-[#F3F5F8] transition">
+            View more
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <!-- GLOBAL CLIENTS (full width, below) -->
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-[13px] font-semibold text-[#171923]">Global Clients</p>
+              <p class="text-[11px] text-[#8C8FA3] mt-0.5">Clients across the world</p>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuGlobalFilter').classList.toggle('open')" class="flex items-center gap-1.5 bg-[#F3F5F8] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#3A4B63] hover:bg-[#EAECF1] transition">
+                All Regions
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div id="menuGlobalFilter" class="card-dropdown absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">All Regions</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">APAC</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">EMEA</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Americas</a>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-xl h-[28rem] mb-4 relative overflow-hidden z-0">
+            <div id="globalMapMini" class="w-full h-full"></div>
+            <div class="absolute bottom-2 left-2 flex gap-1 z-[400]">
+              <button onclick="globalMiniMap.zoomIn()" class="w-6 h-6 rounded-md bg-white text-[#171923] text-[13px] font-bold flex items-center justify-center shadow-sm">+</button>
+              <button onclick="globalMiniMap.zoomOut()" class="w-6 h-6 rounded-md bg-white text-[#171923] text-[13px] font-bold flex items-center justify-center shadow-sm">−</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2.5">
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="flex items-center gap-2 text-[#171923] font-medium">1 🇦🇺 Australia</span>
+              <span class="font-semibold text-[#171923]">48%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="flex items-center gap-2 text-[#171923] font-medium">2 🇲🇾 Malaysia</span>
+              <span class="font-semibold text-[#171923]">33%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="flex items-center gap-2 text-[#171923] font-medium">3 🇮🇩 Indonesia</span>
+              <span class="font-semibold text-[#171923]">25%</span>
+            </div>
+            <div class="flex items-center justify-between text-[12px]">
+              <span class="flex items-center gap-2 text-[#171923] font-medium">4 🇸🇬 Singapore</span>
+              <span class="font-semibold text-[#171923]">17%</span>
+            </div>
+          </div>
+          <button onclick="openBigMap('global')" class="w-full mt-4 py-2 rounded-full border border-black/10 text-[12px] font-semibold text-[#171923] flex items-center justify-center gap-1.5 hover:bg-[#F3F5F8] transition">
+            View more
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- BIG MAP MODAL -->
+      <div id="bigMapModal" class="modal-overlay" onclick="closeModal('bigMapModal')">
+        <div class="modal-box glass rounded-2xl w-[95vw] h-[90vh] p-3 relative" onclick="event.stopPropagation()">
+          <button onclick="closeModal('bigMapModal')" class="spin-close absolute top-5 right-5 z-[1000] w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-black/5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+          <p id="bigMapTitle" class="absolute top-5 left-5 z-[1000] bg-white px-4 py-2 rounded-full shadow-md text-[13px] font-bold text-[#171923]">Global Clients</p>
+          <div id="bigMap" class="rounded-xl overflow-hidden z-0 w-full h-full"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD REMINDER MODAL (clock only) -->
+  <div id="reminderModal" class="modal-overlay" onclick="closeModal('reminderModal')">
+    <div class="modal-box glass rounded-2xl w-[380px] max-w-[92vw] p-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-[15px] font-bold text-[#171923]">Add Reminder</p>
+        <button onclick="closeModal('reminderModal')" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-black/5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reminder title</label>
+      <input type="text" placeholder="e.g. Follow up with client" class="w-full mb-4 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+      <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Time</label>
+      <div class="flex items-center gap-2 mb-5 px-3 py-2.5 rounded-xl border border-black/10 focus-within:ring-2 focus-within:ring-[#8A5CF6]/30 focus-within:border-[#8A5CF6]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A5CF6" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <input type="time" class="flex-1 text-[13px] text-[#171923] focus:outline-none bg-transparent">
+      </div>
+      <div class="flex gap-2">
+        <button onclick="closeModal('reminderModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button onclick="closeModal('reminderModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save Reminder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE MEETING MODAL (calendar + clock) -->
+  <div id="meetingModal" class="modal-overlay" onclick="closeModal('meetingModal')">
+    <div class="modal-box glass rounded-2xl w-[420px] max-w-[92vw] p-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-[15px] font-bold text-[#171923]">Schedule Meeting</p>
+        <button onclick="closeModal('meetingModal')" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-black/5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Meeting title</label>
+      <input type="text" placeholder="e.g. Product Sync" class="w-full mb-4 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669]">
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Date</label>
+          <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-black/10 focus-within:ring-2 focus-within:ring-[#059669]/30 focus-within:border-[#059669]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <input type="date" class="flex-1 text-[13px] text-[#171923] focus:outline-none bg-transparent">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Time</label>
+          <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-black/10 focus-within:ring-2 focus-within:ring-[#059669]/30 focus-within:border-[#059669]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <input type="time" class="flex-1 text-[13px] text-[#171923] focus:outline-none bg-transparent">
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="closeModal('meetingModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button onclick="closeModal('meetingModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-emerald-500/25" style="background-image:linear-gradient(135deg,#34D399,#059669);">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMARK MODAL -->
+  <div id="remarkModal" class="modal-overlay" onclick="closeModal('remarkModal')">
+    <div class="modal-box glass rounded-2xl w-[380px] max-w-[92vw] p-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-[15px] font-bold text-[#171923]">Add Remark</p>
+        <button onclick="closeModal('remarkModal')" class="spin-close w-7 h-7 rounded-full flex items-center justify-center hover:bg-black/5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Your remark</label>
+      <textarea rows="4" placeholder="Write a note..." class="w-full mb-5 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#171923]/10 focus:border-[#171923]/30 resize-none"></textarea>
+      <div class="flex gap-2">
+        <button onclick="closeModal('remarkModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button onclick="closeModal('remarkModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white bg-[#171923] hover:bg-black transition">Save Remark</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(function (m) { m.classList.remove('open'); });
+      }
+    });
+  </script>
+
+  <script>
+    (function () {
+      const monthLabel = document.getElementById('calMonthLabel');
+      const grid = document.getElementById('calGrid');
+      const prevBtn = document.getElementById('calPrevBtn');
+      const nextBtn = document.getElementById('calNextBtn');
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      const today = new Date();
+      let viewYear = today.getFullYear();
+      let viewMonth = today.getMonth();
+
+      function renderCalendar() {
+        monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
+        grid.innerHTML = '';
+
+        const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+          grid.insertAdjacentHTML('beforeend', '<span></span>');
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const isToday = d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          if (isToday) {
+            grid.insertAdjacentHTML('beforeend', '<span class="text-[11.5px] font-bold text-white py-1 rounded-full mx-auto w-6 h-6 flex items-center justify-center" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">' + d + '</span>');
+          } else {
+            grid.insertAdjacentHTML('beforeend', '<span class="text-[11.5px] font-medium text-[#171923] py-1">' + d + '</span>');
+          }
+        }
+      }
+
+      prevBtn.addEventListener('click', function () {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        renderCalendar();
+      });
+
+      nextBtn.addEventListener('click', function () {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        renderCalendar();
+      });
+
+      renderCalendar();
+    })();
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('profileMenu');
+      if (menu && menu.classList.contains('open') && !e.target.closest('.relative')?.contains(menu)) {
+        menu.classList.remove('open');
+      }
+      document.querySelectorAll('.card-dropdown.open').forEach(function(dd) {
+        if (!e.target.closest('.relative')?.contains(dd)) {
+          dd.classList.remove('open');
+        }
+      });
+    });
+
+    function updateGreetingAndClock() {
+      const now = new Date();
+      const hour = now.getHours();
+      let greeting = 'Good Night';
+      if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+      else if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+      else if (hour >= 17 && hour < 21) greeting = 'Good Evening';
+
+      const greetingEl = document.getElementById('greetingText');
+      if (greetingEl) greetingEl.textContent = greeting + ', Admin User';
+
+      const clockEl = document.getElementById('liveClock');
+      if (clockEl) clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      const dateEl = document.getElementById('liveDate');
+      if (dateEl) dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    }
+
+    updateGreetingAndClock();
+    setInterval(updateGreetingAndClock, 1000);
+  </script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:inline="none">
+    const globalMiniMap = L.map('globalMapMini', { zoomControl: false, attributionControl: false, scrollWheelZoom: false }).setView([-2, 108], 3.5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(globalMiniMap);
+    L.marker([-25.27, 133.77]).addTo(globalMiniMap).bindPopup('Australia');
+    L.marker([4.21, 101.98]).addTo(globalMiniMap).bindPopup('Malaysia');
+    L.marker([-0.79, 113.92]).addTo(globalMiniMap).bindPopup('Indonesia');
+    L.marker([1.35, 103.82]).addTo(globalMiniMap).bindPopup('Singapore');
+    setTimeout(() => globalMiniMap.invalidateSize(), 200);
+
+    const indiaMiniMap = L.map('indiaMapMini', { zoomControl: false, attributionControl: false, scrollWheelZoom: false }).setView([22.9734, 78.6569], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(indiaMiniMap);
+    L.marker([28.7041, 77.1025]).addTo(indiaMiniMap);
+    L.marker([19.0760, 72.8777]).addTo(indiaMiniMap);
+    L.marker([13.0827, 80.2707]).addTo(indiaMiniMap);
+    L.marker([22.5726, 88.3639]).addTo(indiaMiniMap);
+    setTimeout(() => indiaMiniMap.invalidateSize(), 200);
+
+    let bigMap = null;
+    function openBigMap(type) {
+      openModal('bigMapModal');
+      document.getElementById('bigMapTitle').textContent = type === 'india' ? 'India Clients' : 'Global Clients';
+
+      if (bigMap) { bigMap.remove(); bigMap = null; }
+
+      bigMap = L.map('bigMap').setView(
+        type === 'india' ? [22.9734, 78.6569] : [-2, 108],
+        type === 'india' ? 5 : 4
+      );
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(bigMap);
+
+      const points = type === 'india'
+        ? [[28.7041, 77.1025, 'Delhi'], [19.0760, 72.8777, 'Mumbai'], [13.0827, 80.2707, 'Chennai'], [22.5726, 88.3639, 'Kolkata']]
+        : [[-25.27, 133.77, 'Australia'], [4.21, 101.98, 'Malaysia'], [-0.79, 113.92, 'Indonesia'], [1.35, 103.82, 'Singapore']];
+      points.forEach(p => L.marker([p[0], p[1]]).addTo(bigMap).bindPopup(p[2]));
+
+      setTimeout(() => bigMap.invalidateSize(), 200);
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script>
+    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    const barGradient = revCtx.createLinearGradient(0, 0, 0, 260);
+    barGradient.addColorStop(0, '#8A5CF6');
+    barGradient.addColorStop(1, 'rgba(138, 92, 246, 0.08)');
+
+    new Chart(revCtx, {
+      type: 'bar',
+      data: {
+        labels: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        datasets: [{
+          label: 'Revenue',
+          data: [4,3,6,5,4,3,5,29,3,4,3,5],
+          backgroundColor: barGradient,
+          hoverBackgroundColor: barGradient,
+          borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          barPercentage: 0.42,
+          categoryPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: false,
+            external: function (context) {
+              const box = document.getElementById('chartHoverBox');
+              const labelEl = document.getElementById('chartHoverLabel');
+              const valueEl = document.getElementById('chartHoverValue');
+              const tooltipModel = context.tooltip;
+
+              if (!tooltipModel || tooltipModel.opacity === 0) {
+                box.classList.add('hidden');
+                box.classList.remove('flex');
+                return;
+              }
+
+              const dp = tooltipModel.dataPoints && tooltipModel.dataPoints[0];
+              if (dp) {
+                labelEl.textContent = dp.label;
+                valueEl.textContent = '$' + (dp.parsed.y * 1000).toLocaleString();
+              }
+              box.classList.remove('hidden');
+              box.classList.add('flex');
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: '#EEF0F3' },
+            ticks: {
+              color: '#8C8FA3',
+              font: { family: 'Manrope', size: 11, weight: '500' },
+              maxRotation: 40,
+              minRotation: 40
+            }
+          },
+          y: {
+            grid: { color: '#EEF0F3', borderDash: [4, 4] },
+            border: { display: false },
+            ticks: {
+              color: '#8C8FA3',
+              font: { family: 'Manrope', size: 11 },
+              callback: (val) => val + 'k'
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+  <script>
+    const pieCtx = document.getElementById('leadsPieChart').getContext('2d');
+
+    const gradReferral = pieCtx.createLinearGradient(0, 0, 190, 190);
+    gradReferral.addColorStop(0, '#B084F5');
+    gradReferral.addColorStop(1, '#6D8CFF');
+
+    const gradWebsite = pieCtx.createLinearGradient(0, 0, 190, 190);
+    gradWebsite.addColorStop(0, '#8A5CF6');
+    gradWebsite.addColorStop(1, '#5B34C1');
+
+    const gradSocial = pieCtx.createLinearGradient(0, 0, 190, 190);
+    gradSocial.addColorStop(0, '#7EEBB8');
+    gradSocial.addColorStop(1, '#2FAE76');
+
+    const gradCold = pieCtx.createLinearGradient(0, 0, 190, 190);
+    gradCold.addColorStop(0, '#FFCB77');
+    gradCold.addColorStop(1, '#F3A73D');
+
+    new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Referral', 'Website', 'Social Media', 'Cold Outreach'],
+        datasets: [{
+          data: [38, 27, 20, 15],
+          backgroundColor: [gradReferral, gradWebsite, gradSocial, gradCold],
+          borderColor: '#FFFFFF',
+          borderWidth: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#171923',
+            bodyColor: '#171923',
+            borderColor: '#EEF0F3',
+            borderWidth: 1,
+            titleFont: { family: 'Manrope', weight: '700', size: 11 },
+            bodyFont: { family: 'Manrope', weight: '800', size: 12 },
+            padding: 8,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => ctx.parsed + '%'
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

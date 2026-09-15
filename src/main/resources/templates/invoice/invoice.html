@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Performa Invoice</title>
+  <style>
+    @page { size: A4; margin: 12mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #2a3855; font-family: Arial, sans-serif; font-size: 12px; font-weight: 400; }
+    .invoice-heading { margin: 0 0 10px; color: #17243d; font-size: 16px; }
+    .container { width: 100%; border: 1px solid #000; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { vertical-align: top; }
+    .header-main { width: 70%; padding: 0; }
+    .header-logo { width: 115px; padding: 5px; text-align: center; vertical-align: middle; }
+    .header-logo img { display: block; max-width: 105px; max-height: 75px; margin: 0 auto; }
+    .header-text { padding: 7px 5px; vertical-align: middle; }
+    .header-text h3 { margin: 0 0 3px; font-size: 16px; line-height: 1.15; }
+    .header-text p { margin: 2px 0; font-size: 11px; line-height: 1.25; }
+    .invoice-meta { width: 30%; padding: 6px; border-left: 1px solid #000; }
+    .invoice-meta th { width: 35%; padding: 2px; text-align: left; font-size: 11px; white-space: nowrap; }
+    .invoice-meta td { padding: 2px; text-align: left; font-size: 11px; overflow-wrap: break-word; }
+    .bill-to { padding: 6px 8px; border-top: 1px solid #000; }
+    .bill-to h3 { margin: 0 0 2px; font-size: 16px; }
+    .bill-to p { margin: 2px 0; font-size: 13px; line-height: 1.35; }
+    .items { table-layout: fixed; }
+    .items th { padding: 5px; border: 1px solid #000; background: #edf2fa; color: #17243d; font-size: 11px; }
+    .items .serial { width: 10%; text-align: center; }
+    .items .description { width: 75%; text-align: left; }
+    .items .amount { width: 15%; text-align: center; }
+    .item-row td { padding: 6px 5px; border-right: 1px solid #000; min-height: 36px; }
+    .item-row td:last-child { border-right: 0; }
+    .item-row .serial { text-align: center; }
+    .item-title { display: block; font-size: 11px; font-weight: bold; }
+    .item-description { display: block; margin-top: 3px; font-size: 10px; line-height: 1.35; white-space: pre-line; }
+    .items-spacer td { height: 205px; border-right: 1px solid #000; }
+    .items-spacer td:last-child { border-right: 0; }
+    .total-row td { padding: 5px; border: 1px solid #000; font-size: 11px; }
+    .total-label { text-align: right; font-weight: bold; }
+    .extra-row td { color: #d22525; }
+    .final-row td { background: #edf2fa; }
+    .remarks { padding: 6px 8px; border-top: 1px solid #000; min-height: 34px; font-size: 11px; }
+    .remarks strong { font-size: 12px; }
+    .remarks-value { margin-left: 4px; white-space: pre-line; }
+    .footer-container { margin-top: 10px; }
+    .amount-words { padding: 6px 8px; font-size: 10px; line-height: 1.35; }
+    .amount-words strong { font-size: 11px; }
+    .computer-generated { font-size: 8px; }
+    .terms { padding: 6px 8px; border-top: 1px solid #000; }
+    .terms h4 { margin: 0 0 3px; font-size: 11px; }
+    .terms ol { margin: 0; padding-left: 20px; }
+    .terms li { margin: 2px 0; font-size: 9px; line-height: 1.3; }
+    .bank-details { width: 60%; padding: 5px; border-top: 1px solid #000; border-right: 1px solid #000; }
+    .bank-table td { padding: 2px; font-size: 9px; line-height: 1.2; }
+    .bank-label { width: 82px; font-weight: bold; white-space: nowrap; }
+    .signature { width: 40%; height: 125px; padding: 5px; border-top: 1px solid #000; text-align: center; vertical-align: bottom; }
+    .signature img { display: block; max-width: 210px; max-height: 82px; margin: 0 auto 2px; object-fit: contain; }
+    .signature span { font-size: 11px; line-height: 1.3; }
+    .signature strong { font-size: 11px; }
+    .invoice-page.page-break { page-break-after: always; break-after: page; }
+  </style>
+</head>
+<body>
+  <th:block th:each="page, pageStat : ${invoicePages}">
+  <div class="invoice-page" th:classappend="${!pageStat.last} ? ' page-break'">
+  <h4 class="invoice-heading" th:text="${heading}">Export Invoice</h4>
+
+  <div class="container">
+    <table>
+      <tr>
+        <td class="header-main">
+          <table>
+            <tr>
+              <td class="header-logo">
+                <img th:if="${logoDataUri != ''}" th:src="${logoDataUri}" alt="Company Logo" />
+              </td>
+              <td class="header-text">
+                <h3 th:text="${companyName}">EMPHATIC VANS &amp; TESTING LABS PRIVATE LIMITED</h3>
+                <p th:if="${companyAddress != ''}" th:text="${companyAddress}">Company address</p>
+                <p th:if="${invoice.gstin != null and !invoice.gstin.isBlank()}" th:text="'GSTIN: ' + ${invoice.gstin}">GSTIN</p>
+                <p th:if="${invoice.panNo != null and !invoice.panNo.isBlank()}" th:text="'PAN NUMBER: ' + ${invoice.panNo}">PAN</p>
+                <p th:if="${companyEmail != ''}" th:text="'EMAIL: ' + ${companyEmail}">Email</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td class="invoice-meta">
+          <table>
+            <tr><th>Invoice No:-</th><td th:text="${invoice.invNo}">INV-001</td></tr>
+            <tr><th>Invoice Date:-</th><td th:text="${invoice.date != null ? #temporals.format(invoice.date, 'yyyy-MM-dd') : ''}">2026-09-09</td></tr>
+            <tr><th>PO No:-</th><td th:text="${invoice.poNo}">PO-001</td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="bill-to">
+          <h3>Bill To</h3>
+          <p><strong th:text="${invoice.name}">Client Name</strong></p>
+          <p><strong>Address:- </strong><span th:text="${invoice.address}">Client address</span></p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:0;">
+          <table class="items">
+            <thead>
+              <tr>
+                <th class="serial">S.No</th>
+                <th class="description">Particular</th>
+                <th class="amount" th:text="'AMOUNT ' + ${currencyLabel}">AMOUNT (USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="item-row" th:each="item : ${page}">
+                <td class="serial" th:text="${item.serialNumber}">1</td>
+                <td class="description">
+                  <span class="item-title" th:text="${item.title}">Service Fee</span>
+                  <span class="item-description" th:text="${item.particular}">Service description</span>
+                </td>
+                <td class="amount"><span th:text="${currencySymbol}">$</span> <span th:text="${item.amount}">0.00</span></td>
+              </tr>
+              <tr class="total-row" th:if="${pageStat.last}">
+                <td colspan="2" class="total-label">Net Amount</td>
+                <td><span th:text="${currencySymbol}">$</span> <span th:text="${netAmountFormatted}">0.00</span></td>
+              </tr>
+              <tr class="total-row extra-row" th:if="${pageStat.last}">
+                <td colspan="2" style="text-align:right;" th:text="${invoice.extraServices}">Extra Services</td>
+                <td><span th:text="${currencySymbol}">$</span> <span th:text="${extraAmountFormatted}">0.00</span></td>
+              </tr>
+              <tr class="total-row final-row" th:if="${pageStat.last}">
+                <td colspan="2" class="total-label">Final Amount</td>
+                <td><span th:text="${currencySymbol}">$</span> <span th:text="${finalAmountFormatted}">0.00</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr th:if="${pageStat.last}">
+        <td colspan="2" class="remarks"><strong>Remarks:-</strong><span class="remarks-value" th:text="${invoice.remarks}"></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="container footer-container" th:if="${pageStat.last}">
+    <table>
+      <tr>
+        <td colspan="2" class="amount-words">
+          <strong><u>Total Amount (In Words):-</u> <span th:text="${totalInWords} + ' ONLY ' + ${currencyLabel}">ZERO ONLY (USD)</span></strong><br />
+          <span class="computer-generated">Computer Generated Invoice</span>
+        </td>
+      </tr>
+      <tr th:if="${invoice.isTerms != null and invoice.isTerms == 1 and !invoiceTerms.isEmpty()}">
+        <td colspan="2" class="terms">
+          <h4>Terms and Conditions</h4>
+          <ol><li th:each="term : ${invoiceTerms}" th:text="${term}">Term</li></ol>
+        </td>
+      </tr>
+      <tr>
+        <td class="bank-details">
+          <table class="bank-table">
+            <tr th:if="${invoice.invType != null and invoice.invType == 1 and bank.bankDetails != null and !bank.bankDetails.isBlank()}"><td class="bank-label">Bank Details:</td><td th:text="${bank.bankDetails}"></td></tr>
+            <tr th:if="${invoice.invType != null and invoice.invType == 2}"><td class="bank-label">Bank Details:</td><td>PROLIX INDIA &amp; REGULATORY COMPLIANCE CONSULTANT</td></tr>
+            <tr th:if="${bank.bankName != null}"><td class="bank-label">Bank Name:</td><td th:text="${bankName}"></td></tr>
+            <tr th:if="${bank.branch != null and !bank.branch.isBlank()}"><td class="bank-label">Branch:</td><td th:text="${bank.branch}"></td></tr>
+            <tr th:if="${bank.bankAcc != null and !bank.bankAcc.isBlank()}"><td class="bank-label">Bank A/C:</td><td th:text="${bank.bankAcc}"></td></tr>
+            <tr th:if="${bank.ifscCode != null and !bank.ifscCode.isBlank()}"><td class="bank-label">IFSC Code:</td><td th:text="${bank.ifscCode}"></td></tr>
+            <tr th:if="${bank.accType != null}"><td class="bank-label">Type of Acc.:</td><td th:text="${accountType}"></td></tr>
+            <tr th:if="${bank.micrCode != null and !bank.micrCode.isBlank()}"><td class="bank-label">MICR Code:</td><td th:text="${bank.micrCode}"></td></tr>
+            <tr th:if="${bank.swiftCode != null and !bank.swiftCode.isBlank()}"><td class="bank-label">SWIFT Code:</td><td th:text="${bank.swiftCode}"></td></tr>
+          </table>
+        </td>
+        <td class="signature">
+          <img th:if="${(invoice.isSign == null or invoice.isSign == 0) and signatureDataUri != ''}" th:src="${signatureDataUri}" alt="Authorized Signature" />
+          <span>Authorized Signatory For<br /><strong th:text="${companyName}">Company</strong></span>
+        </td>
+      </tr>
+    </table>
+  </div>
+  </div>
+  </th:block>
+</body>
+</html>

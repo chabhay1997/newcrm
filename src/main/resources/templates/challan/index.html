@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <title>Challan | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .challan-page-title { display:flex; align-items:center; gap:14px; }
+    .challan-list-heading { flex:none; white-space:nowrap; }.challan-list-heading h2 { font-size:16px; }
+    .challan-list-toolbar { padding-left:20px; padding-right:4px; }
+    .challan-page-icon { display:flex; width:54px; height:54px; align-items:center; justify-content:center; border-radius:16px; background:linear-gradient(145deg,#e6eaff,#f5f6ff); color:#4d43ef; box-shadow:0 8px 22px rgba(81,72,244,.10); }
+    .challan-page-icon svg { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .challan-add-button { min-width:190px; height:40px; padding:0 18px; background:#2563eb !important; color:#fff !important; font-size:13px !important; box-shadow:0 8px 20px rgba(37,99,235,.28); }.challan-add-button svg { width:18px; height:18px; }.challan-add-button:hover { background:#1d4ed8 !important; }
+    .challan-analytics-button { display:inline-flex; height:40px; align-items:center; justify-content:center; gap:8px; padding:0 17px; border:1px solid #bfdbfe; border-radius:12px; background:#eff6ff; color:#1d4ed8; font-size:13px; font-weight:800; text-decoration:none; transition:background .16s ease,border-color .16s ease,transform .16s ease; }.challan-analytics-button:hover { border-color:#93c5fd; background:#dbeafe; transform:translateY(-1px); }.challan-analytics-button svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .challan-table-scroll { width:100%; overflow-x:auto; overflow-y:hidden; scrollbar-gutter:stable; -webkit-overflow-scrolling:touch; }
+    .challan-table { width:100%; min-width:1280px; border-collapse:separate; border-spacing:0; border:1px solid #dce5f1; border-radius:0 0 15px 15px; overflow:hidden; table-layout:fixed; background:#fff; }
+    .challan-table th { height:64px; padding:0 13px; border-right:1px solid rgba(223,234,248,.22); background:linear-gradient(135deg,#173456,#294972); color:#f8fbff; font-size:11px; font-weight:800; letter-spacing:.075em; text-transform:uppercase; }
+    .challan-table th > span { display:inline-flex; align-items:center; gap:7px; }.challan-table th svg { width:15px; height:15px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
+    .challan-table th:last-child { position:sticky; right:0; z-index:2; min-width:110px; border-right:0; box-shadow:-2px 0 5px rgba(14,42,76,.14); white-space:nowrap; }
+    .challan-table td { height:74px; padding:8px 13px; border-right:1px solid #e1e9f3; border-bottom:1px solid #e1e9f3; color:#162e52; font-size:12px; vertical-align:middle; overflow-wrap:anywhere; word-break:normal; }
+    .challan-table td:last-child { position:sticky; right:0; z-index:1; min-width:110px; border-right:0; background:#fff; box-shadow:-2px 0 5px rgba(14,42,76,.08); }.challan-table tbody tr:last-child td { border-bottom:0; }
+    .challan-table tbody tr.menu-open td:last-child { z-index:50; }
+    .challan-table tbody tr { transition:background .16s ease; }.challan-table tbody tr:hover td { background:#fcfdff; }
+    .challan-table tbody td { transition:background .16s ease,box-shadow .16s ease; }
+    .challan-table tbody td:hover { background:#edf4ff !important; box-shadow:inset 3px 0 #4e7df2; }
+    .challan-table th:nth-child(1) { width:18%; }.challan-table th:nth-child(2) { width:16%; }.challan-table th:nth-child(3) { width:18%; }.challan-table th:nth-child(4) { width:17%; }.challan-table th:nth-child(5) { width:12%; }.challan-table th:nth-child(6) { width:13%; }.challan-table th:nth-child(7) { width:6%; }
+    .challan-number { display:flex; min-height:38px; align-items:center; gap:8px; overflow:hidden; padding:0 9px; border-radius:10px; background:#f1f5fd; color:#183d78; font-size:11px; font-weight:800; }
+    .challan-number svg { width:17px; height:17px; flex:none; fill:none; stroke:#2455e9; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }.challan-number span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .challan-client { display:flex; min-width:0; align-items:center; gap:8px; }.challan-client-name { min-width:0; flex:1; overflow:hidden; color:#17345e; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+    .challan-client-action { display:inline-flex; width:26px; height:26px; flex:none; align-items:center; justify-content:center; border:0; border-radius:7px; background:transparent; color:#0867ef; cursor:pointer; }
+    .challan-client-action:hover,.challan-client-action:focus-visible { outline:none; background:#e4edff; color:#304ce8; }.challan-client-action svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .challan-preview-modal-box { display:flex; width:min(940px,calc(100vw - 32px)); max-height:calc(100vh - 28px); flex-direction:column; overflow:hidden; padding:0 !important; border:1px solid #dbe3ed; background:#f3f6fa !important; }
+    .challan-preview-toolbar { display:flex; flex:none; align-items:center; justify-content:space-between; gap:14px; padding:14px 17px; border-bottom:1px solid #dbe3ed; background:#fff; }.challan-preview-toolbar-title { color:#17213f; font-size:14px; font-weight:850; }.challan-preview-toolbar-actions { display:flex; align-items:center; gap:8px; }.challan-preview-toolbar-link { display:inline-flex; height:34px; align-items:center; justify-content:center; gap:6px; padding:0 11px; border:1px solid #d7dfeb; border-radius:9px; background:#fff; color:#304968; font-size:11px; font-weight:800; text-decoration:none; }.challan-preview-toolbar-link:hover { background:#f2f6fb; }.challan-preview-toolbar-link.primary { border-color:#315bd7; background:#315bd7; color:#fff; }.challan-preview-toolbar-link svg { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .challan-preview-content { min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:18px; scrollbar-width:thin; scrollbar-color:#8ca8d0 #e7edf5; }.challan-preview-content::-webkit-scrollbar { width:9px; }.challan-preview-content::-webkit-scrollbar-track { border-radius:999px; background:#e7edf5; }.challan-preview-content::-webkit-scrollbar-thumb { border:2px solid #e7edf5; border-radius:999px; background:#8ca8d0; }
+    .challan-document { overflow:hidden; border:1px solid #d6dee9; border-radius:14px; background:#fff; color:#18263a; box-shadow:0 14px 34px rgba(26,48,82,.10); }.challan-document-accent { height:7px; background:linear-gradient(90deg,#0d5f88 0%,#147da5 72%,#ff7a21 72%,#ff7a21 100%); }
+    .challan-document-head { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px 25px 18px; }.challan-document-brand { display:flex; min-width:0; align-items:center; gap:16px; }.challan-document-logo { width:175px; height:auto; object-fit:contain; }.challan-document-company { padding-left:15px; border-left:1px solid #dce4ed; color:#5e6c80; font-size:9.5px; line-height:1.55; }.challan-document-heading { flex:none; text-align:right; }.challan-document-heading strong { display:block; color:#12395d; font-size:22px; font-weight:900; letter-spacing:.055em; }.challan-document-heading span { display:inline-block; margin-top:7px; padding:5px 9px; border-radius:7px; background:#fff1e7; color:#df6413; font-size:10px; font-weight:850; }
+    .challan-document-meta { display:grid; grid-template-columns:1.25fr 1fr 1fr; border-top:1px solid #e0e6ed; border-bottom:1px solid #e0e6ed; background:#eef4f8; }.challan-document-meta > div { min-width:0; padding:13px 17px; border-right:1px solid #d8e2ea; }.challan-document-meta > div:last-child { border-right:0; }.challan-document-label { display:block; margin-bottom:5px; color:#687b92; font-size:9px; font-weight:850; letter-spacing:.055em; text-transform:uppercase; }.challan-document-value { display:block; overflow-wrap:anywhere; color:#183b5d; font-size:11.5px; font-weight:800; }
+    .challan-document-parties { display:grid; grid-template-columns:1.25fr .75fr; gap:0; border-bottom:1px solid #dce4ed; }.challan-party { padding:19px 22px; }.challan-party + .challan-party { border-left:1px solid #dce4ed; background:#fbfcfe; }.challan-party-title { display:flex; align-items:center; gap:8px; margin:0 0 12px; color:#0d5f88; font-size:10px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }.challan-party-title::before { width:4px; height:16px; border-radius:4px; background:#ff7a21; content:""; }.challan-party-name { color:#162f4b; font-size:15px; font-weight:900; }.challan-party-line { margin-top:6px; color:#5b6b80; font-size:10.5px; line-height:1.55; white-space:pre-wrap; }
+    .challan-items-wrap { padding:20px 22px; }.challan-items-title { margin:0 0 10px; color:#163a5d; font-size:11px; font-weight:900; text-transform:uppercase; }.challan-document-table { width:100%; border-collapse:collapse; table-layout:fixed; }.challan-document-table th { padding:10px 11px; border:1px solid #244663; background:#193f62; color:#fff; font-size:9px; font-weight:850; letter-spacing:.045em; text-align:left; text-transform:uppercase; }.challan-document-table td { min-height:50px; padding:13px 11px; border:1px solid #d8e1eb; color:#243950; font-size:11px; font-weight:650; vertical-align:top; overflow-wrap:anywhere; }.challan-document-table th:nth-child(1) { width:32%; }.challan-document-table th:nth-child(2) { width:22%; }.challan-document-table th:nth-child(3) { width:9%; }.challan-document-table th:nth-child(4) { width:13%; }.challan-document-table th:nth-child(5) { width:9%; }.challan-document-table th:nth-child(6) { width:15%; }
+    .challan-document-bottom { display:grid; grid-template-columns:1fr 280px; gap:20px; padding:0 22px 22px; }.challan-notes { display:grid; gap:10px; }.challan-note { padding:12px 14px; border:1px solid #dce4ed; border-radius:9px; background:#f9fbfd; }.challan-note.orange { border-color:#ffd9bd; background:#fff8f2; }.challan-note .challan-document-value { font-size:10.5px; font-weight:650; white-space:pre-wrap; }.challan-totals { overflow:hidden; align-self:start; border:1px solid #d6e0ea; border-radius:10px; }.challan-total-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 13px; border-bottom:1px solid #e2e8ef; color:#52677d; font-size:10.5px; }.challan-total-row:last-child { border-bottom:0; }.challan-total-row strong { color:#183b5d; font-size:11px; }.challan-total-row.grand { background:linear-gradient(120deg,#123b60,#1d5c88); color:#fff; font-weight:850; }.challan-total-row.grand strong { color:#fff; font-size:14px; }
+    .challan-document-footer { display:flex; justify-content:space-between; gap:20px; padding:13px 22px; border-top:1px solid #dce4ed; background:#f5f8fb; color:#75849a; font-size:9px; }.challan-document-footer strong { color:#35516f; }
+    @media(max-width:700px) { .challan-document-head,.challan-document-brand { align-items:flex-start; flex-direction:column; }.challan-document-heading { text-align:left; }.challan-document-company { padding-left:0; border-left:0; }.challan-document-meta,.challan-document-parties,.challan-document-bottom { grid-template-columns:1fr; }.challan-document-meta > div,.challan-party + .challan-party { border-right:0; border-left:0; border-bottom:1px solid #d8e2ea; }.challan-document-table { min-width:650px; }.challan-items-wrap { overflow-x:auto; } }
+    .challan-date { display:inline-flex; min-height:36px; align-items:center; padding:0 9px; border-radius:10px; background:#f1f5fd; color:#17345e; font-size:11px; font-weight:800; }
+    .challan-creator { display:flex; flex-direction:column; gap:3px; }.challan-creator-name { color:#111827; font-weight:700; }.challan-creator-date { color:#111827; font-size:11px; font-weight:700; }.challan-black-cell { color:#111827 !important; font-weight:700; }
+    .challan-amount { display:flex; flex-direction:column; gap:3px; }.challan-amount-qty { color:#6b87a8; font-size:11px; font-weight:600; }.challan-amount-value { color:#17345e; font-weight:800; }
+    .challan-actions { position:relative; display:inline-block; }
+    .challan-actions-toggle { display:inline-flex; width:34px; height:34px; align-items:center; justify-content:center; padding:0; border:0; border-radius:50%; background:#f2f6ff; color:#5369ff; cursor:pointer; transition:transform .16s ease,background .16s ease,box-shadow .16s ease; }
+    .challan-actions-toggle:hover { background:#dfe9ff; box-shadow:0 4px 12px rgba(8,103,239,.20); transform:translateY(-1px); }
+    .challan-actions-toggle:focus-visible { outline:none; background:#dfe9ff; box-shadow:0 0 0 3px rgba(8,103,239,.25); }
+    .challan-actions-menu { position:fixed; z-index:1200; display:none; width:144px; overflow:hidden; padding:4px 0; border:1px solid #e2e6ef; border-radius:12px; background:#fff; text-align:left; box-shadow:0 10px 25px rgba(15,23,42,.14); }
+    .challan-actions-menu.open { display:block; }
+    .challan-actions-menu a,.challan-actions-menu button { display:block; width:100%; padding:8px 12px; border:0; background:transparent; color:#263451; font-size:12px; font-weight:600; text-align:left; text-decoration:none; cursor:pointer; }
+    .challan-actions-menu a:hover,.challan-actions-menu button:hover { background:#f4f6ff; }.challan-actions-menu .delete-option { color:#e5484d; }.challan-actions-menu .delete-option:hover { background:#fff1f2; }
+    .return-alert-box { width:min(540px,calc(100vw - 28px)); overflow:hidden; padding:0 !important; border:1px solid #fed7aa; background:#fff !important; }.return-alert-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 19px; background:linear-gradient(125deg,#fff7ed,#ffedd5); }.return-alert-title-row { display:flex; align-items:center; gap:11px; }.return-alert-icon { display:flex; width:40px; height:40px; flex:none; align-items:center; justify-content:center; border-radius:12px; background:#f97316; color:#fff; box-shadow:0 7px 16px rgba(249,115,22,.23); }.return-alert-icon svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }.return-alert-title { margin:0; color:#7c2d12; font-size:16px; font-weight:850; }.return-alert-subtitle { margin:3px 0 0; color:#9a4a20; font-size:10.5px; }.return-alert-list { display:flex; max-height:360px; flex-direction:column; gap:9px; overflow-y:auto; padding:14px; }.return-alert-item { display:grid; grid-template-columns:1fr auto; gap:12px; padding:12px 13px; border:1px solid #e4e9f0; border-radius:11px; background:#fbfcfe; }.return-alert-number { color:#173f70; font-size:11.5px; font-weight:850; }.return-alert-client { margin-top:4px; color:#273b55; font-size:11px; font-weight:750; }.return-alert-item-name { margin-top:2px; color:#71809a; font-size:10px; }.return-alert-due { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; }.return-alert-date { color:#9a3412; font-size:10.5px; font-weight:850; }.return-alert-days { margin-top:4px; padding:3px 7px; border-radius:999px; background:#ffedd5; color:#c2410c; font-size:9.5px; font-weight:850; }.return-alert-days.today { background:#fee2e2; color:#be123c; }.return-alert-foot { display:flex; align-items:center; justify-content:flex-end; padding:12px 15px; border-top:1px solid #edf0f4; background:#fafbfd; }.return-alert-dismiss { height:34px; padding:0 14px; border:0; border-radius:9px; background:#173f70; color:#fff; font-size:11px; font-weight:800; cursor:pointer; }
+    @media (min-width:1024px) { .challan-header-controls { flex:1 1 auto; flex-direction:row; align-items:flex-end; justify-content:flex-end; margin-left:auto; } }
+    @media (min-width:1280px) { #challanSearchForm { order:1; } #challanExcelImportWrap { order:2; } #challanExcelExport { order:3; } }
+  </style>
+</head>
+<body>
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+    <main class="flex-1 px-6 pt-3 pb-8 space-y-5">
+      <div th:if="${successMessage}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[12px] font-semibold text-emerald-700" th:text="${successMessage}"></div>
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="challan-page-title"><div class="challan-page-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div><div><h1 class="text-[27px] leading-none font-extrabold tracking-[-.03em] text-[#132c50]">Delivery Challan</h1><p class="mt-1.5 text-[13px] text-[#617391]">Review and manage delivery challans.</p></div></div>
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="/challan/analytics" class="challan-analytics-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V2"/></svg><span>Challan Analytics</span></a>
+          <a href="/challan/create" class="challan-add-button inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-5 text-[12px] font-bold transition focus:outline-none focus:ring-2 focus:ring-indigo-200"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add Challan</span></a>
+        </div>
+      </div>
+      <section class="rounded-2xl bg-white border border-[#E5EAF1] shadow-[0_12px_32px_-24px_rgba(23,50,79,.42)] overflow-hidden">
+        <div class="challan-list-toolbar py-4 border-b border-[#dfe7f1] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div class="challan-list-heading"><h2 class="font-extrabold text-[#17324F]">Challan List (<span id="challanRecordCount">…</span>)</h2></div>
+          <div class="challan-header-controls flex w-full flex-col gap-3 lg:flex-1 xl:flex-row xl:items-end xl:justify-end">
+            <div id="challanExcelImportWrap" class="shrink-0">
+              <input id="challanExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
+              <label id="challanExcelImport" for="challanExcelFile" class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-[#d8deea] bg-white px-3 text-[11px] font-bold text-[#344159] transition hover:border-[#7182ef] hover:bg-[#f4f6ff] focus-within:ring-2 focus-within:ring-indigo-100" title="Import Challans from an Excel sheet">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M5 21h14"/></svg>
+                <span id="challanExcelImportLabel">Import Excel</span>
+              </label>
+            </div>
+            <a id="challanExcelExport" href="/api/challans/export" class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 text-[11px] font-bold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-200" title="Export the filtered Challan list to Excel">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m8 13 4-4 4 4"/><path d="M5 4h14"/></svg>
+              <span>Export Excel</span>
+            </a>
+            <form id="challanSearchForm" class="flex flex-wrap items-end justify-end gap-2">
+              <label class="flex flex-col gap-1 text-[10.5px] font-bold text-[#526783]">
+                <span>Starting Date</span>
+                <input id="challanStartDate" name="startDate" type="date" class="h-9 rounded-lg border border-[#E1E7EF] bg-white px-2.5 text-[11.5px] text-[#263d60] outline-none focus:ring-2 focus:ring-indigo-100">
+              </label>
+              <label class="flex flex-col gap-1 text-[10.5px] font-bold text-[#526783]">
+                <span>Ending Date</span>
+                <input id="challanEndDate" name="endDate" type="date" class="h-9 rounded-lg border border-[#E1E7EF] bg-white px-2.5 text-[11.5px] text-[#263d60] outline-none focus:ring-2 focus:ring-indigo-100">
+              </label>
+              <div class="flex items-center gap-2">
+                <input id="challanSearch" name="q" maxlength="100" type="search" placeholder="Search challans" aria-label="Search challans" class="w-52 h-9 rounded-lg border border-[#E1E7EF] px-3 text-[11.5px] outline-none focus:ring-2 focus:ring-indigo-100">
+                <button type="submit" class="h-9 px-3 rounded-lg bg-[#F3F6FB] text-[#3A4B63] text-[11px] font-bold">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="challan-table-scroll" role="region" aria-label="Challan list table" tabindex="0">
+          <table class="challan-table text-left">
+            <thead><tr>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Challan No.</span></th>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.1 3.6-7 8-7s8 2.9 8 7"/></svg>Created By</span></th>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.1 3.6-7 8-7s8 2.9 8 7"/></svg>Client Name</span></th>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="m3 8 9 5 9-5M3 12l9 5 9-5"/></svg>Item Name</span></th>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3.4 13.4a2 2 0 0 1 0-2.8l7.2-7.2a2 2 0 0 1 2.8 0l7.2 7.2a2 2 0 0 1 0 2.8Z"/><circle cx="8.5" cy="8.5" r="1"/></svg>Brand Name</span></th>
+              <th><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a3 3 0 0 1 3-3h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V7Z"/><path d="M3 8h15a2 2 0 0 1 2 2v4H3"/><circle cx="16" cy="12" r="1"/></svg>Amount (as per Qty)</span></th>
+              <th class="text-right"><span>Action</span></th>
+            </tr></thead>
+            <tbody id="challanRows"><tr><td colspan="7" class="px-5 py-12 text-center text-[12px] text-[#6B87A8]">Loading challan records...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="px-5 py-3.5 border-t border-[#EEF1F5] flex items-center justify-between gap-3">
+          <p id="challanSummary" class="text-[11px] text-[#6B87A8]">Loading records...</p>
+          <nav id="challanPagination" class="flex items-center gap-1.5" aria-label="Challan pagination"></nav>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="sampleReturnAlertModal" class="modal-overlay" aria-hidden="true">
+    <div class="return-alert-box modal-box rounded-2xl" role="alertdialog" aria-modal="true" aria-labelledby="sampleReturnAlertTitle">
+      <div class="return-alert-head">
+        <div class="return-alert-title-row"><span class="return-alert-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><div><h2 id="sampleReturnAlertTitle" class="return-alert-title">Sample Return Reminder</h2><p id="sampleReturnAlertSubtitle" class="return-alert-subtitle">Samples due within the next 7 days</p></div></div>
+        <button id="closeSampleReturnAlert" type="button" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-100" aria-label="Close sample return alert"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a4a20" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div id="sampleReturnAlertList" class="return-alert-list"></div>
+      <div class="return-alert-foot"><button id="dismissSampleReturnAlert" type="button" class="return-alert-dismiss">Got it</button></div>
+    </div>
+  </div>
+  <div id="challanHistoryModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-box glass rounded-2xl w-[420px] max-w-[92vw] p-5" role="dialog" aria-modal="true" aria-labelledby="challanHistoryTitle">
+      <div class="flex items-center justify-between gap-4 border-b border-black/5 pb-4">
+        <div>
+          <h2 id="challanHistoryTitle" class="text-[16px] font-extrabold text-[#17213f]">Edit History</h2>
+          <p id="challanHistorySubtitle" class="mt-1 text-[11px] text-[#73809b]">Challan updates</p>
+        </div>
+        <button id="closeChallanHistory" type="button" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5" aria-label="Close edit history">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="challanHistoryEntries" class="mt-4 max-h-72 overflow-y-auto space-y-3"></div>
+    </div>
+  </div>
+  <div id="challanPreviewModal" class="modal-overlay" aria-hidden="true">
+    <div class="challan-preview-modal-box modal-box glass rounded-2xl w-[680px] max-w-[94vw] p-5" role="dialog" aria-modal="true" aria-labelledby="challanPreviewTitle">
+      <div class="challan-preview-toolbar">
+        <div><div id="challanPreviewTitle" class="challan-preview-toolbar-title">Delivery Challan Preview</div><p id="challanPreviewSubtitle" class="mt-1 text-[10px] text-[#73809b]">Loading Challan…</p></div>
+        <div class="challan-preview-toolbar-actions">
+          <a id="challanPreviewEdit" href="#" class="challan-preview-toolbar-link"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>Edit</a>
+          <a id="challanPreviewDownload" href="#" class="challan-preview-toolbar-link primary"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Download PDF</a>
+          <button id="closeChallanPreview" type="button" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5" aria-label="Close Challan preview"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      <div id="challanPreviewContent" class="challan-preview-content"></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const rows = document.getElementById('challanRows');
+      const summary = document.getElementById('challanSummary');
+      const recordCount = document.getElementById('challanRecordCount');
+      const returnAlertModal = document.getElementById('sampleReturnAlertModal');
+      const returnAlertList = document.getElementById('sampleReturnAlertList');
+      const pagination = document.getElementById('challanPagination');
+      const form = document.getElementById('challanSearchForm');
+      const search = document.getElementById('challanSearch');
+      const startDate = document.getElementById('challanStartDate');
+      const endDate = document.getElementById('challanEndDate');
+      const excelExport = document.getElementById('challanExcelExport');
+      const excelFile = document.getElementById('challanExcelFile');
+      const excelImport = document.getElementById('challanExcelImport');
+      const excelImportLabel = document.getElementById('challanExcelImportLabel');
+      const historyModal = document.getElementById('challanHistoryModal');
+      const historySubtitle = document.getElementById('challanHistorySubtitle');
+      const historyEntries = document.getElementById('challanHistoryEntries');
+      const previewModal = document.getElementById('challanPreviewModal');
+      const previewSubtitle = document.getElementById('challanPreviewSubtitle');
+      const previewContent = document.getElementById('challanPreviewContent');
+      const previewDownload = document.getElementById('challanPreviewDownload');
+      const previewEdit = document.getElementById('challanPreviewEdit');
+      const params = new URLSearchParams(window.location.search);
+      let currentPage = Math.max(Number.parseInt(params.get('page') || '1', 10) || 1, 1);
+      let recordsOnPage = 0;
+      search.value = (params.get('q') || '').slice(0, 100);
+      startDate.value = params.get('startDate') || '';
+      endDate.value = params.get('endDate') || '';
+
+      function updateExportUrl() {
+        const url = new URL('/api/challans/export', window.location.origin);
+        const query = search.value.trim();
+        if (query) url.searchParams.set('q', query);
+        if (startDate.value) url.searchParams.set('startDate', startDate.value);
+        if (endDate.value) url.searchParams.set('endDate', endDate.value);
+        excelExport.href = url.pathname + url.search;
+      }
+
+      async function importExcel() {
+        const file = excelFile.files[0];
+        if (!file) return;
+        if (!file.name.toLowerCase().endsWith('.xlsx')) {
+          window.alert('Please select a valid .xlsx Excel file.');
+          excelFile.value = '';
+          return;
+        }
+        excelImport.classList.add('pointer-events-none', 'opacity-60');
+        excelImportLabel.textContent = 'Importing…';
+        const body = new FormData();
+        body.append('file', file);
+        try {
+          const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+          const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+          const response = await fetch('/api/challans/import', {
+            method:'POST', credentials:'same-origin', headers:{ [csrfHeader]:csrfToken, Accept:'application/json' }, body
+          });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.detail || result.message || 'Unable to import the Excel file.');
+          window.alert(result.message);
+          await loadPage(currentPage);
+        } catch (error) {
+          window.alert(error.message || 'Unable to import the Excel file.');
+        } finally {
+          excelFile.value = '';
+          excelImport.classList.remove('pointer-events-none', 'opacity-60');
+          excelImportLabel.textContent = 'Import Excel';
+        }
+      }
+
+      function cell(value, classes) {
+        const td = document.createElement('td');
+        td.className = classes;
+        td.textContent = value === null || value === undefined || value === '' ? '\u2014' : value;
+        return td;
+      }
+
+      function formatDate(value) {
+        if (!value) return '\u2014';
+        return new Intl.DateTimeFormat('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone:'UTC' })
+          .format(new Date(value + 'T00:00:00Z'));
+      }
+
+      function closeSampleReturnAlert() {
+        returnAlertModal.classList.remove('open');
+        returnAlertModal.setAttribute('aria-hidden', 'true');
+      }
+
+      async function loadSampleReturnAlerts() {
+        try {
+          const response = await fetch('/api/challans/return-alerts', { credentials:'same-origin', headers:{Accept:'application/json'} });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) return;
+          const alerts = await response.json();
+          if (!alerts.length) return;
+          returnAlertList.replaceChildren();
+          alerts.forEach(alert => {
+            const item = document.createElement('div'); item.className = 'return-alert-item';
+            const details = document.createElement('div');
+            const number = document.createElement('a'); number.className = 'return-alert-number'; number.href = `/challan/${encodeURIComponent(alert.id)}/edit`; number.textContent = alert.challanNo || `Challan #${alert.id}`;
+            const client = document.createElement('div'); client.className = 'return-alert-client'; client.textContent = alert.clientName || '\u2014';
+            const itemName = document.createElement('div'); itemName.className = 'return-alert-item-name'; itemName.textContent = alert.itemName || '\u2014';
+            details.append(number, client, itemName);
+            const due = document.createElement('div'); due.className = 'return-alert-due';
+            const dueDate = document.createElement('span'); dueDate.className = 'return-alert-date'; dueDate.textContent = formatDate(alert.sampleReturnDate);
+            const days = document.createElement('span'); days.className = `return-alert-days${alert.daysRemaining === 0 ? ' today' : ''}`; days.textContent = alert.daysRemaining === 0 ? 'Due today' : `Due in ${alert.daysRemaining} day${alert.daysRemaining === 1 ? '' : 's'}`;
+            due.append(dueDate, days); item.append(details, due); returnAlertList.appendChild(item);
+          });
+          document.getElementById('sampleReturnAlertSubtitle').textContent = `${alerts.length} sample return${alerts.length === 1 ? '' : 's'} due within 7 days`;
+          returnAlertModal.classList.add('open'); returnAlertModal.setAttribute('aria-hidden', 'false');
+        } catch (ignored) { }
+      }
+
+      function clientCell(record) {
+        const td = document.createElement('td');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'challan-client';
+        const name = document.createElement('span');
+        name.className = 'challan-client-name';
+        name.textContent = record.clientName || '\u2014';
+        const preview = document.createElement('button');
+        preview.type = 'button'; preview.className = 'challan-client-action'; preview.title = 'Preview Challan';
+        preview.setAttribute('aria-label', `Preview challan ${record.challanNo || record.id}`);
+        preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>';
+        preview.addEventListener('click', () => openChallanPreview(record));
+        const download = document.createElement('a');
+        download.href = `/api/challans/${encodeURIComponent(record.id)}/download`;
+        download.className = 'challan-client-action'; download.title = 'Download Challan PDF';
+        download.setAttribute('aria-label', `Download challan ${record.challanNo || record.id}`);
+        download.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+        wrapper.append(name, preview, download); td.appendChild(wrapper); return td;
+      }
+
+      function closeChallanPreview() {
+        previewModal.classList.remove('open');
+        previewModal.setAttribute('aria-hidden', 'true');
+      }
+
+      async function openChallanPreview(record) {
+        previewSubtitle.textContent = record.challanNo || 'Challan details';
+        previewDownload.href = `/api/challans/${encodeURIComponent(record.id)}/download`;
+        previewEdit.href = `/challan/${encodeURIComponent(record.id)}/edit`;
+        previewContent.innerHTML = '<p class="py-8 text-center text-[12px] text-[#73809b]">Loading Challan details…</p>';
+        previewModal.classList.add('open'); previewModal.setAttribute('aria-hidden', 'false');
+        try {
+          const response = await fetch(`/api/challans/${encodeURIComponent(record.id)}`, { credentials:'same-origin', headers:{ Accept:'application/json' } });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error();
+          const data = await response.json();
+          previewContent.innerHTML = `
+            <article class="challan-document">
+              <div class="challan-document-accent"></div>
+              <header class="challan-document-head">
+                <div class="challan-document-brand">
+                  <img class="challan-document-logo" src="/images/invoice/evtl-watermark.png" alt="EVTL India">
+                  <div class="challan-document-company">EMPHATIC VANS &amp; TESTING LABS PRIVATE LIMITED<br>F-88-89 B, S/F, Street No-08, Mangal Bazar<br>Laxmi Nagar, East Delhi – 110092<br>GSTIN: 07AAFCE4483M1Z7</div>
+                </div>
+                <div class="challan-document-heading"><strong>DELIVERY CHALLAN</strong><span data-preview="challanNo"></span></div>
+              </header>
+              <section class="challan-document-meta">
+                <div><span class="challan-document-label">Challan Date</span><span class="challan-document-value" data-preview="date"></span></div>
+                <div><span class="challan-document-label">Sample Return Date</span><span class="challan-document-value" data-preview="returnDate"></span></div>
+                <div><span class="challan-document-label">Prepared By</span><span class="challan-document-value" data-preview="creator"></span></div>
+              </section>
+              <section class="challan-document-parties">
+                <div class="challan-party"><h3 class="challan-party-title">Deliver To</h3><div class="challan-party-name" data-preview="client"></div><div class="challan-party-line" data-preview="address"></div></div>
+                <div class="challan-party"><h3 class="challan-party-title">Contact &amp; Location</h3><div class="challan-party-name" data-preview="phone"></div><div class="challan-party-line" data-preview="location"></div></div>
+              </section>
+              <section class="challan-items-wrap">
+                <h3 class="challan-items-title">Item Details</h3>
+                <table class="challan-document-table"><thead><tr><th>Item / Description</th><th>Brand / Specification</th><th>Qty</th><th>Amount</th><th>GST</th><th>Total</th></tr></thead><tbody><tr><td data-preview="item"></td><td data-preview="brand"></td><td data-preview="qty"></td><td data-preview="amount"></td><td data-preview="gst"></td><td data-preview="total"></td></tr></tbody></table>
+              </section>
+              <section class="challan-document-bottom">
+                <div class="challan-notes"><div class="challan-note orange"><span class="challan-document-label">Sample Return</span><span class="challan-document-value" data-preview="returnNote"></span></div><div class="challan-note"><span class="challan-document-label">Remarks</span><span class="challan-document-value" data-preview="remark"></span></div></div>
+                <div class="challan-totals"><div class="challan-total-row"><span>Amount</span><strong data-preview="subtotal"></strong></div><div class="challan-total-row"><span>GST</span><strong data-preview="gstSummary"></strong></div><div class="challan-total-row grand"><span>Total Amount</span><strong data-preview="grandTotal"></strong></div></div>
+              </section>
+              <footer class="challan-document-footer"><span>This is a system-generated delivery Challan preview.</span><span>For <strong>EVTL India Pvt. Ltd.</strong></span></footer>
+            </article>`;
+          const show = value => value === null || value === undefined || value === '' ? '\u2014' : String(value);
+          const currency = value => value === null || value === undefined || value === '' || Number.isNaN(Number(value)) ? '\u2014' : `\u20b9 ${Number(value).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+          const put = (key, value) => { const target = previewContent.querySelector(`[data-preview="${key}"]`); if (target) target.textContent = show(value); };
+          put('challanNo', data.challanNo); put('date', formatDate(data.date)); put('returnDate', formatDate(data.sampleReturnDate)); put('creator', data.createdBy);
+          put('client', data.clientName); put('address', data.address); put('phone', data.clientNumber); put('location', [data.state, data.pincode].filter(Boolean).join(' · '));
+          put('item', data.itemName); put('brand', data.brandName); put('qty', data.qty); put('amount', currency(data.amount)); put('gst', data.gst === null || data.gst === undefined || data.gst === '' ? '\u2014' : `${data.gst}%`); put('total', currency(data.totalAmount));
+          put('returnNote', data.sampleReturnDate ? `Sample scheduled for return on ${formatDate(data.sampleReturnDate)}.` : 'No sample return date specified.'); put('remark', data.remark);
+          put('subtotal', currency(data.amount)); put('gstSummary', data.gst === null || data.gst === undefined || data.gst === '' ? '\u2014' : `${data.gst}%`); put('grandTotal', currency(data.totalAmount));
+        } catch (error) {
+          previewContent.innerHTML = '<p class="py-8 text-center text-[12px] text-[#e5484d]">Unable to load Challan details.</p>';
+        }
+      }
+
+      function statusRow(message, isError) {
+        rows.replaceChildren();
+        const tr = document.createElement('tr');
+        const td = cell(message, `px-5 py-12 text-center text-[12px] ${isError ? 'text-rose-600' : 'text-[#6B87A8]'}`);
+        td.colSpan = 7;
+        tr.appendChild(td);
+        rows.appendChild(tr);
+      }
+
+      function pageSequence(current, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+        if (current <= 2) return [1, 2, 3, 'ellipsis', total];
+        if (current === 3) return [1, 2, 3, 4, 'ellipsis', total];
+        if (current >= total - 1) return [1, 'ellipsis', total - 2, total - 1, total];
+        if (current === total - 2) return [1, 'ellipsis', total - 3, total - 2, total - 1, total];
+        return [1, 'ellipsis-left', current - 1, current, current + 1, 'ellipsis-right', total];
+      }
+
+      function pageButton(label, targetPage, active, disabled, ariaLabel) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.disabled = disabled;
+        button.setAttribute('aria-label', ariaLabel || `Page ${targetPage}`);
+        if (active) button.setAttribute('aria-current', 'page');
+        button.className = active
+          ? 'flex h-9 min-w-9 items-center justify-center rounded-full bg-[#7467F8] px-2 text-[12px] font-bold text-white shadow-sm'
+          : 'flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-[12px] font-semibold text-[#17324F] transition hover:bg-[#F3F4F8] disabled:cursor-not-allowed disabled:text-[#B4BDCA] disabled:hover:bg-transparent';
+        if (!disabled && !active) button.addEventListener('click', () => loadPage(targetPage));
+        return button;
+      }
+
+      function renderPagination(current, total) {
+        pagination.replaceChildren();
+        if (total < 1) return;
+        const previousButton = pageButton('\u2039', current - 1, false, current === 1, 'Previous page');
+        previousButton.className += ' border border-[#E1E5EB]';
+        pagination.appendChild(previousButton);
+        pageSequence(current, total).forEach(entry => {
+          if (typeof entry === 'string') {
+            const dots = document.createElement('span');
+            dots.className = 'flex h-9 min-w-7 items-center justify-center text-[13px] text-[#718096]';
+            dots.textContent = '\u2026';
+            dots.setAttribute('aria-hidden', 'true');
+            pagination.appendChild(dots);
+          } else {
+            pagination.appendChild(pageButton(String(entry), entry, entry === current, false));
+          }
+        });
+        const nextButton = pageButton('\u203a', current + 1, false, current === total, 'Next page');
+        nextButton.className += ' border border-[#E1E5EB]';
+        pagination.appendChild(nextButton);
+      }
+
+      function closeActionMenus(exceptMenu) {
+        document.querySelectorAll('.challan-actions-menu.open').forEach(menu => {
+          if (menu !== exceptMenu) {
+            menu.classList.remove('open');
+            menu.closest('tr')?.classList.remove('menu-open');
+          }
+        });
+        document.querySelectorAll('.challan-actions-toggle').forEach(toggle => {
+          if (!exceptMenu || toggle.nextElementSibling !== exceptMenu) toggle.setAttribute('aria-expanded', 'false');
+        });
+      }
+
+      function positionActionMenu(toggle, menu) {
+        const rect = toggle.getBoundingClientRect();
+        const margin = 8;
+        const left = Math.max(margin, Math.min(rect.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - margin));
+        let top = rect.bottom + 6;
+        if (top + menu.offsetHeight > window.innerHeight - margin) top = rect.top - menu.offsetHeight - 6;
+        menu.style.left = `${left}px`;
+        menu.style.top = `${Math.max(margin, top)}px`;
+      }
+
+      function actionMenu(record) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'challan-actions';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'challan-actions-toggle';
+        toggle.setAttribute('aria-label', `Actions for challan ${record.challanNo || record.id}`);
+        toggle.setAttribute('aria-haspopup', 'menu');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>';
+        const menu = document.createElement('div');
+        menu.className = 'challan-actions-menu';
+        menu.setAttribute('role', 'menu');
+        const edit = document.createElement('a');
+        edit.href = `/challan/${encodeURIComponent(record.id)}/edit`;
+        edit.textContent = 'Edit';
+        edit.setAttribute('role', 'menuitem');
+        const editHistory = document.createElement('button');
+        editHistory.type = 'button';
+        editHistory.textContent = 'Edit History';
+        editHistory.setAttribute('role', 'menuitem');
+        editHistory.addEventListener('click', () => { closeActionMenus(); openEditHistory(record); });
+        const download = document.createElement('a');
+        download.href = `/api/challans/${encodeURIComponent(record.id)}/download`;
+        download.textContent = 'Download';
+        download.setAttribute('role', 'menuitem');
+        download.addEventListener('click', () => closeActionMenus());
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'delete-option';
+        remove.textContent = 'Delete';
+        remove.setAttribute('role', 'menuitem');
+        remove.addEventListener('click', () => { closeActionMenus(); deleteChallan(record, remove); });
+        menu.append(edit, editHistory, download, remove);
+        toggle.addEventListener('click', event => {
+          event.stopPropagation();
+          const willOpen = !menu.classList.contains('open');
+          closeActionMenus(menu);
+          menu.classList.toggle('open', willOpen);
+          toggle.setAttribute('aria-expanded', String(willOpen));
+          wrapper.closest('tr')?.classList.toggle('menu-open', willOpen);
+          if (willOpen) positionActionMenu(toggle, menu);
+        });
+        wrapper.append(toggle, menu);
+        return wrapper;
+      }
+
+      function closeHistoryModal() {
+        historyModal.classList.remove('open');
+        historyModal.setAttribute('aria-hidden', 'true');
+      }
+
+      async function openEditHistory(record) {
+        historySubtitle.textContent = 'Loading challan updates…';
+        historyEntries.innerHTML = '<p class="py-5 text-center text-[12px] text-[#73809b]">Loading history…</p>';
+        historyModal.classList.add('open');
+        historyModal.setAttribute('aria-hidden', 'false');
+        try {
+          const response = await fetch(`/api/challans/${encodeURIComponent(record.id)}/history`, {
+            credentials:'same-origin', headers:{ Accept:'application/json' }
+          });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to load challan history');
+          const result = await response.json();
+          historySubtitle.textContent = result.length
+            ? `${result.length} recorded update${result.length === 1 ? '' : 's'}` : 'No recorded updates';
+          historyEntries.replaceChildren();
+          if (!result.length) {
+            const empty = document.createElement('p');
+            empty.className = 'py-6 text-center text-[12px] text-[#73809b]';
+            empty.textContent = 'No edits have been recorded for this challan yet.';
+            historyEntries.appendChild(empty);
+            return;
+          }
+          result.forEach(entry => {
+            const item = document.createElement('div');
+            item.className = 'rounded-xl border border-[#e5e9f1] bg-[#fafbfe] px-3.5 py-3';
+            const editor = document.createElement('p');
+            editor.className = 'text-[12px] font-extrabold text-[#17213f]';
+            editor.textContent = entry.editor;
+            const timestamp = document.createElement('p');
+            timestamp.className = 'mt-1 text-[11px] text-[#73809b]';
+            timestamp.textContent = `Updated on ${entry.editedAt.replace('T', ' ')}`;
+            item.append(editor, timestamp);
+            historyEntries.appendChild(item);
+          });
+        } catch (error) {
+          historySubtitle.textContent = 'History unavailable';
+          historyEntries.innerHTML = '<p class="py-6 text-center text-[12px] text-[#e5484d]">Unable to load challan history.</p>';
+        }
+      }
+
+      async function deleteChallan(record, button) {
+        const label = record.challanNo || `#${record.id}`;
+        if (!window.confirm(`Delete challan ${label} permanently?`)) return;
+        button.disabled = true;
+        try {
+          const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+          const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+          const response = await fetch(`/api/challans/${encodeURIComponent(record.id)}`, {
+            method: 'DELETE', credentials: 'same-origin', headers: { [csrfHeader]: csrfToken, Accept: 'application/json' }
+          });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to delete challan');
+          await loadPage(recordsOnPage === 1 && currentPage > 1 ? currentPage - 1 : currentPage);
+        } catch (error) {
+          button.disabled = false;
+          window.alert('Unable to delete this challan. Please try again.');
+        }
+      }
+
+      async function loadPage(page) {
+        statusRow('Loading challan records...', false);
+        pagination.replaceChildren();
+        const query = search.value.trim();
+        try {
+          const url = new URL('/api/challans', window.location.origin);
+          url.searchParams.set('page', page);
+          if (query) url.searchParams.set('q', query);
+          if (startDate.value) url.searchParams.set('startDate', startDate.value);
+          if (endDate.value) url.searchParams.set('endDate', endDate.value);
+          const response = await fetch(url, { credentials:'same-origin', headers:{ Accept:'application/json' } });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to load challans');
+          const data = await response.json();
+          currentPage = data.currentPage;
+          recordsOnPage = data.records.length;
+          recordCount.textContent = String(data.totalRecords);
+          rows.replaceChildren();
+          if (!data.records.length) {
+            statusRow('No challan records found.', false);
+          } else {
+            data.records.forEach((record, index) => {
+              const tr = document.createElement('tr');
+              tr.className = 'challan-row';
+              const challanNumberCell = document.createElement('td');
+              challanNumberCell.className = '';
+              const challanNumberLink = document.createElement('a');
+              challanNumberLink.href = `/challan/${encodeURIComponent(record.id)}/edit`;
+              challanNumberLink.className = 'challan-number hover:bg-[#e7efff] focus:outline-none focus:ring-2 focus:ring-indigo-200';
+              challanNumberLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span></span>';
+              challanNumberLink.querySelector('span').textContent = record.challanNo || `Challan #${record.id}`;
+              challanNumberLink.title = `Edit ${record.challanNo || 'challan'}`;
+              challanNumberLink.setAttribute('aria-label', `Edit challan ${record.challanNo || record.id}`);
+              challanNumberCell.appendChild(challanNumberLink);
+              tr.append(challanNumberCell);
+              const creatorCell = document.createElement('td');
+              const creator = document.createElement('div');
+              creator.className = 'challan-creator';
+              const creatorName = document.createElement('span');
+              creatorName.className = 'challan-creator-name';
+              creatorName.textContent = record.createdBy || '\u2014';
+              const creatorDate = document.createElement('span');
+              creatorDate.className = 'challan-creator-date';
+              // Older records were saved before a creation timestamp was recorded.
+              // Show their existing record date until a true creation date is available.
+              creatorDate.textContent = formatDate(record.createdAt ? record.createdAt.slice(0, 10) : record.date);
+              creator.append(creatorName, creatorDate);
+              creatorCell.appendChild(creator);
+              tr.append(creatorCell);
+              tr.append(clientCell(record));
+              tr.append(cell(record.itemName, 'challan-black-cell'));
+              tr.append(cell(record.brandName, 'challan-black-cell'));
+              const amountCell = document.createElement('td');
+              const amount = document.createElement('div');
+              amount.className = 'challan-amount';
+              const quantity = document.createElement('span');
+              quantity.className = 'challan-amount-qty';
+              quantity.textContent = `Qty: ${record.qty || '\u2014'}`;
+              const amountValue = document.createElement('span');
+              amountValue.className = 'challan-amount-value';
+              amountValue.textContent = record.amount === null || record.amount === undefined || record.amount === ''
+                ? '\u2014' : Number(record.amount).toFixed(2);
+              amount.append(amountValue, quantity);
+              amountCell.appendChild(amount);
+              tr.append(amountCell);
+              const actionCell = document.createElement('td');
+              actionCell.className = 'text-right';
+              actionCell.appendChild(actionMenu(record));
+              tr.appendChild(actionCell);
+              rows.appendChild(tr);
+            });
+          }
+          const first = data.totalRecords ? ((data.currentPage - 1) * data.pageSize) + 1 : 0;
+          const last = first ? first + data.records.length - 1 : 0;
+          summary.textContent = data.totalRecords ? `Showing ${first} to ${last} of ${data.totalRecords} challans` : 'No challans found';
+          renderPagination(data.currentPage, data.totalPages);
+          const browserUrl = new URL(window.location.href);
+          browserUrl.searchParams.set('page', data.currentPage);
+          query ? browserUrl.searchParams.set('q', query) : browserUrl.searchParams.delete('q');
+          startDate.value ? browserUrl.searchParams.set('startDate', startDate.value) : browserUrl.searchParams.delete('startDate');
+          endDate.value ? browserUrl.searchParams.set('endDate', endDate.value) : browserUrl.searchParams.delete('endDate');
+          history.replaceState(null, '', browserUrl);
+          updateExportUrl();
+        } catch (error) {
+          statusRow('Unable to load challan records. Please refresh the page.', true);
+          summary.textContent = 'Records unavailable';
+          pagination.replaceChildren();
+        }
+      }
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        if (startDate.value && endDate.value && startDate.value > endDate.value) {
+          window.alert('Starting Date must not be after Ending Date.');
+          startDate.focus();
+          return;
+        }
+        loadPage(1);
+      });
+      [search, startDate, endDate].forEach(control => control.addEventListener('input', updateExportUrl));
+      excelFile.addEventListener('change', importExcel);
+      document.addEventListener('click', event => { if (!event.target.closest('.challan-actions')) closeActionMenus(); });
+      document.querySelector('.challan-table-scroll').addEventListener('scroll', () => closeActionMenus(), { passive:true });
+      window.addEventListener('resize', () => closeActionMenus());
+      document.getElementById('closeChallanHistory').addEventListener('click', closeHistoryModal);
+      document.getElementById('closeSampleReturnAlert').addEventListener('click', closeSampleReturnAlert);
+      document.getElementById('dismissSampleReturnAlert').addEventListener('click', closeSampleReturnAlert);
+      document.getElementById('closeChallanPreview').addEventListener('click', closeChallanPreview);
+      historyModal.addEventListener('click', event => { if (event.target === historyModal) closeHistoryModal(); });
+      returnAlertModal.addEventListener('click', event => { if (event.target === returnAlertModal) closeSampleReturnAlert(); });
+      previewModal.addEventListener('click', event => { if (event.target === previewModal) closeChallanPreview(); });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { closeActionMenus(); closeHistoryModal(); closeChallanPreview(); closeSampleReturnAlert(); }
+      });
+      search.addEventListener('input', () => {
+        if (search.value.trim() === '' && new URL(window.location.href).searchParams.has('q')) {
+          loadPage(1);
+        }
+      });
+      updateExportUrl();
+      loadPage(currentPage);
+      loadSampleReturnAlerts();
+    })();
+  </script>
+</body>
+</html>

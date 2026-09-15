@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="invoice-calculator" id="invoiceCalculatorModal" class="invoice-calculator-modal" aria-hidden="true">
+    <div class="invoice-calculator-shell" role="dialog" aria-modal="true" aria-labelledby="invoiceCalculatorTitle">
+      <header class="invoice-calculator-header">
+        <div class="invoice-calculator-heading">
+          <span class="invoice-calculator-logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h1M12 10h1M16 10h1M8 14h1M12 14h1M16 14h1M8 18h1M12 18h1M16 18h1"/></svg>
+          </span>
+          <div>
+            <h2 id="invoiceCalculatorTitle">Invoice Calculator</h2>
+            <p>Standard calculator plus business math helpers for tax, discount, split, and quantity totals.</p>
+          </div>
+        </div>
+        <button type="button" id="closeInvoiceCalculator" class="invoice-calculator-close" aria-label="Close calculator">×</button>
+      </header>
+
+      <div class="invoice-calculator-content">
+        <section class="standard-calculator" aria-label="Standard calculator">
+          <div class="calculator-display">
+            <span id="calculatorExpression">Ready for calculation</span>
+            <strong id="calculatorDisplay">0</strong>
+          </div>
+          <div class="calculator-keypad" id="calculatorKeypad">
+            <button type="button" class="key key-action" data-action="clear">AC</button>
+            <button type="button" class="key key-action" data-action="delete">DEL</button>
+            <button type="button" class="key key-operator" data-value="%">%</button>
+            <button type="button" class="key key-operator" data-value="/">÷</button>
+            <button type="button" class="key" data-value="7">7</button><button type="button" class="key" data-value="8">8</button><button type="button" class="key" data-value="9">9</button><button type="button" class="key key-operator" data-value="*">×</button>
+            <button type="button" class="key" data-value="4">4</button><button type="button" class="key" data-value="5">5</button><button type="button" class="key" data-value="6">6</button><button type="button" class="key key-operator" data-value="-">−</button>
+            <button type="button" class="key" data-value="1">1</button><button type="button" class="key" data-value="2">2</button><button type="button" class="key" data-value="3">3</button><button type="button" class="key key-operator" data-value="+">+</button>
+            <button type="button" class="key key-operator" data-value="(">(</button><button type="button" class="key key-operator" data-value=")">)</button><button type="button" class="key" data-value="0">0</button><button type="button" class="key" data-value=".">.</button>
+            <button type="button" class="key key-operator" data-action="negate">+/−</button>
+            <button type="button" class="key key-operator" data-action="load-net">Net</button>
+            <button type="button" class="key key-operator" data-action="use-display">Use</button>
+            <button type="button" class="key key-equals" data-action="equals">=</button>
+          </div>
+          <p class="calculator-tip">Tip: click inside any amount field first, then use <strong>Use</strong> or a helper button to push the result directly into that field.</p>
+        </section>
+
+        <div class="invoice-helper-grid">
+          <section class="invoice-helper-card helper-tax">
+            <div class="helper-card-top"><div><span class="helper-badge">Tax helper</span><h3>Tax / GST</h3></div><span class="helper-icon">%</span></div>
+            <p>Calculate tax amount and total from a base amount and rate.</p>
+            <div class="helper-fields"><label>Base amount<input id="taxBaseAmount" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Tax rate %<input id="taxRate" type="number" min="0" step="0.01" value="18"></label></div>
+            <div class="helper-results"><div><span>Tax</span><strong id="taxAmountResult">0.00</strong></div><div><span>Total</span><strong id="taxTotalResult">0.00</strong></div></div>
+            <div class="helper-actions"><button type="button" data-use="taxAmountResult">Use Tax</button><button type="button" class="primary" data-use="taxTotalResult">Use Total</button></div>
+          </section>
+
+          <section class="invoice-helper-card helper-discount">
+            <div class="helper-card-top"><div><span class="helper-badge">Price cut</span><h3>Discount</h3></div><span class="helper-icon">⌑</span></div>
+            <p>See discount value and final amount after percentage reduction.</p>
+            <div class="helper-fields"><label>Amount<input id="discountAmount" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Discount %<input id="discountRate" type="number" min="0" step="0.01" value="10"></label></div>
+            <div class="helper-results"><div><span>Discount</span><strong id="discountResult">0.00</strong></div><div><span>Net amount</span><strong id="discountNetResult">0.00</strong></div></div>
+            <div class="helper-actions"><button type="button" data-use="discountResult">Use Discount</button><button type="button" class="primary" data-use="discountNetResult">Use Net</button></div>
+          </section>
+
+          <section class="invoice-helper-card helper-quantity">
+            <div class="helper-card-top"><div><span class="helper-badge">Line total</span><h3>Quantity × Rate</h3></div><span class="helper-icon">▦</span></div>
+            <p>Useful for service units, trips, or item pricing.</p>
+            <div class="helper-fields"><label>Quantity<input id="quantityValue" type="number" min="0" step="0.01" value="1"></label><label>Rate<input id="rateValue" type="number" min="0" step="0.01" placeholder="0.00"></label></div>
+            <div class="helper-results single"><div><span>Line total</span><strong id="lineTotalResult">0.00</strong></div></div>
+            <div class="helper-actions single"><button type="button" class="primary" data-use="lineTotalResult">Use Total</button></div>
+          </section>
+
+          <section class="invoice-helper-card helper-split">
+            <div class="helper-card-top"><div><span class="helper-badge">Split helper</span><h3>Split Amount</h3></div><span class="helper-icon">▣</span></div>
+            <p>Split one value across people, parts, or milestones.</p>
+            <div class="helper-fields"><label>Total amount<input id="splitAmount" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Split count<input id="splitCount" type="number" min="1" step="1" value="2"></label></div>
+            <div class="helper-results single"><div><span>Per split</span><strong id="splitResult">0.00</strong></div></div>
+            <div class="helper-actions single"><button type="button" class="primary" data-use="splitResult">Use Split</button></div>
+          </section>
+
+          <section class="invoice-helper-card helper-shortcuts">
+            <div class="helper-card-top"><div><span class="helper-badge">Shortcuts</span><h3>Quick Invoice Helpers</h3></div><span class="helper-icon">ϟ</span></div>
+            <p>Jump straight into invoice values already on the page.</p>
+            <div class="shortcut-actions">
+              <button type="button" data-load-field="netAmountInput">Load Net Amount</button>
+              <button type="button" data-load-field="finalAmountInput">Load Final Amount</button>
+              <button type="button" data-load-field="extraServicesAmountInput">Load Extra Amount</button>
+              <button type="button" class="primary" data-action="use-display">Use Display Result</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

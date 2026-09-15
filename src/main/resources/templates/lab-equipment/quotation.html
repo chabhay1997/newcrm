@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotation | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .quotation-records-table { border: 1px solid #64748B; }
+    .quotation-records-table th { border-bottom: 2px solid #64748B; }
+    .quotation-records-table td { border-bottom: 1px solid #94A3B8; }
+    .quotation-records-table th:not(:last-child), .quotation-records-table td:not(:last-child) { border-right: 1px solid #64748B; }
+    .quotation-records-table tbody tr:last-child td { border-bottom: 0; }
+    .quotation-action-button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border: 0; border-radius: 7px; cursor: pointer; transition: background .16s ease; }
+    .quotation-action-button.download { color: #4F46E5; background: #EEF2FF; }
+    .quotation-action-button.download:hover { background: #E0E7FF; }
+    .quotation-action-button.delete { color: #DC2626; background: #FEF2F2; }
+    .quotation-action-button.delete:hover { background: #FEE2E2; }
+  </style>
+</head>
+<body>
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <main class="flex-1 px-8 pb-8 space-y-5">
+      <section class="rounded-2xl bg-white border border-[#E5EAF1] shadow-[0_12px_32px_-24px_rgba(23,50,79,.42)] overflow-hidden">
+        <div class="px-5 py-4 border-b border-[#EEF1F5]">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h1 class="text-[14px] font-extrabold text-[#17324F]">Equipment Quotation</h1>
+              <p class="mt-0.5 text-[11px] text-[#6B87A8]">Review lab equipment quotations.</p>
+            </div>
+            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <a href="/lab-equipment/quotation/create"
+                class="inline-flex h-9 items-center rounded-lg bg-[#5B4CF5] px-3 text-[11px] font-bold text-white shadow-md shadow-indigo-500/20 transition hover:bg-[#4F46E5] focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                Add Equipment Quotation
+              </a>
+              <button type="button"
+                class="inline-flex h-9 items-center rounded-lg border border-[#D9E2EC] bg-white px-3 text-[11px] font-bold text-[#3A4B63] transition hover:bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                Terms and Conditions
+              </button>
+            </div>
+          </div>
+          <form id="quotationSearchForm" class="mt-3 flex items-center gap-2 sm:justify-end" role="search">
+            <input id="quotationSearch" name="q" type="search" maxlength="100" placeholder="Search quotations"
+              aria-label="Search quotations" class="h-9 w-52 rounded-lg border border-[#E1E7EF] px-3 text-[11.5px] outline-none focus:ring-2 focus:ring-indigo-100">
+            <button type="submit" class="h-9 rounded-lg bg-[#F3F6FB] px-3 text-[11px] font-bold text-[#3A4B63]">Search</button>
+          </form>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="quotation-records-table w-full min-w-[1200px] border-collapse text-left" aria-label="Lab equipment quotations">
+            <thead class="bg-[#F8FAFC]">
+              <tr class="text-[10px] uppercase tracking-[.08em] text-[#6B87A8]">
+                <th scope="col" class="border-b border-[#DDE4EC] px-5 py-3 font-extrabold">S No.</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Created By</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Invoice No.</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Date</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Attention</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Client Name</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">IS Code</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Company Name</th>
+                <th scope="col" class="border-b border-[#DDE4EC] px-5 py-3 text-right font-extrabold">Action</th>
+              </tr>
+            </thead>
+            <tbody id="quotationRows">
+              <tr>
+                <td colspan="9" class="px-5 py-12 text-center text-[12px] text-[#6B87A8]">Loading quotations...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF1F5] px-5 py-3.5">
+          <p id="quotationSummary" class="text-[11px] text-[#6B87A8]">Loading quotations...</p>
+          <nav id="quotationPagination" class="flex items-center gap-1.5" aria-label="Quotation pagination"></nav>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const rows = document.getElementById('quotationRows');
+      const summary = document.getElementById('quotationSummary');
+      const pagination = document.getElementById('quotationPagination');
+      const form = document.getElementById('quotationSearchForm');
+      const search = document.getElementById('quotationSearch');
+      const params = new URLSearchParams(window.location.search);
+      let currentPage = Math.max(Number.parseInt(params.get('page') || '1', 10) || 1, 1);
+      search.value = (params.get('q') || '').slice(0, 100);
+
+      function cell(value, className) {
+        const td = document.createElement('td');
+        td.className = className;
+        td.textContent = value === null || value === undefined || value === '' ? '—' : value;
+        return td;
+      }
+
+      function status(message, isError) {
+        rows.replaceChildren();
+        const tr = document.createElement('tr');
+        const td = cell(message, `px-5 py-12 text-center text-[12px] ${isError ? 'text-rose-600' : 'text-[#6B87A8]'}`);
+        td.colSpan = 9;
+        tr.appendChild(td);
+        rows.appendChild(tr);
+      }
+
+      function formatDate(value) {
+        if (!value) return '—';
+        return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(`${value}T00:00:00Z`));
+      }
+
+      function renderRows(records, page, pageSize) {
+        rows.replaceChildren();
+        if (!records.length) {
+          status('No quotations available.', false);
+          return;
+        }
+        records.forEach((record, index) => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b border-[#EEF1F5] last:border-b-0';
+          tr.append(
+            cell(String(((page - 1) * pageSize) + index + 1), 'px-5 py-3 text-[12px] font-semibold text-[#17324F]'),
+            cell(record.createdBy, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(record.invoiceNo, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(formatDate(record.date), 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(record.attention, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(record.clientName, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(record.isCode, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            cell(record.companyName, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+            actionCell(record)
+          );
+          rows.appendChild(tr);
+        });
+      }
+
+      function actionCell(record) {
+        const td = document.createElement('td');
+        td.className = 'px-5 py-3 text-right';
+        const actions = document.createElement('div');
+        actions.className = 'inline-flex items-center gap-2';
+
+        const download = document.createElement('button');
+        download.type = 'button';
+        download.className = 'quotation-action-button download';
+        download.title = 'Download quotation';
+        download.setAttribute('aria-label', `Download quotation ${record.invoiceNo || record.id}`);
+        download.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'quotation-action-button delete';
+        remove.title = 'Delete quotation';
+        remove.setAttribute('aria-label', `Delete quotation ${record.invoiceNo || record.id}`);
+        remove.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
+        actions.append(download, remove);
+        td.appendChild(actions);
+        return td;
+      }
+
+      function pageButton(label, targetPage, disabled, active, ariaLabel) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.disabled = disabled;
+        button.setAttribute('aria-label', ariaLabel);
+        if (active) button.setAttribute('aria-current', 'page');
+        button.className = active
+          ? 'flex h-8 min-w-8 items-center justify-center rounded-lg bg-[#5B4CF5] px-2 text-[11px] font-bold text-white'
+          : 'flex h-8 min-w-8 items-center justify-center rounded-lg border border-[#E1E7EF] px-2 text-[11px] font-semibold text-[#3A4B63] disabled:cursor-not-allowed disabled:text-[#B4BDCA]';
+        if (!disabled && !active) button.addEventListener('click', () => loadPage(targetPage));
+        return button;
+      }
+
+      function renderPagination(data) {
+        pagination.replaceChildren();
+        if (data.totalPages < 2) return;
+        pagination.appendChild(pageButton('‹', data.currentPage - 1, !data.hasPrevious, false, 'Previous page'));
+        const pages = data.totalPages <= 7
+          ? Array.from({ length: data.totalPages }, (_, index) => index + 1)
+          : [1, ...(data.currentPage > 3 ? ['…'] : []), ...[data.currentPage - 1, data.currentPage, data.currentPage + 1]
+              .filter(page => page > 1 && page < data.totalPages), ...(data.currentPage < data.totalPages - 2 ? ['…'] : []), data.totalPages];
+        pages.forEach(page => {
+          if (page === '…') {
+            const dots = document.createElement('span');
+            dots.className = 'px-1 text-[11px] text-[#6B87A8]';
+            dots.textContent = page;
+            dots.setAttribute('aria-hidden', 'true');
+            pagination.appendChild(dots);
+          } else {
+            pagination.appendChild(pageButton(String(page), page, false, page === data.currentPage, `Page ${page}`));
+          }
+        });
+        pagination.appendChild(pageButton('›', data.currentPage + 1, !data.hasNext, false, 'Next page'));
+      }
+
+      async function loadPage(page) {
+        const query = search.value.trim();
+        const request = new URLSearchParams({ page: String(page) });
+        if (query) request.set('q', query);
+        const url = `${window.location.pathname}?${request}`;
+        window.history.replaceState({}, '', url);
+        try {
+          const response = await fetch(`/api/lab-equipment/quotations?${request}`, {
+            headers: { Accept: 'application/json' }, credentials: 'same-origin'
+          });
+          if (!response.ok) throw new Error('Unable to load quotations.');
+          const data = await response.json();
+          currentPage = data.currentPage;
+          renderRows(data.records, data.currentPage, data.pageSize);
+          summary.textContent = data.totalRecords
+            ? `Showing ${((data.currentPage - 1) * data.pageSize) + 1} to ${Math.min(data.currentPage * data.pageSize, data.totalRecords)} of ${data.totalRecords} quotations`
+            : 'Showing 0 quotations';
+          renderPagination(data);
+        } catch (error) {
+          status('Unable to load quotations. Please try again.', true);
+          summary.textContent = 'Quotation records could not be loaded.';
+          pagination.replaceChildren();
+        }
+      }
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        loadPage(1);
+      });
+      loadPage(currentPage);
+    })();
+  </script>
+</body>
+</html>

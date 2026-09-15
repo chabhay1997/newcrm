@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Invoice</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+<style>
+  .invoice-edit-sections #invoiceCreateForm .grid > div {
+    padding: 12px;
+    border: 1px solid #E1E5EA;
+    border-radius: 14px;
+    background: #F7F8FA;
+  }
+  .invoice-edit-sections #invoiceCreateForm .grid > .space-y-4 {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .invoice-edit-sections #invoiceCreateForm .grid > .space-y-4 > div {
+    padding: 12px;
+    border: 1px solid #E1E5EA;
+    border-radius: 14px;
+    background: #F7F8FA;
+  }
+  .invoice-edit-sections #particularsTable,
+  .invoice-edit-sections #particularsTable th,
+  .invoice-edit-sections #particularsTable td {
+    border: 1px solid #E1E5EA;
+  }
+  .invoice-edit-sections #particularsTable th { background: #F0F2F5; }
+  .invoice-edit-sections #particularsTable td { background: #FAFBFC; }
+  .invoice-edit-sections #invoiceCreateForm > .glass > div:last-child {
+    padding: 12px;
+    border: 1px solid #E1E5EA;
+    border-radius: 14px;
+    background: #F7F8FA;
+  }
+  .toolbar-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12.5px; font-weight: 700; color: #171923;
+    padding: 9px 16px; border-radius: 12px;
+    background: #fff; border: 1px solid rgba(0,0,0,0.08);
+    transition: background .15s ease, transform .1s ease;
+  }
+  .toolbar-btn:hover { background: #F3F5F8; }
+  .toolbar-btn:active { transform: scale(0.97); }
+  .toolbar-btn-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; border: 1px solid rgba(0,0,0,0.08);
+    transition: background .15s ease;
+  }
+  .toolbar-btn-icon:hover { background: #F3F5F8; }
+  .field-label { font-size: 13px; font-weight: 800; color: #171923; margin-bottom: 6px; display: block; }
+  .field-input {
+    width: 100%; padding: 10px 13px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.1); font-size: 13px; color: #171923;
+    background: #fff;
+  }
+  .field-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(138,92,246,0.3); border-color: #8A5CF6; }
+  .field-input::placeholder { color: #A7AFC0; }
+  #bank_type { border: 2px solid #EF4444; background-color: #FFF5F5; }
+  #bank_type:focus { border-color: #DC2626; box-shadow: 0 0 0 3px rgba(239,68,68,0.18); }
+  .mini-check { width: 17px; height: 17px; accent-color: #8A5CF6; cursor: pointer; flex-shrink: 0; }
+
+  .pill-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: #ffffff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pill-toggle span {
+    font-size: 12.5px;
+    color: #171923;
+    font-weight: 600;
+  }
+  .invoice-options-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 18px;
+  }
+  .invoice-options-row .pill-toggle { flex: 0 0 auto; }
+
+  .bank-confirm-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.4);
+    z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .bank-confirm-card {
+    width: min(360px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .bank-confirm-card h4 { font-size: 15px; font-weight: 800; color: #171923; margin-bottom: 4px; }
+  .bank-confirm-card p { font-size: 12px; color: #8C8FA3; margin-bottom: 12px; }
+  .bank-confirm-preview {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08); margin-bottom: 14px;
+  }
+  .bank-confirm-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;
+  }
+  .bank-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .bank-confirm-actions button {
+    border: none; border-radius: 10px; padding: 8px 14px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .bank-confirm-cancel { background: #F3F5F8; color: #171923; }
+  .bank-confirm-accept { background: #8A5CF6; color: #fff; }
+
+  .terms-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 10000;
+    align-items: center; justify-content: center; padding: 18px;
+    background: rgba(38, 48, 64, .58);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  }
+  .terms-modal-overlay.open { display: flex; }
+  .terms-modal-card {
+    width: min(880px, 100%); max-height: calc(100vh - 36px); overflow-y: auto;
+    padding: 22px 30px 30px; border: 1px solid #d5e1f0; border-radius: 22px;
+    background: #f8fbff; box-shadow: 0 30px 75px rgba(15, 30, 50, .3);
+  }
+  .terms-modal-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 18px;
+    padding-bottom: 18px; border-bottom: 1px solid #d3dfed;
+  }
+  .terms-modal-actions { display: flex; align-items: center; gap: 13px; }
+  .terms-action-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 126px; height: 48px; padding: 0 18px; border: 0; border-radius: 14px;
+    color: #fff; background: linear-gradient(145deg,#3776f5,#2859d9);
+    font-size: 14px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 13px 28px rgba(47,107,234,.22);
+  }
+  .terms-action-btn.secondary { min-width: 108px; background: #788394; box-shadow: none; }
+  .terms-action-btn:disabled { opacity: .6; cursor: wait; }
+  .terms-modal-content { padding-top: 21px; }
+  .terms-modal-content h2 { margin: 0 0 18px; color: #172033; font-size: 22px; font-weight: 800; }
+  .terms-list { display: flex; flex-direction: column; gap: 15px; }
+  .term-row {
+    position: relative; padding: 19px 23px;
+    border: 1px solid #cedef0; border-radius: 20px;
+    background: linear-gradient(145deg,#fbfdff,#eff6ff);
+  }
+  .term-input {
+    display: block; width: 100%; min-height: 102px; resize: vertical;
+    padding: 14px 15px; border: 1px solid #c5d7ec; border-radius: 15px;
+    outline: none; background: rgba(255,255,255,.82); color: #172033;
+    font-size: 14px; line-height: 1.5;
+  }
+  .term-input:focus { border-color: #4777ec; box-shadow: 0 0 0 3px rgba(71,119,236,.13); }
+  .remove-term-btn {
+    position: absolute; top: -12px; right: -12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border: 2px solid #fff; border-radius: 50%;
+    background: #ff565c; color: #fff; font-size: 20px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 9px 22px rgba(255,86,92,.32);
+  }
+  .terms-empty { padding: 28px; border: 1px dashed #cbd8e9; border-radius: 17px; color: #7a879b; text-align: center; font-size: 13px; }
+  @media (max-width: 600px) {
+    .terms-modal-card { padding: 16px 18px 22px; border-radius: 17px; }
+    .terms-modal-toolbar { align-items: stretch; flex-direction: column; }
+    .terms-modal-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .terms-action-btn { min-width: 0; height: 46px; font-size: 14px; border-radius: 13px; }
+    .term-row { padding: 16px; }
+    .term-input { min-height: 105px; padding: 13px; font-size: 14px; }
+    .terms-modal-content h2 { font-size: 22px; }
+  }
+</style>
+</head>
+
+<body>
+
+  <div id="invoiceTypeServerError" th:if="${invoiceTypeError}"
+    th:attr="data-message=${invoiceTypeError}" hidden></div>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <main class="flex-1 px-8 pt-3 pb-8 space-y-5"
+          th:classappend="${invoice.id != null} ? ' invoice-edit-sections' : ''">
+
+      <!-- ACTION TOOLBAR -->
+      <div class="glass rounded-2xl p-3 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2">
+          <a th:href="@{/invoice}" class="toolbar-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+          </a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="addRow()" class="toolbar-btn text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF); border:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add Row
+          </button>
+          <button type="button" onclick="removeRow()" class="toolbar-btn text-white" style="background-image:linear-gradient(135deg,#FF9B9B,#E5484D); border:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+            Remove Row
+          </button>
+          <button type="button" title="Undo" class="toolbar-btn-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B6DF2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+          </button>
+          <button type="button" title="Redo" class="toolbar-btn-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2FAE76" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <!-- inv_type: Evtl India / Prolix / Government — GSTIN/PAN aur next inv/po no. isi se driven hain -->
+            <select id="invoiceTypeSelect" name="invType" form="invoiceCreateForm"
+              class="field-input pr-8 appearance-none cursor-pointer" style="min-width:180px;">
+              <option value="">--Invoice Type--</option>
+              <option value="1" th:selected="${invoice.invType != null and invoice.invType == 1}">Evtl India</option>
+              <option value="2" th:selected="${invoice.invType != null and invoice.invType == 2}">Prolix</option>
+              <option value="3" th:selected="${invoice.invType != null and invoice.invType == 3}">Government</option>
+            </select>
+          </div>
+          <button type="submit" form="invoiceCreateForm" class="toolbar-btn text-white" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76); border:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Save
+          </button>
+          <button type="button" id="openTermsModal" class="toolbar-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            Terms
+          </button>
+        </div>
+      </div>
+
+      <!-- INVOICE FORM CARD -->
+      <form id="invoiceCreateForm" th:action="@{/invoice/create}" th:object="${invoice}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <div class="glass rounded-2xl p-6 space-y-6">
+
+          <!-- TOGGLES ROW -->
+          <div class="invoice-options-row">
+
+            <!-- inv_types (Export/Tax) — inv_type select se ALAG field hai. Naya invoice = Export by default -->
+            <label id="pillExport" class="pill-toggle">
+              <input type="checkbox" id="exportInvoiceCheck" name="invTypes" value="1"
+                th:checked="${invoice.id == null or (invoice.invTypes != null and invoice.invTypes == 1)}"
+                class="mini-check" onchange="handleHeadingToggle(this,'pillExport','pillTax','exportInvoiceCheck','taxInvoiceCheck')">
+              <span>Export Invoice</span>
+            </label>
+
+            <label id="pillTax" class="pill-toggle">
+              <input type="checkbox" id="taxInvoiceCheck" name="invTypes" value="2"
+                th:checked="${invoice.invTypes != null and invoice.invTypes == 2}"
+                class="mini-check" onchange="handleHeadingToggle(this,'pillTax','pillExport','taxInvoiceCheck','exportInvoiceCheck')">
+              <span>Tax Invoice</span>
+            </label>
+
+            <label id="pillInr" class="pill-toggle">
+              <input type="checkbox" id="inrCheck" name="isInr" value="1"
+                th:checked="${invoice.isInr != null and invoice.isInr == 1}"
+                class="mini-check" onchange="toggleTogglePill(this)">
+              <span style="font-weight:500; color:#3A4B63;">(If checked then invoice will generate in INR)</span>
+            </label>
+
+            <label id="pillSignature" class="pill-toggle">
+              <input type="checkbox" id="removeSignatureCheck" name="isSign" value="1"
+                th:checked="${invoice.isSign != null and invoice.isSign == 1}"
+                class="mini-check" onchange="toggleTogglePill(this)">
+              <span style="font-weight:500; color:#3A4B63;">(Remove Signature)</span>
+            </label>
+
+            <!-- is_terms — naya invoice ho to default CHECKED (blade jaisa: isset($invoice) ? ... : 'checked') -->
+            <label id="pillTerms" class="pill-toggle">
+              <input type="checkbox" id="showTermsCheck" name="isTerms" value="1"
+                th:checked="${invoice.id == null or (invoice.isTerms != null and invoice.isTerms == 1)}"
+                class="mini-check" onchange="toggleTogglePill(this)">
+              <span style="font-weight:500; color:#3A4B63;">(If checked then show Terms &amp; Condition)</span>
+            </label>
+
+          </div>
+
+          <!-- BILL TO / INVOICE NO / PO NO -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="field-label">Bill To</label>
+              <input type="text" th:field="*{name}" placeholder="Enter Client Name" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">Invoice No:</label>
+              <input type="text" id="invNoInput" th:field="*{invNo}" placeholder="Enter Invoice No" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">PO No:</label>
+              <input type="text" id="poNoInput" th:field="*{poNo}" placeholder="Enter PO No" class="field-input">
+            </div>
+          </div>
+
+          <!-- ADDRESS / DATE / PAN -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="field-label">Address</label>
+              <textarea th:field="*{address}" rows="5" placeholder="Enter Address" class="field-input resize-none"></textarea>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="field-label">Date:</label>
+                <input type="date" id="invoiceDateInput" th:field="*{date}" class="field-input">
+              </div>
+              <div>
+                <label class="field-label">PAN No:</label>
+                <input type="text" id="panNoInput" th:field="*{panNo}" class="field-input">
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="field-label">SAC Code</label>
+                <input type="text" th:field="*{sacCode}" placeholder="e.g. 9983" class="field-input">
+              </div>
+              <div>
+                <label class="field-label">Choose Bank:</label>
+                <select id="bank_type" th:field="*{bankType}" class="field-input">
+                  <option value="">Choose Bank</option>
+                  <option th:each="bank : ${banks}"
+                          th:value="${bank.id}"
+                          th:text="${@bankNameResolver.resolve(bank.bankName)} + ' - ' + ${bank.bankAcc}"
+                          th:attr="data-bank-name=${@bankNameResolver.resolve(bank.bankName)}, data-bank-account=${bank.bankAcc}">
+                    Bank Name
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATE CODE / GSTIN -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <label class="field-label">State Code</label>
+              <input type="text" name="stateCode" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">GSTIN:-</label>
+              <input type="text" id="gstinInput" th:field="*{gstin}" placeholder="e.g. 07AAFCE4483M1Z7" class="field-input">
+            </div>
+          </div>
+
+          <!-- PARTICULARS TABLE -->
+          <div class="rounded-2xl border border-black/5 overflow-hidden">
+            <table class="w-full text-left" id="particularsTable">
+              <thead>
+                <tr class="bg-[#F7F8FB]">
+                  <th class="py-3 px-4 text-[13px] font-extrabold text-[#171923] w-16">S No.</th>
+                  <th class="py-3 px-4 text-[13px] font-extrabold text-[#171923]">Particular</th>
+                  <th class="py-3 px-4 text-[13px] font-extrabold text-[#171923] w-48 text-right">Amount ($)</th>
+                </tr>
+              </thead>
+              <tbody id="particularsBody">
+                <tr th:each="item, itemStat : ${lineItems}" class="border-t border-black/5 particular-row">
+                  <td class="py-4 px-4 align-top text-[13px] font-semibold text-[#171923]" th:text="${itemStat.count}">1</td>
+                  <td class="py-4 px-4 align-top space-y-2">
+                    <input type="text" name="title" th:value="${item.title}" placeholder="Enter title" class="field-input">
+                    <textarea name="particular" rows="3" th:text="${item.particular}" placeholder="Enter description..." class="field-input resize-none"></textarea>
+                  </td>
+                  <td class="py-4 px-4 align-top text-right">
+                    <div class="flex items-center gap-1.5 justify-end">
+                      <span class="text-[13px] font-semibold text-[#8C8FA3]">$</span>
+                      <input type="number" step="0.01" name="amtD" th:value="${item.amount}" class="field-input row-amount text-right" oninput="recalcNetAmount()">
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="border-t border-black/5 bg-[#F7F8FB]">
+                  <td colspan="2" class="py-3 px-4 text-right text-[14px] font-extrabold text-[#171923]">Net Amount</td>
+                  <td class="py-3 px-4 text-right">
+                    <input type="text" id="netAmountInput" th:field="*{netAmt}" class="field-input text-right font-bold" value="0.00">
+                  </td>
+                </tr>
+                <tr class="border-t border-black/5">
+                  <td colspan="2" class="py-3 px-4">
+                    <input type="text" th:field="*{extraServices}" placeholder="Enter Extra Services" class="field-input">
+                  </td>
+                  <td class="py-3 px-4 text-right">
+                    <input type="number" step="0.01" id="extraServicesAmountInput" th:field="*{extraAmt}" class="field-input text-right" oninput="recalcNetAmount()">
+                  </td>
+                </tr>
+                <tr class="border-t border-black/5 bg-[#F7F8FB]">
+                  <td colspan="2" class="py-3 px-4 text-right text-[15px] font-extrabold text-[#171923]">Final Amount</td>
+                  <td class="py-3 px-4 text-right">
+                    <input type="text" id="finalAmountInput" th:field="*{finalAmt}" class="field-input text-right font-extrabold" value="0.00">
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- REMARKS -->
+          <div>
+            <label class="field-label" for="remarksInput">Remarks</label>
+            <textarea id="remarksInput" th:field="*{remarks}" rows="3"
+                      placeholder="Enter remarks" class="field-input resize-none"></textarea>
+          </div>
+
+        </div>
+
+      </form>
+
+    </main>
+  </div>
+
+  <!-- ROW TEMPLATE (hidden, cloned by JS) -->
+  <template id="rowTemplate">
+    <tr class="border-t border-black/5 particular-row">
+      <td class="py-4 px-4 align-top text-[13px] font-semibold text-[#171923] row-index">1</td>
+      <td class="py-4 px-4 align-top space-y-2">
+        <input type="text" name="title" placeholder="Enter title" class="field-input">
+        <textarea name="particular" rows="3" placeholder="Enter description..." class="field-input resize-none"></textarea>
+      </td>
+      <td class="py-4 px-4 align-top text-right">
+        <div class="flex items-center gap-1.5 justify-end">
+          <span class="text-[13px] font-semibold text-[#8C8FA3]">$</span>
+          <input type="number" step="0.01" name="amtD" class="field-input row-amount text-right" oninput="recalcNetAmount()">
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- TERMS & CONDITIONS MODAL -->
+  <div class="terms-modal-overlay" id="termsModal" aria-hidden="true">
+    <section class="terms-modal-card" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle">
+      <div class="terms-modal-toolbar">
+        <button type="button" class="terms-action-btn" id="addTermButton">+ Add Term</button>
+        <div class="terms-modal-actions">
+          <button type="button" class="terms-action-btn" id="saveTermsButton">Save</button>
+          <button type="button" class="terms-action-btn secondary" id="closeTermsModal">Close</button>
+        </div>
+      </div>
+      <div class="terms-modal-content">
+        <h2 id="termsModalTitle">Terms List</h2>
+        <div class="terms-list" id="termsList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- BANK CONFIRM MODAL -->
+  <div class="bank-confirm-overlay" id="bankConfirmOverlay">
+    <div class="bank-confirm-card">
+      <h4>Are you sure this is the bank?</h4>
+      <p>Please reconfirm the selected bank before continuing with this invoice.</p>
+      <div class="bank-confirm-preview">
+        <span class="bank-confirm-logo" id="bankConfirmLogo" style="background:#6777ef;">BK</span>
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#171923;" id="bankConfirmName">Selected bank</div>
+          <div style="font-size:12px; color:#8C8FA3;" id="bankConfirmAccount">Account details</div>
+        </div>
+      </div>
+      <div class="bank-confirm-actions">
+        <button type="button" class="bank-confirm-cancel" id="bankConfirmCancel">Change</button>
+        <button type="button" class="bank-confirm-accept" id="bankConfirmAccept">Yes, use this bank</button>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="none">
+    function toggleTogglePill(checkbox) {
+      const pill = checkbox.closest('.pill-toggle');
+      if (!pill) return;
+      pill.style.borderColor = checkbox.checked ? '#8A5CF6' : 'rgba(0,0,0,0.1)';
+      pill.style.backgroundColor = checkbox.checked ? '#F5F1FF' : '#ffffff';
+    }
+
+    // Export/Tax mutually exclusive — ek hamesha checked rahega (blade ke syncInvoiceHeadingToggle jaisa)
+    function handleHeadingToggle(checkbox, ownPillId, otherPillId, ownId, otherId) {
+      if (!checkbox.checked) {
+        checkbox.checked = true; // do not allow both unchecked
+        return;
+      }
+      document.getElementById(otherId).checked = false;
+      toggleTogglePill(document.getElementById(ownId));
+      toggleTogglePill(document.getElementById(otherId));
+    }
+
+    function initTogglePills() {
+      document.querySelectorAll('.pill-toggle input[type="checkbox"]').forEach(toggleTogglePill);
+    }
+
+    function addRow() {
+      const body = document.getElementById('particularsBody');
+      const tpl = document.getElementById('rowTemplate').innerHTML;
+      const wrapper = document.createElement('tbody');
+      wrapper.innerHTML = tpl;
+      body.appendChild(wrapper.firstElementChild);
+      renumberRows();
+    }
+
+    function removeRow() {
+      const body = document.getElementById('particularsBody');
+      const rows = body.querySelectorAll('.particular-row');
+      if (rows.length > 1) {
+        rows[rows.length - 1].remove();
+      }
+      renumberRows();
+      recalcNetAmount();
+    }
+
+    function renumberRows() {
+      document.querySelectorAll('#particularsBody .particular-row').forEach((row, i) => {
+        const cell = row.querySelector('td:first-child');
+        if (cell) cell.textContent = i + 1;
+      });
+    }
+
+    // ab amount type karte hi (input event par) turant recalc hoga
+    function recalcNetAmount() {
+      let net = 0;
+      document.querySelectorAll('.row-amount').forEach(input => {
+        net += parseFloat(input.value) || 0;
+      });
+      const extra = parseFloat(document.getElementById('extraServicesAmountInput').value) || 0;
+      document.getElementById('netAmountInput').value = net.toFixed(2);
+      document.getElementById('finalAmountInput').value = (net + extra).toFixed(2);
+    }
+
+    // inv_type (Evtl India/Prolix/Government) -> GSTIN/PAN autofill + next invoice/po number
+    const INVOICE_TYPE_DEFAULTS = {
+      '1': { gstin: '07AAFCE4483M1Z7', pan: 'AAFCE4483M' },
+      '2': { gstin: '09MXYPS7492H1ZW', pan: 'MXYPS7492H' },
+      '3': { gstin: '', pan: '' }
+    };
+
+    function handleInvoiceTypeChange() {
+      const invType = document.getElementById('invoiceTypeSelect').value;
+      const defaults = INVOICE_TYPE_DEFAULTS[invType];
+
+      if (defaults) {
+        document.getElementById('gstinInput').value = defaults.gstin;
+        document.getElementById('panNoInput').value = defaults.pan;
+      } else {
+        document.getElementById('gstinInput').value = '';
+        document.getElementById('panNoInput').value = '';
+      }
+
+      if (!invType) {
+        document.getElementById('invNoInput').value = '';
+        document.getElementById('poNoInput').value = '';
+        return;
+      }
+
+      fetch(`/invoice/get-next-invoice?inv_type=${encodeURIComponent(invType)}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('invNoInput').value = data.invoice_no || '';
+          document.getElementById('poNoInput').value = data.po_no || '';
+        })
+        .catch(err => console.error(err));
+    }
+
+    // Bank confirm modal
+    (function () {
+      const bankSelect = document.getElementById('bank_type');
+      const overlay = document.getElementById('bankConfirmOverlay');
+      const logo = document.getElementById('bankConfirmLogo');
+      const nameEl = document.getElementById('bankConfirmName');
+      const accEl = document.getElementById('bankConfirmAccount');
+      const accept = document.getElementById('bankConfirmAccept');
+      const cancel = document.getElementById('bankConfirmCancel');
+
+      let confirmedValue = bankSelect.value || '';
+      let pendingValue = '';
+
+      function initials(name) {
+        const words = (name || '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean);
+        let out = '';
+        for (const w of words) {
+          out += w[0].toUpperCase();
+          if (out.length >= 2) break;
+        }
+        return out || 'BK';
+      }
+
+      function colorFor(name) {
+        const n = (name || '').toLowerCase();
+        if (n.includes('state bank') || n.includes('sbi')) return '#2563eb';
+        if (n.includes('pnb') || n.includes('punjab')) return '#b45309';
+        if (n.includes('baroda')) return '#ca8a04';
+        if (n.includes('canara')) return '#15803d';
+        if (n.includes('hdfc')) return '#0f4c81';
+        if (n.includes('icici')) return '#c2410c';
+        if (n.includes('axis')) return '#a21caf';
+        if (n.includes('kotak')) return '#dc2626';
+        return '#6777ef';
+      }
+
+      function openConfirm(value) {
+        const opt = Array.from(bankSelect.options).find(o => o.value === value);
+        if (!opt) { confirmedValue = value; return; }
+        const name = opt.dataset.bankName || opt.textContent.trim();
+        const account = opt.dataset.bankAccount || 'Account not available';
+        logo.textContent = initials(name);
+        logo.style.background = colorFor(name);
+        nameEl.textContent = name;
+        accEl.textContent = account;
+        pendingValue = value;
+        overlay.style.display = 'flex';
+      }
+
+      bankSelect.addEventListener('change', function () {
+        const val = bankSelect.value;
+        if (!val || val === confirmedValue) { confirmedValue = val; return; }
+        openConfirm(val);
+      });
+
+      accept.addEventListener('click', function () {
+        confirmedValue = pendingValue;
+        overlay.style.display = 'none';
+      });
+
+      cancel.addEventListener('click', function () {
+        bankSelect.value = confirmedValue;
+        overlay.style.display = 'none';
+      });
+    })();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initTogglePills();
+      const invoiceTypeSelect = document.getElementById('invoiceTypeSelect');
+      const invoiceForm = document.getElementById('invoiceCreateForm');
+      const invoiceDateInput = document.getElementById('invoiceDateInput');
+      const serverError = document.getElementById('invoiceTypeServerError');
+
+      if (invoiceDateInput && !invoiceDateInput.value) {
+        const today = new Date();
+        const localYear = today.getFullYear();
+        const localMonth = String(today.getMonth() + 1).padStart(2, '0');
+        const localDay = String(today.getDate()).padStart(2, '0');
+        invoiceDateInput.value = `${localYear}-${localMonth}-${localDay}`;
+      }
+
+      invoiceTypeSelect.addEventListener('change', function () {
+        invoiceTypeSelect.style.borderColor = '';
+        handleInvoiceTypeChange();
+      });
+
+      invoiceForm.addEventListener('submit', function (event) {
+        if (!invoiceTypeSelect.value) {
+          event.preventDefault();
+          invoiceTypeSelect.style.borderColor = '#E5484D';
+          invoiceTypeSelect.focus();
+          alert('Please select an Invoice Type before saving.');
+        }
+      });
+
+      if (serverError) {
+        alert(serverError.dataset.message);
+      }
+
+      const termsModal = document.getElementById('termsModal');
+      const termsList = document.getElementById('termsList');
+      const openTermsButton = document.getElementById('openTermsModal');
+      const closeTermsButton = document.getElementById('closeTermsModal');
+      const addTermButton = document.getElementById('addTermButton');
+      const saveTermsButton = document.getElementById('saveTermsButton');
+      let activeTermsInvoiceType = null;
+
+      function addTermRow(value = '') {
+        const row = document.createElement('div');
+        row.className = 'term-row';
+
+        const textarea = document.createElement('textarea');
+        textarea.className = 'term-input';
+        textarea.placeholder = 'Enter term or condition';
+        textarea.value = value;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-term-btn';
+        removeButton.setAttribute('aria-label', 'Remove term');
+        removeButton.textContent = '×';
+        removeButton.addEventListener('click', function () { row.remove(); });
+
+        row.append(textarea, removeButton);
+        termsList.appendChild(row);
+      }
+
+      function closeTerms() {
+        termsModal.classList.remove('open');
+        termsModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        openTermsButton.focus();
+      }
+
+      openTermsButton.addEventListener('click', async function () {
+        if (!invoiceTypeSelect.value) {
+          invoiceTypeSelect.style.borderColor = '#E5484D';
+          invoiceTypeSelect.focus();
+          alert('Please select an Invoice Type before opening Terms.');
+          return;
+        }
+
+        activeTermsInvoiceType = Number(invoiceTypeSelect.value);
+        termsList.innerHTML = '<div class="terms-empty">Loading terms...</div>';
+        termsModal.classList.add('open');
+        termsModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        try {
+          const response = await fetch(`/invoice/terms?invType=${encodeURIComponent(activeTermsInvoiceType)}`);
+          if (!response.ok) throw new Error('Unable to load terms.');
+          const terms = await response.json();
+          termsList.innerHTML = '';
+          if (terms.length === 0) addTermRow();
+          terms.forEach(term => addTermRow(term.terms_condtions || ''));
+        } catch (error) {
+          termsList.innerHTML = '';
+          addTermRow();
+          alert(error.message);
+        }
+      });
+
+      addTermButton.addEventListener('click', function () {
+        addTermRow();
+        termsList.lastElementChild.querySelector('textarea').focus();
+      });
+
+      saveTermsButton.addEventListener('click', async function () {
+        const terms = Array.from(termsList.querySelectorAll('.term-input'))
+          .map(input => input.value.trim())
+          .filter(Boolean);
+        const csrfInput = invoiceForm.querySelector('input[name="_csrf"]');
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrfInput) headers['X-CSRF-TOKEN'] = csrfInput.value;
+
+        saveTermsButton.disabled = true;
+        saveTermsButton.textContent = 'Saving...';
+        try {
+          const response = await fetch('/invoice/terms', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ invType: activeTermsInvoiceType, terms })
+          });
+          if (!response.ok) throw new Error('Unable to save terms.');
+          alert('Terms saved successfully.');
+          closeTerms();
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          saveTermsButton.disabled = false;
+          saveTermsButton.textContent = 'Save';
+        }
+      });
+
+      closeTermsButton.addEventListener('click', closeTerms);
+      termsModal.addEventListener('mousedown', function (event) {
+        if (event.target === termsModal) closeTerms();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && termsModal.classList.contains('open')) closeTerms();
+      });
+    });
+  </script>
+</body>
+</html> 

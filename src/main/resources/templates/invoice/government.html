@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    @page { size: A4; margin: 12mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #2a3855; font-family: Arial, sans-serif; font-size: 12px; }
+    .heading { margin: 0 0 10px; font-size: 16px; }
+    .box { width: 100%; border: 1px solid #000; }
+    table { width: 100%; border-collapse: collapse; }
+    /* Exact BIS header artwork from the approved Government invoice reference. */
+    .government-header { height: 79px; overflow: hidden; border-bottom: 1px solid #000; }
+    .bis-header { display: block; width: 100%; height: 78px; }
+    .bill { width: 65%; padding: 5px 8px; border-top: 1px solid #000; vertical-align: top; }
+    .meta { width: 35%; padding: 14px 10px 5px; border-top: 1px solid #000; text-align: right; vertical-align: top; }
+    .bill h3 { margin: 0 0 3px; font-size: 17px; }
+    .bill p, .meta p { margin: 1px 0; }
+    .bill-name { font-size: 16px; font-weight: bold; }
+    .bill p { font-size: 13px; }
+    .address-label { font-size: 16px; }
+    .items { table-layout: fixed; }
+    .items th { padding: 4px; border: 1px solid #000; background: #edf2fa; font-size: 15px; }
+    .items .serial { width: 10%; }
+    .items .particular { width: 75%; }
+    .items .amount { width: 15%; }
+    .item-cell { padding: 5px; vertical-align: top; }
+    .item-serial, .item-description { border-right: 1px solid #000; }
+    .item-serial { text-align: center; }
+    .item-description { text-align: left; }
+    .item-title { font-size: 14px; font-weight: bold; }
+    .item-detail { margin-top: 2px; font-size: 12px; white-space: pre-line; }
+    .item-amount { text-align: center; }
+    .item-space { height: 300px; }
+    .total-label, .total-value { padding: 4px; border: 1px solid #000; }
+    .total-label { text-align: right; font-size: 14px; }
+    .final-row td { background: #edf2fa; }
+    .remarks { padding: 4px 8px; border-top: 1px solid #000; min-height: 30px; }
+    .lower { margin-top: 15px; }
+    .words { padding: 5px 8px 10px; }
+    .words strong { font-size: 14px; text-decoration: underline; }
+    .words-value { margin-left: 30px; font-size: 13px; font-weight: bold; }
+    .computer { display: block; margin-top: 10px; font-size: 10px; font-weight: bold; }
+    .terms { border-top: 1px solid #000; padding: 4px 8px; }
+    .terms h4 { margin: 0 0 2px; font-size: 14px; }
+    .terms ol { margin: 0; padding-left: 20px; }
+    .terms li { margin: 1px 0; font-size: 12px; }
+    .bank { border-top: 1px solid #000; padding: 5px 7px; }
+    .bank table { width: auto; }
+    .bank td { padding: 2px 0; font-size: 12px; vertical-align: top; }
+    .bank-label { width: 110px; font-weight: bold; white-space: nowrap; }
+    .invoice-page.page-break { page-break-after: always; break-after: page; }
+  </style>
+</head>
+<body>
+  <th:block th:each="page, pageStat : ${invoicePages}">
+  <div class="invoice-page" th:classappend="${!pageStat.last} ? ' page-break'">
+  <h4 class="heading" th:text="${heading}">Export Invoice</h4>
+
+  <div class="box">
+    <div class="government-header" th:if="${governmentHeaderDataUri != ''}">
+      <img class="bis-header" th:src="${governmentHeaderDataUri}" alt="Bureau of Indian Standards" />
+    </div>
+    <table>
+      <tr>
+        <td class="bill">
+          <h3>Bill To</h3>
+          <p class="bill-name" th:text="${invoice.name}">Customer name</p>
+          <p><span class="address-label">Address:-</span><br /><span th:text="${invoice.address}">Customer address</span></p>
+        </td>
+        <td class="meta">
+          <p><b>Date:</b><br /><span th:text="${invoice.date != null ? #temporals.format(invoice.date, 'yyyy-MM-dd') : ''}">2026-09-07</span></p>
+          <p><b>Invoice No:</b><br /><span th:text="${invoice.invNo}">GOV/ACC/26-27/144</span></p>
+          <p th:if="${invoice.poNo != null and !invoice.poNo.isBlank()}"><b>PO No:</b><br /><span th:text="${invoice.poNo}">PO-001</span></p>
+          <p th:if="${invoice.gstin != null and !invoice.gstin.isBlank()}"><b>GSTIN:</b><br /><span th:text="${invoice.gstin}">GSTIN</span></p>
+          <p th:if="${invoice.panNo != null and !invoice.panNo.isBlank()}"><b>PAN No:</b><br /><span th:text="${invoice.panNo}">PAN</span></p>
+        </td>
+      </tr>
+    </table>
+
+    <table class="items">
+      <thead><tr><th class="serial">S.No</th><th class="particular">Particular</th><th class="amount" th:text="'AMOUNT ' + ${currencySymbol}">AMOUNT $</th></tr></thead>
+      <tbody>
+        <tr th:each="item : ${page}">
+          <td class="item-cell item-serial">
+            <span th:text="${item.serialNumber}">1</span>
+          </td>
+          <td class="item-cell item-description"><span class="item-title" th:text="${item.title}">BIS Application Fees</span><span class="item-detail" th:text="${item.particular}">IS 302</span></td>
+          <td class="item-cell item-amount" th:text="${currencySymbol + ' ' + item.amount}">$ 100.00</td>
+        </tr>
+        <tr th:if="${page.isEmpty()}"><td class="item-cell item-serial"><div class="item-space"></div></td><td class="item-cell item-description"></td><td class="item-cell"></td></tr>
+      </tbody>
+      <tfoot>
+        <tr th:if="${pageStat.last}"><td colspan="2" class="total-label"><strong>Net Amount</strong></td><td class="total-value" th:text="${currencySymbol + ' ' + netAmountFormatted}">$ 100.00</td></tr>
+        <tr th:if="${pageStat.last and ((invoice.extraServices != null and !invoice.extraServices.isBlank()) or (invoice.extraAmt != null and !invoice.extraAmt.isBlank()))}"><td colspan="2" class="total-label" th:text="${invoice.extraServices != null and !invoice.extraServices.isBlank() ? invoice.extraServices : 'Extra Services'}">Extra Services</td><td class="total-value" th:text="${currencySymbol + ' ' + extraAmountFormatted}">$ 0.00</td></tr>
+        <tr class="final-row" th:if="${pageStat.last}"><td colspan="2" class="total-label">Final Amount</td><td class="total-value" th:text="${currencySymbol + ' ' + finalAmountFormatted}">$ 100.00</td></tr>
+      </tfoot>
+    </table>
+    <div class="remarks" th:if="${pageStat.last}"><span style="font-size:15px">Remarks:-</span><span th:text="${invoice.remarks}"></span></div>
+  </div>
+
+  <div class="box lower" th:if="${pageStat.last}">
+    <div class="words"><strong>Total Amount (In Words):-</strong><span class="words-value" th:text="${currencySymbol + ' ' + totalInWords + ' ' + currencyLabel}">$ ONE HUNDRED (U.S.D)</span><span class="computer">Computer Generated Invoice</span></div>
+    <div class="terms" th:if="${invoice.isTerms != null and invoice.isTerms == 1 and !invoiceTerms.isEmpty()}"><h4>Terms and Conditions</h4><ol><li th:each="term : ${invoiceTerms}" th:text="${term}">Term</li></ol></div>
+    <div class="bank">
+      <table>
+        <tr th:if="${invoice.invType != null and invoice.invType == 1 and bank.bankDetails != null and !bank.bankDetails.isBlank()}"><td class="bank-label">Bank Details:</td><td th:text="${bank.bankDetails}"></td></tr>
+        <tr th:if="${invoice.invType != null and invoice.invType == 2}"><td class="bank-label">Bank Details:</td><td>PROLIX INDIA &amp; REGULATORY COMPLIANCE CONSULTANT</td></tr>
+        <tr th:if="${bank.bankName != null}"><td class="bank-label">Bank Name:</td><td th:text="${bankName}"></td></tr>
+        <tr th:if="${bank.branch != null and !bank.branch.isBlank()}"><td class="bank-label">Branch:</td><td th:text="${bank.branch}"></td></tr>
+        <tr th:if="${bank.bankAcc != null and !bank.bankAcc.isBlank()}"><td class="bank-label">Bank A/C:</td><td th:text="${bank.bankAcc}"></td></tr>
+        <tr th:if="${bank.ifscCode != null and !bank.ifscCode.isBlank()}"><td class="bank-label">IFSC Code:</td><td th:text="${bank.ifscCode}"></td></tr>
+        <tr th:if="${bank.accType != null}"><td class="bank-label">Type of Acc.:</td><td th:text="${accountType}"></td></tr>
+        <tr th:if="${bank.micrCode != null and !bank.micrCode.isBlank()}"><td class="bank-label">MICR Code:</td><td th:text="${bank.micrCode}"></td></tr>
+        <tr th:if="${bank.swiftCode != null and !bank.swiftCode.isBlank()}"><td class="bank-label">SWIFT Code:</td><td th:text="${bank.swiftCode}"></td></tr>
+      </table>
+    </div>
+  </div>
+  </div>
+  </th:block>
+</body>
+</html>

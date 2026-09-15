@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challan Analytics | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    body { background:#f3f6fb; }.analytics-shell { min-height:100vh; color:#17213f; background:radial-gradient(circle at 90% 5%,rgba(99,102,241,.10),transparent 25%),linear-gradient(180deg,#f8faff 0,#f3f6fb 42%,#eef3f9 100%); }
+    .analytics-header { position:relative; display:flex; min-height:126px; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; overflow:hidden; padding:25px 28px; border-radius:22px; background:linear-gradient(120deg,#102f57 0%,#224f88 53%,#5369f2 100%); box-shadow:0 18px 40px rgba(22,54,105,.20); }
+    .analytics-header::before { position:absolute; top:-80px; right:16%; width:210px; height:210px; border:42px solid rgba(255,255,255,.07); border-radius:50%; content:""; }.analytics-header::after { position:absolute; right:-45px; bottom:-90px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.07); content:""; }
+    .analytics-header > * { position:relative; z-index:1; }.analytics-title { margin:0; color:#fff; font-size:30px; line-height:1.05; font-weight:850; letter-spacing:-.035em; }.analytics-header p { color:#d9e8ff !important; }
+    .analytics-back { display:inline-flex; height:42px; align-items:center; gap:7px; padding:0 16px; border:1px solid rgba(255,255,255,.30); border-radius:12px; background:rgba(255,255,255,.13); color:#fff; font-size:12px; font-weight:800; text-decoration:none; backdrop-filter:blur(8px); transition:background .16s ease,transform .16s ease; }.analytics-back:hover { background:rgba(255,255,255,.22); transform:translateY(-1px); }
+    .analytics-filter { display:flex; flex-wrap:wrap; align-items:flex-end; gap:10px; padding:16px 18px; border:1px solid #dce5f2; border-radius:16px; background:rgba(255,255,255,.92); box-shadow:0 10px 28px rgba(23,50,79,.08); backdrop-filter:blur(10px); }
+    .analytics-filter label { display:flex; flex-direction:column; gap:5px; color:#526783; font-size:10.5px; font-weight:800; }
+    .analytics-filter input { width:170px; height:38px; padding:0 10px; border:1px solid #dce4ef; border-radius:9px; color:#203a5d; font-size:12px; outline:none; }.analytics-filter input:focus { border-color:#7194ef; box-shadow:0 0 0 3px rgba(79,112,232,.12); }
+    .analytics-filter button { height:38px; padding:0 16px; border:0; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }.analytics-filter button:hover { transform:translateY(-1px); }.analytics-apply { background:linear-gradient(135deg,#4f6df5,#2852ce); color:#fff; box-shadow:0 6px 15px rgba(53,87,213,.22); }.analytics-reset { background:#edf2f8; color:#405574; }
+    .analytics-range { margin-left:auto; color:#71809a; font-size:11px; font-weight:700; }
+    .metric-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+    .metric-card { position:relative; display:flex; min-width:0; align-items:center; gap:13px; overflow:hidden; padding:18px; border:1px solid transparent; border-radius:17px; box-shadow:0 10px 28px rgba(23,50,79,.09); transition:transform .18s ease,box-shadow .18s ease; }.metric-card:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(23,50,79,.14); }.metric-card::after { position:absolute; right:-28px; bottom:-34px; width:92px; height:92px; border-radius:50%; background:rgba(255,255,255,.50); content:""; }
+    .metric-card:nth-child(1) { border-color:#c7d7ff; background:linear-gradient(135deg,#eef3ff,#dfe8ff); }.metric-card:nth-child(2) { border-color:#bdebd8; background:linear-gradient(135deg,#edfcf6,#d8f7ea); }.metric-card:nth-child(3) { border-color:#ead3ff; background:linear-gradient(135deg,#f8f0ff,#edddff); }.metric-card:nth-child(4) { border-color:#ffdcb1; background:linear-gradient(135deg,#fff7e9,#ffebca); }.metric-card:nth-child(5) { border-color:#bfe8f2; background:linear-gradient(135deg,#edfaff,#dff5fa); }
+    .metric-icon { position:relative; z-index:1; display:flex; width:42px; height:42px; flex:none; align-items:center; justify-content:center; border-radius:13px; background:#fff; color:#315bd7; box-shadow:0 7px 17px rgba(40,73,141,.11); }.metric-icon svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }.metric-card:nth-child(2) .metric-icon { color:#0c9270; }.metric-card:nth-child(3) .metric-icon { color:#8a48cb; }.metric-card:nth-child(4) .metric-icon { color:#db7b16; }.metric-card:nth-child(5) .metric-icon { color:#1384a0; }.metric-copy { position:relative; z-index:1; min-width:0; }
+    .metric-label { color:#667892; font-size:10px; font-weight:850; letter-spacing:.045em; text-transform:uppercase; }.metric-value { display:block; margin-top:7px; overflow:hidden; color:#132c50; font-size:22px; line-height:1; font-weight:850; text-overflow:ellipsis; white-space:nowrap; }
+    .analytics-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr); gap:14px; }
+    .analytics-card { position:relative; min-width:0; overflow:hidden; padding:20px; border:1px solid #dfe7f2; border-radius:18px; background:rgba(255,255,255,.96); box-shadow:0 12px 32px rgba(23,50,79,.075); }.analytics-card::before { position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg,#5369f2,#33a4df); content:""; }.analytics-card h2 { margin:0; color:#17324f; font-size:15px; font-weight:850; }.analytics-card-subtitle { margin:4px 0 0; color:#73809b; font-size:10.5px; }
+    .monthly-chart { display:flex; min-height:285px; align-items:flex-end; gap:12px; margin-top:20px; padding:16px 12px 0; overflow-x:auto; border:1px solid #edf1f6; border-radius:13px; background:repeating-linear-gradient(to top,#fbfcff 0,#fbfcff 54px,#e9eef6 55px); }
+    .month-column { display:flex; width:56px; min-width:56px; height:235px; flex-direction:column; align-items:center; justify-content:flex-end; gap:7px; }.month-count { color:#526783; font-size:10px; font-weight:800; }.month-bar { width:30px; min-height:4px; border-radius:8px 8px 2px 2px; background:linear-gradient(180deg,#5b7cfa,#284fc7); box-shadow:0 5px 12px rgba(50,83,205,.18); }.month-label { width:64px; color:#6f7e96; font-size:9.5px; font-weight:700; text-align:center; white-space:nowrap; }
+    .month-column:nth-child(6n+1) .month-bar { background:linear-gradient(180deg,#5b7cfa,#3155c8); box-shadow:0 5px 12px rgba(49,85,200,.22); }
+    .month-column:nth-child(6n+2) .month-bar { background:linear-gradient(180deg,#22c59a,#07806d); box-shadow:0 5px 12px rgba(7,128,109,.22); }
+    .month-column:nth-child(6n+3) .month-bar { background:linear-gradient(180deg,#a66be2,#7139b8); box-shadow:0 5px 12px rgba(113,57,184,.22); }
+    .month-column:nth-child(6n+4) .month-bar { background:linear-gradient(180deg,#ffae4d,#df7416); box-shadow:0 5px 12px rgba(223,116,22,.22); }
+    .month-column:nth-child(6n+5) .month-bar { background:linear-gradient(180deg,#ef668b,#c83362); box-shadow:0 5px 12px rgba(200,51,98,.22); }
+    .month-column:nth-child(6n) .month-bar { background:linear-gradient(180deg,#35b6db,#147da5); box-shadow:0 5px 12px rgba(20,125,165,.22); }
+    .breakdown-list { display:flex; flex-direction:column; gap:14px; margin-top:18px; }.breakdown-row { display:grid; grid-template-columns:minmax(90px,1fr) 2fr auto; align-items:center; gap:10px; }.breakdown-name { overflow:hidden; color:#304968; font-size:11px; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }.breakdown-track { height:9px; overflow:hidden; border-radius:999px; background:#edf2f7; }.breakdown-fill { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#6c7ff5,#3b66db); box-shadow:0 2px 7px rgba(59,102,219,.22); }.breakdown-count { display:flex; min-width:27px; height:24px; align-items:center; justify-content:center; border-radius:8px; background:#eef3ff; color:#3156bd; font-size:10.5px; font-weight:850; }
+    #itemBreakdown .breakdown-fill { background:linear-gradient(90deg,#a45de4,#7640c2); } #itemBreakdown .breakdown-count { background:#f6edff; color:#7b3dbc; } #stateBreakdown .breakdown-fill { background:linear-gradient(90deg,#19b990,#087f72); } #stateBreakdown .breakdown-count { background:#e7faf5; color:#087f72; }
+    .analytics-lower { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }.empty-chart { display:flex; min-height:180px; align-items:center; justify-content:center; color:#7b879b; font-size:12px; }
+    .analytics-error { padding:14px; border:1px solid #fecaca; border-radius:12px; background:#fff1f2; color:#be123c; font-size:12px; font-weight:700; }
+    @media(max-width:1200px) { .metric-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }.analytics-grid { grid-template-columns:1fr; } }
+    @media(max-width:760px) { .metric-grid,.analytics-lower { grid-template-columns:1fr; }.analytics-filter input { width:145px; }.analytics-range { width:100%; margin-left:0; }.analytics-shell { padding-left:0; } }
+  </style>
+</head>
+<body>
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div class="analytics-shell min-h-screen flex flex-col pl-[6.5rem]">
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+    <main class="flex-1 px-6 pt-3 pb-8 space-y-5">
+      <div class="analytics-header">
+        <div><h1 class="analytics-title">Challan Analytics</h1><p class="mt-1.5 text-[13px] text-[#617391]">Operational volume, value and distribution insights.</p></div>
+        <a href="/challan" class="analytics-back"><span aria-hidden="true">←</span> Back to Challan List</a>
+      </div>
+      <form id="analyticsFilter" class="analytics-filter">
+        <label><span>Starting Date</span><input id="analyticsStartDate" type="date"></label>
+        <label><span>Ending Date</span><input id="analyticsEndDate" type="date"></label>
+        <button type="submit" class="analytics-apply">Apply Filter</button>
+        <button id="analyticsReset" type="button" class="analytics-reset">Reset</button>
+        <span id="analyticsRange" class="analytics-range">All available Challans</span>
+      </form>
+      <div id="analyticsError" class="analytics-error" hidden></div>
+      <section class="metric-grid" aria-label="Challan summary">
+        <article class="metric-card"><span class="metric-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span><div class="metric-copy"><span class="metric-label">Total Challans</span><strong id="metricTotal" class="metric-value">—</strong></div></article>
+        <article class="metric-card"><span class="metric-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M7 10h10M7 15h6"/></svg></span><div class="metric-copy"><span class="metric-label">Total Challan Value</span><strong id="metricValue" class="metric-value">—</strong></div></article>
+        <article class="metric-card"><span class="metric-icon"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V2"/></svg></span><div class="metric-copy"><span class="metric-label">Average Value</span><strong id="metricAverage" class="metric-value">—</strong></div></article>
+        <article class="metric-card"><span class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg></span><div class="metric-copy"><span class="metric-label">Recorded Quantity</span><strong id="metricQuantity" class="metric-value">—</strong></div></article>
+        <article class="metric-card"><span class="metric-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.1 3.6-7 8-7s8 2.9 8 7"/></svg></span><div class="metric-copy"><span class="metric-label">Unique Clients</span><strong id="metricClients" class="metric-value">—</strong></div></article>
+      </section>
+      <section class="analytics-grid">
+        <article class="analytics-card"><h2>Monthly Challan Activity</h2><p class="analytics-card-subtitle">Challan count by document date; hover a bar for its stored value.</p><div id="monthlyChart" class="monthly-chart"></div></article>
+        <article class="analytics-card"><h2>Top Clients</h2><p class="analytics-card-subtitle">Ranked by number of Challans.</p><div id="clientBreakdown" class="breakdown-list"></div></article>
+      </section>
+      <section class="analytics-lower">
+        <article class="analytics-card"><h2>Top Items</h2><p class="analytics-card-subtitle">Most frequently listed items.</p><div id="itemBreakdown" class="breakdown-list"></div></article>
+        <article class="analytics-card"><h2>State Distribution</h2><p class="analytics-card-subtitle">Challan volume by client state.</p><div id="stateBreakdown" class="breakdown-list"></div></article>
+      </section>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const start = document.getElementById('analyticsStartDate');
+      const end = document.getElementById('analyticsEndDate');
+      const error = document.getElementById('analyticsError');
+      const params = new URLSearchParams(window.location.search);
+      start.value = params.get('startDate') || ''; end.value = params.get('endDate') || '';
+      const number = value => Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits:2 });
+      const money = value => '₹ ' + Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits:2, maximumFractionDigits:2 });
+      const date = value => value ? new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T00:00:00Z')) : '';
+
+      function renderMonthly(points) {
+        const chart = document.getElementById('monthlyChart'); chart.replaceChildren();
+        if (!points.length) { chart.innerHTML = '<div class="empty-chart">No dated Challans in this period.</div>'; return; }
+        const max = Math.max(...points.map(point => point.count), 1);
+        points.forEach(point => {
+          const column = document.createElement('div'); column.className = 'month-column';
+          const count = document.createElement('span'); count.className = 'month-count'; count.textContent = point.count;
+          const bar = document.createElement('span'); bar.className = 'month-bar'; bar.style.height = `${Math.max(4, (point.count / max) * 185)}px`; bar.title = `${point.label}: ${point.count} Challan(s), ${money(point.value)}`;
+          const label = document.createElement('span'); label.className = 'month-label'; label.textContent = point.label;
+          column.append(count, bar, label); chart.appendChild(column);
+        });
+      }
+
+      function renderBreakdown(id, entries, includeValue) {
+        const target = document.getElementById(id); target.replaceChildren();
+        if (!entries.length) { target.innerHTML = '<div class="empty-chart">No data available.</div>'; return; }
+        const max = Math.max(...entries.map(entry => entry.count), 1);
+        entries.forEach(entry => {
+          const row = document.createElement('div'); row.className = 'breakdown-row';
+          const name = document.createElement('span'); name.className = 'breakdown-name'; name.textContent = entry.label; name.title = includeValue ? `${entry.label} · ${money(entry.value)}` : entry.label;
+          const track = document.createElement('span'); track.className = 'breakdown-track';
+          const fill = document.createElement('span'); fill.className = 'breakdown-fill'; fill.style.width = `${(entry.count/max)*100}%`; track.appendChild(fill);
+          const count = document.createElement('span'); count.className = 'breakdown-count'; count.textContent = entry.count;
+          row.append(name, track, count); target.appendChild(row);
+        });
+      }
+
+      async function loadAnalytics() {
+        if (start.value && end.value && start.value > end.value) { alert('Starting Date must not be after Ending Date.'); start.focus(); return; }
+        error.hidden = true;
+        const url = new URL('/api/challans/analytics', window.location.origin);
+        if (start.value) url.searchParams.set('startDate', start.value); if (end.value) url.searchParams.set('endDate', end.value);
+        try {
+          const response = await fetch(url, { credentials:'same-origin', headers:{Accept:'application/json'} });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to load Challan analytics.');
+          const data = await response.json();
+          document.getElementById('metricTotal').textContent = number(data.summary.totalChallans);
+          document.getElementById('metricValue').textContent = money(data.summary.totalValue);
+          document.getElementById('metricAverage').textContent = money(data.summary.averageValue);
+          document.getElementById('metricQuantity').textContent = number(data.summary.totalQuantity);
+          document.getElementById('metricClients').textContent = number(data.summary.uniqueClients);
+          document.getElementById('analyticsRange').textContent = data.summary.startingDate || data.summary.endingDate ? `${date(data.summary.startingDate) || 'Beginning'} – ${date(data.summary.endingDate) || 'Today'}` : 'No dated Challans';
+          renderMonthly(data.monthlyTrend); renderBreakdown('clientBreakdown', data.topClients, true); renderBreakdown('itemBreakdown', data.topItems, false); renderBreakdown('stateBreakdown', data.stateDistribution, false);
+          history.replaceState(null,'',url.search ? `/challan/analytics${url.search}` : '/challan/analytics');
+        } catch (exception) { error.textContent = exception.message; error.hidden = false; }
+      }
+      document.getElementById('analyticsFilter').addEventListener('submit', event => { event.preventDefault(); loadAnalytics(); });
+      document.getElementById('analyticsReset').addEventListener('click', () => { start.value=''; end.value=''; loadAnalytics(); });
+      loadAnalytics();
+    })();
+  </script>
+</body>
+</html>

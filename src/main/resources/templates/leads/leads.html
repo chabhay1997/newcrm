@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leads</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+<style>
+  .mini-toggle { position: relative; display: inline-block; width: 34px; height: 19px; cursor: pointer; }
+  .mini-toggle input { display: none; }
+  .mini-toggle-track { position: absolute; inset: 0; background: #E4E7EE; border-radius: 999px; transition: background .2s ease; }
+  .mini-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s ease; }
+  .mini-toggle input:checked + .mini-toggle-track { background-image: linear-gradient(135deg,#8A5CF6,#6D8CFF); }
+  .mini-toggle input:checked + .mini-toggle-track .mini-toggle-thumb { transform: translateX(15px); }
+  #leadsListCard.leads-list-expanded { padding-top: 1.75rem; padding-bottom: 1.75rem; }
+  #leadsListCard.leads-list-expanded table tbody tr td { padding-top: 1rem; padding-bottom: 1rem; }
+</style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- MAIN -->
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+
+    <!-- TOPBAR -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <!-- CONTENT -->
+    <main class="flex-1 px-8 pt-3 pb-8 space-y-5">
+
+      <!-- STAT CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+
+        <div class="stat-card stat-card-blue rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25" style="background-image:linear-gradient(135deg,#8CA6FF,#5D7DFA);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Total Leads</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">129</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 2%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-purple rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#C6A2F8,#9B6DF2);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">New Leads</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">42</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 8%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-amber rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/25" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Qualified Leads</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">38</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 12%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-green rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/25" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Converted Leads</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">21</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 5%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-blue rounded-2xl p-3 border border-black/5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/25" style="background-image:linear-gradient(135deg,#7ED0F5,#3D9FDB);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5c0-1.38-1.34-2.5-3-2.5s-3 1.12-3 2.5 1.34 2.5 3 2.5 3 1.12 3 2.5-1.34 2.5-3 2.5-3-1.12-3-2.5"/></svg>
+              </div>
+              <span class="stat-label text-[12px] font-semibold text-[#171923]">Conversion Rate</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1.5">
+              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">16.28%</span>
+              <span class="text-[10px] font-semibold text-emerald-600">↑ 3.4%</span>
+            </div>
+            <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last month</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LEADS OVERVIEW + LEADS BY SOURCE + LEADS BY STATUS -->
+      <div id="leadsChartsGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- LEADS OVERVIEW (bar chart) -->
+        <div class="glass rounded-2xl p-5 lg:col-span-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <p class="text-[13px] font-semibold text-[#171923]">Leads Overview</p>
+              <div class="flex items-center gap-3 text-[11px] font-semibold text-[#8C8FA3]">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#8A5CF6;"></span>New Leads</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#C7B8F5;"></span>Converted Leads</span>
+              </div>
+            </div>
+            <div class="relative">
+              <button onclick="document.getElementById('menuOverviewFilter').classList.toggle('open')" class="flex items-center gap-1.5 bg-[#F3F5F8] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#3A4B63] hover:bg-[#EAECF1] transition">
+                This Month
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div id="menuOverviewFilter" class="card-dropdown absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">This Month</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">Last Month</a>
+                <a href="#" class="block px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">This Quarter</a>
+              </div>
+            </div>
+          </div>
+          <div style="height:260px;">
+            <canvas id="leadsOverviewChart"></canvas>
+          </div>
+        </div>
+
+        <!-- LEADS BY SOURCE -->
+        <div class="glass rounded-2xl p-5 lg:col-span-3">
+          <p class="text-[13px] font-semibold text-[#171923] mb-5">Leads by Source</p>
+          <div class="flex justify-center mb-5">
+            <div class="relative shrink-0" style="width:150px;height:150px;">
+              <canvas id="sourcePieChart"></canvas>
+              <div id="sourceCenterText" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-150">
+                <span class="text-[20px] font-extrabold text-[#171923] leading-none">129</span>
+                <span class="text-[10px] text-[#8C8FA3] font-medium mt-1">Total Leads</span>
+              </div>
+            </div>
+          </div>
+          <div class="divide-y divide-black/[0.04]">
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#B084F5,#6D8CFF);"></span>Website</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">35%</span> <span class="text-[#8C8FA3] font-medium">(45)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#7ED0F5,#3D9FDB);"></span>Referral</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">25%</span> <span class="text-[#8C8FA3] font-medium">(32)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);"></span>Social Media</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">20%</span> <span class="text-[#8C8FA3] font-medium">(26)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);"></span>Email Campaign</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">12%</span> <span class="text-[#8C8FA3] font-medium">(16)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background:#C7CBD6;"></span>Others</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">8%</span> <span class="text-[#8C8FA3] font-medium">(11)</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEADS BY STATUS -->
+        <div class="glass rounded-2xl p-5 lg:col-span-3">
+          <p class="text-[13px] font-semibold text-[#171923] mb-5">Leads by Status</p>
+          <div class="flex justify-center mb-5">
+            <div class="relative shrink-0" style="width:150px;height:150px;">
+              <canvas id="statusPieChart"></canvas>
+              <div id="statusCenterText" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-150">
+                <span class="text-[20px] font-extrabold text-[#171923] leading-none">129</span>
+                <span class="text-[10px] text-[#8C8FA3] font-medium mt-1">Total Leads</span>
+              </div>
+            </div>
+          </div>
+          <div class="divide-y divide-black/[0.04]">
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#B084F5,#6D8CFF);"></span>New</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">42%</span> <span class="text-[#8C8FA3] font-medium">(54)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#7ED0F5,#3D9FDB);"></span>Contacted</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">28%</span> <span class="text-[#8C8FA3] font-medium">(36)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);"></span>Qualified</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">18%</span> <span class="text-[#8C8FA3] font-medium">(23)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);"></span>Proposal Sent</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">8%</span> <span class="text-[#8C8FA3] font-medium">(10)</span></span>
+            </div>
+            <div class="flex items-center justify-between py-2.5">
+              <span class="flex items-center gap-2.5 text-[#171923] text-[12.5px] font-medium"><span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background:#C7CBD6;"></span>Converted</span>
+              <span class="text-[12.5px]"><span class="font-bold text-[#171923]">4%</span> <span class="text-[#8C8FA3] font-medium">(6)</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LEADS LIST -->
+      <div id="leadsListCard" class="glass rounded-2xl p-5 transition-all duration-200">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <p class="text-[15px] font-bold text-[#171923]">Leads List</p>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold text-white px-2.5 py-1.5 rounded-lg" style="background:#F3A73D;">Graphs Section</span>
+            <label class="mini-toggle" title="Show/Hide Charts">
+              <input type="checkbox" id="chartsToggle" checked onchange="toggleLeadsCharts(this.checked)">
+              <span class="mini-toggle-track"><span class="mini-toggle-thumb"></span></span>
+            </label>
+            <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-black/10 bg-white ml-3">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Search leads..." class="text-[12.5px] text-[#171923] focus:outline-none bg-transparent w-40">
+            </div>
+            <button class="flex items-center gap-1.5 text-[12px] font-semibold text-[#171923] bg-white border border-black/10 px-3.5 py-2 rounded-xl hover:bg-[#F3F5F8] transition">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
+              Filter
+            </button>
+            <button onclick="openAddLead()" class="flex items-center gap-1.5 text-[12px] font-semibold text-white px-4 py-2 rounded-xl shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add Lead
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-black/5">
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Lead Name</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Company</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Email</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Phone</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Source</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Status</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Lead Score</th>
+                <th class="pb-2.5 pr-4 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide">Created On</th>
+                <th class="pb-2.5 text-[11px] font-semibold text-[#8C8FA3] uppercase tracking-wide text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr class="border-b border-black/5">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style="background-image:linear-gradient(135deg,#B084F5,#6D8CFF);">RK</div>
+                    <span class="text-[13px] font-semibold text-[#171923]">Rohit Kumar</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">TechNova Pvt. Ltd.</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">rohit@technova.com</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">+91 98765 43210</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Website</td>
+                <td class="py-3 pr-4"><span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#F0EEFB;color:#7C4FE0;">New</span></td>
+                <td class="py-3 pr-4 text-[12.5px] font-semibold text-[#171923]">72</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Aug 29, 2026</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button onclick="openEditLead('Rohit Kumar','TechNova Pvt. Ltd.','rohit@technova.com','+91 98765 43210','Website','New','72','2026-08-29')" class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-black/5" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-red-50" title="Delete">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="border-b border-black/5">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style="background-image:linear-gradient(135deg,#7ED0F5,#3D9FDB);">PS</div>
+                    <span class="text-[13px] font-semibold text-[#171923]">Priya Sharma</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Innova Solutions</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">priya@innovas.com</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">+91 91234 56789</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Referral</td>
+                <td class="py-3 pr-4"><span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#EAF4FE;color:#2C7EC7;">Contacted</span></td>
+                <td class="py-3 pr-4 text-[12.5px] font-semibold text-[#171923]">65</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Aug 28, 2026</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button onclick="openEditLead('Priya Sharma','Innova Solutions','priya@innovas.com','+91 91234 56789','Referral','Contacted','65','2026-08-28')" class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-black/5" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-red-50" title="Delete">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="border-b border-black/5">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style="background-image:linear-gradient(135deg,#7EEBB8,#2FAE76);">AM</div>
+                    <span class="text-[13px] font-semibold text-[#171923]">Amit Malhotra</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Malhotra & Co.</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">amit@malhotra.com</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">+91 99887 66544</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Social Media</td>
+                <td class="py-3 pr-4"><span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#E7F9F0;color:#1F9D5C;">Qualified</span></td>
+                <td class="py-3 pr-4 text-[12.5px] font-semibold text-[#171923]">85</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Aug 27, 2026</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button onclick="openEditLead('Amit Malhotra','Malhotra & Co.','amit@malhotra.com','+91 99887 66544','Social Media','Qualified','85','2026-08-27')" class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-black/5" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-red-50" title="Delete">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="border-b border-black/5">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style="background-image:linear-gradient(135deg,#FFCB77,#F3A73D);">SN</div>
+                    <span class="text-[13px] font-semibold text-[#171923]">Sneha Nair</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Bright Future LLP</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">sneha@brightfuture.in</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">+91 88878 65443</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Email Campaign</td>
+                <td class="py-3 pr-4"><span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#FFF1DE;color:#C2760B;">Proposal Sent</span></td>
+                <td class="py-3 pr-4 text-[12.5px] font-semibold text-[#171923]">78</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Aug 26, 2026</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button onclick="openEditLead('Sneha Nair','Bright Future LLP','sneha@brightfuture.in','+91 88878 65443','Email Campaign','Proposal Sent','78','2026-08-26')" class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-black/5" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-red-50" title="Delete">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style="background-image:linear-gradient(135deg,#B084F5,#6D8CFF);">VD</div>
+                    <span class="text-[13px] font-semibold text-[#171923]">Vikram Desai</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Desai Enterprises</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">vikram@desai.com</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">+91 77665 44332</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Website</td>
+                <td class="py-3 pr-4"><span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#EDEFF3;color:#4B5567;">Converted</span></td>
+                <td class="py-3 pr-4 text-[12.5px] font-semibold text-[#171923]">92</td>
+                <td class="py-3 pr-4 text-[12.5px] text-[#3A4B63]">Aug 25, 2026</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button onclick="openEditLead('Vikram Desai','Desai Enterprises','vikram@desai.com','+91 77665 44332','Website','Converted','92','2026-08-25')" class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-black/5" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A4B63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button class="w-7 h-7 rounded-full inline-flex items-center justify-center hover:bg-red-50" title="Delete">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-black/5">
+          <span class="text-[12px] text-[#8C8FA3] font-medium">Showing 1 to 5 of 129 leads</span>
+          <div class="flex items-center gap-1.5">
+            <button class="w-7 h-7 rounded-full border border-black/10 flex items-center justify-center hover:bg-[#F3F5F8]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">1</span>
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold text-[#3A4B63] hover:bg-[#F3F5F8] cursor-pointer">2</span>
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold text-[#3A4B63] hover:bg-[#F3F5F8] cursor-pointer">3</span>
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold text-[#8C8FA3]">...</span>
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold text-[#3A4B63] hover:bg-[#F3F5F8] cursor-pointer">26</span>
+            <button class="w-7 h-7 rounded-full border border-black/10 flex items-center justify-center hover:bg-[#F3F5F8]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD LEAD MODAL -->
+  <div id="addLeadModal" class="modal-overlay" onclick="closeModal('addLeadModal')">
+    <div class="modal-box glass rounded-2xl w-[640px] max-w-[94vw] p-6" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <p id="addLeadModalTitle" class="text-[16px] font-bold text-[#171923]">Add New Lead</p>
+        <button onclick="closeModal('addLeadModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lead Name</label>
+          <input id="leadNameInput" type="text" placeholder="e.g. Rohit Kumar" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Company</label>
+          <input id="leadCompanyInput" type="text" placeholder="e.g. TechNova Pvt. Ltd." class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Email</label>
+          <input id="leadEmailInput" type="email" placeholder="e.g. rohit@technova.com" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Phone</label>
+          <input id="leadPhoneInput" type="text" placeholder="e.g. +91 98765 43210" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Source</label>
+          <select id="leadSourceInput" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+            <option value="">Select source</option>
+            <option value="Website">Website</option>
+            <option value="Referral">Referral</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Email Campaign">Email Campaign</option>
+            <option value="Cold Outreach">Cold Outreach</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Status</label>
+          <select id="leadStatusInput" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+            <option value="">Select status</option>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Qualified">Qualified</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Converted">Converted</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lead Score</label>
+          <input id="leadScoreInput" type="number" min="0" max="100" placeholder="e.g. 72" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Created On</label>
+          <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-black/10 focus-within:ring-2 focus-within:ring-[#8A5CF6]/30 focus-within:border-[#8A5CF6]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A5CF6" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <input id="leadCreatedOnInput" type="date" class="flex-1 text-[13px] text-[#171923] focus:outline-none bg-transparent">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-6">
+        <button onclick="closeModal('addLeadModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button id="addLeadSubmitBtn" onclick="closeModal('addLeadModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="none">
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function openAddLead() {
+      document.getElementById('addLeadModalTitle').textContent = 'Add New Lead';
+      document.getElementById('addLeadSubmitBtn').textContent = 'Save Lead';
+      document.getElementById('leadNameInput').value = '';
+      document.getElementById('leadCompanyInput').value = '';
+      document.getElementById('leadEmailInput').value = '';
+      document.getElementById('leadPhoneInput').value = '';
+      document.getElementById('leadSourceInput').value = '';
+      document.getElementById('leadStatusInput').value = '';
+      document.getElementById('leadScoreInput').value = '';
+      document.getElementById('leadCreatedOnInput').value = '';
+      openModal('addLeadModal');
+    }
+
+    function openEditLead(name, company, email, phone, source, status, score, createdOn) {
+      document.getElementById('addLeadModalTitle').textContent = 'Edit Lead';
+      document.getElementById('addLeadSubmitBtn').textContent = 'Update Lead';
+      document.getElementById('leadNameInput').value = name;
+      document.getElementById('leadCompanyInput').value = company;
+      document.getElementById('leadEmailInput').value = email;
+      document.getElementById('leadPhoneInput').value = phone;
+      document.getElementById('leadSourceInput').value = source;
+      document.getElementById('leadStatusInput').value = status;
+      document.getElementById('leadScoreInput').value = score;
+      document.getElementById('leadCreatedOnInput').value = createdOn;
+      openModal('addLeadModal');
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(function (m) { m.classList.remove('open'); });
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      document.querySelectorAll('.card-dropdown.open').forEach(function(dd) {
+        if (!e.target.closest('.relative')?.contains(dd)) {
+          dd.classList.remove('open');
+        }
+      });
+    });
+
+    function toggleLeadsCharts(show) {
+      const chartsGrid = document.getElementById('leadsChartsGrid');
+      const listCard = document.getElementById('leadsListCard');
+      if (show) {
+        chartsGrid.classList.remove('hidden');
+        listCard.classList.remove('leads-list-expanded');
+      } else {
+        chartsGrid.classList.add('hidden');
+        listCard.classList.add('leads-list-expanded');
+      }
+      localStorage.setItem('leadsChartsVisible', show ? '1' : '0');
+    }
+
+    (function initLeadsChartsToggle() {
+      const saved = localStorage.getItem('leadsChartsVisible');
+      const checkbox = document.getElementById('chartsToggle');
+      if (saved === null || !checkbox) return;
+      const show = saved === '1';
+      checkbox.checked = show;
+      toggleLeadsCharts(show);
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script th:inline="none">
+    const ovCtx = document.getElementById('leadsOverviewChart').getContext('2d');
+
+    const newLeadsGradient = ovCtx.createLinearGradient(0, 0, 0, 260);
+    newLeadsGradient.addColorStop(0, '#8A5CF6');
+    newLeadsGradient.addColorStop(1, 'rgba(138, 92, 246, 0.08)');
+
+    const convertedLeadsGradient = ovCtx.createLinearGradient(0, 0, 0, 260);
+    convertedLeadsGradient.addColorStop(0, '#C7B8F5');
+    convertedLeadsGradient.addColorStop(1, 'rgba(199, 184, 245, 0.08)');
+
+    new Chart(ovCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Aug 1','Aug 3','Aug 5','Aug 8','Aug 10','Aug 13','Aug 15','Aug 18','Aug 20','Aug 23','Aug 25','Aug 27','Aug 29'],
+        datasets: [
+          {
+            label: 'New Leads',
+            data: [18, 14, 25, 20, 32, 22, 45, 30, 52, 38, 48, 42, 36],
+            backgroundColor: newLeadsGradient,
+            hoverBackgroundColor: newLeadsGradient,
+            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+            borderSkipped: false,
+            barPercentage: 0.45,
+            categoryPercentage: 0.7
+          },
+          {
+            label: 'Converted Leads',
+            data: [10, 8, 14, 12, 20, 15, 26, 20, 30, 24, 28, 26, 22],
+            backgroundColor: convertedLeadsGradient,
+            hoverBackgroundColor: convertedLeadsGradient,
+            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+            borderSkipped: false,
+            barPercentage: 0.45,
+            categoryPercentage: 0.7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#171923',
+            bodyColor: '#171923',
+            borderColor: '#EEF0F3',
+            borderWidth: 1,
+            titleFont: { family: 'Manrope', weight: '700', size: 11 },
+            bodyFont: { family: 'Manrope', weight: '700', size: 11.5 },
+            padding: 10,
+            cornerRadius: 10,
+            displayColors: true,
+            boxPadding: 4,
+            usePointStyle: true
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: '#EEF0F3' },
+            ticks: {
+              color: '#8C8FA3',
+              font: { family: 'Manrope', size: 10.5, weight: '500' },
+              maxRotation: 40,
+              minRotation: 40
+            }
+          },
+          y: {
+            grid: { color: '#EEF0F3', borderDash: [4, 4] },
+            border: { display: false },
+            ticks: { color: '#8C8FA3', font: { family: 'Manrope', size: 11 } }
+          }
+        }
+      }
+    });
+
+    const sourceCtx = document.getElementById('sourcePieChart').getContext('2d');
+    new Chart(sourceCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Website', 'Referral', 'Social Media', 'Email Campaign', 'Others'],
+        datasets: [{
+          data: [35, 25, 20, 12, 8],
+          backgroundColor: ['#8A5CF6', '#3D9FDB', '#2FAE76', '#F3A73D', '#C7CBD6'],
+          borderColor: '#FFFFFF',
+          borderWidth: 3,
+          hoverOffset: 6
+        }]
+      },
+      plugins: [{
+        id: 'sourceCenterToggle',
+        afterDraw: (chart) => {
+          const el = document.getElementById('sourceCenterText');
+          if (!el) return;
+          el.style.opacity = (chart.tooltip && chart.tooltip.opacity > 0) ? '0' : '1';
+        }
+      }],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#171923',
+            bodyColor: '#171923',
+            borderColor: '#EEF0F3',
+            borderWidth: 1,
+            titleFont: { family: 'Manrope', weight: '700', size: 11 },
+            bodyFont: { family: 'Manrope', weight: '800', size: 12 },
+            padding: 8,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => ctx.parsed + '%'
+            }
+          }
+        }
+      }
+    });
+
+    const statusCtx = document.getElementById('statusPieChart').getContext('2d');
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['New', 'Contacted', 'Qualified', 'Proposal Sent', 'Converted'],
+        datasets: [{
+          data: [42, 28, 18, 8, 4],
+          backgroundColor: ['#8A5CF6', '#3D9FDB', '#2FAE76', '#F3A73D', '#C7CBD6'],
+          borderColor: '#FFFFFF',
+          borderWidth: 3,
+          hoverOffset: 6
+        }]
+      },
+      plugins: [{
+        id: 'statusCenterToggle',
+        afterDraw: (chart) => {
+          const el = document.getElementById('statusCenterText');
+          if (!el) return;
+          el.style.opacity = (chart.tooltip && chart.tooltip.opacity > 0) ? '0' : '1';
+        }
+      }],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#171923',
+            bodyColor: '#171923',
+            borderColor: '#EEF0F3',
+            borderWidth: 1,
+            titleFont: { family: 'Manrope', weight: '700', size: 11 },
+            bodyFont: { family: 'Manrope', weight: '800', size: 12 },
+            padding: 8,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => ctx.parsed + '%'
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

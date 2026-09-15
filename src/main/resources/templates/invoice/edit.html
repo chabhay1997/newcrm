@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Invoice</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .edit-shell{max-width:1280px;margin:0 auto}.edit-workspace{display:grid;grid-template-columns:minmax(0,980px) 220px;gap:22px;align-items:start}.document-editor{--document-gutter:5px;box-sizing:border-box;width:100%;height:calc(100dvh - 7.5rem);margin:0;padding:0 var(--document-gutter) 5px;overflow-x:auto;overflow-y:auto;border:1px solid #dfe3e9;border-radius:16px;background:#fff;color:#26313d;font-size:11px;box-shadow:0 16px 45px rgba(18,31,53,.08);scrollbar-gutter:stable}
+    .document-editor>*{min-width:760px}.document-editor::-webkit-scrollbar{width:9px;height:9px}.document-editor::-webkit-scrollbar-track{background:#f1f3f6}.document-editor::-webkit-scrollbar-thumb{border:2px solid #f1f3f6;border-radius:999px;background:#aeb6c4}.document-editor::-webkit-scrollbar-corner{background:#f1f3f6}
+    .document-rule{width:calc(100% + (var(--document-gutter) * 2));height:9px;margin:0 calc(var(--document-gutter) * -1);background:#050505}
+    .document-meta{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:5px;width:calc(100% + (var(--document-gutter) * 2));margin:0 calc(var(--document-gutter) * -1);padding:5px;background:#e5e5e5}
+    .doc-field{display:flex;align-items:center;gap:5px;min-width:0;font-size:11px}.doc-field label{flex:none;font-weight:800}
+    .doc-input{min-width:0;width:100%;padding:4px;border:1px solid transparent;border-radius:4px;background:transparent;color:#26313d;font:inherit}
+    .doc-input:hover,.doc-input:focus{border-color:#aeb9cb;background:#fff;outline:none;box-shadow:0 0 0 2px rgba(83,105,255,.1)}
+    .bill-section{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px 0}.doc-label{display:block;margin-bottom:5px;font-size:11px;font-weight:800;letter-spacing:.02em}
+    .document-bank-select{width:100%;height:30px;padding:0 4px;border:1px solid #cfd6e2;border-radius:4px;background:#fff;color:#26313d;font-size:11px;outline:none}.document-bank-select:focus{border-color:#5369ff;box-shadow:0 0 0 2px rgba(83,105,255,.12)}
+    .doc-textarea{resize:vertical;line-height:1.5}.document-items{width:calc(100% - 8px);margin:0 4px;border-collapse:collapse;border-top:2px solid #151515;border-bottom:2px solid #151515}
+    .document-items th{padding:5px;border-bottom:2px solid #151515;text-align:left;font-size:11px}.document-items th:last-child,.document-items td:last-child{width:180px;text-align:right}
+    .document-items td{padding:5px;border-bottom:1px solid #e4e6e9;vertical-align:top}.item-title{font-weight:700}.amount-summary{display:grid;grid-template-columns:1fr;gap:5px;margin:5px 4px 0;padding:5px;border:1px solid #d8dce2;border-radius:5px;background:#f8f9fb}.amount-summary-row{display:grid;grid-template-columns:minmax(0,1fr) 220px;align-items:center;gap:12px}.amount-summary-row .doc-label{margin:0;text-align:left}.amount-summary .doc-input{grid-column:2;background:#fff;border-color:#d8dce2}.net-amount-input{font-weight:800;text-align:right}.remarks-section{margin-top:5px;padding-top:5px;border-top:1px solid #d8dce2}
+    .editor-toolbar{width:100%;margin:0 0 10px;display:flex;align-items:center;gap:12px}.editor-toolbar .editor-button{width:100%}.editor-actions{display:flex;gap:9px}
+    .editor-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 17px;border:1px solid #d9dee8;border-radius:10px;background:#fff;color:#263451;font-size:12px;font-weight:800;text-decoration:none}.editor-button.primary{border-color:#5369ff;background:#5369ff;color:#fff}.remove-line{color:#e5484d;font-size:11px;font-weight:800}
+    .right-control-column{position:sticky;top:88px}.edit-control-rail{padding:16px;border:1px solid #dfe3e9;border-radius:16px;background:#fff;box-shadow:0 12px 32px rgba(18,31,53,.07)}.rail-label{display:block;margin-bottom:6px;color:#59667e;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.rail-select{width:100%;height:42px;padding:0 10px;border:1px solid #d9dee8;border-radius:9px;background:#fff;color:#17213f;font-size:12px;font-weight:700}.rail-company-currency{display:grid;grid-template-columns:minmax(0,1fr) 68px;gap:8px;align-items:end}.rail-currency .rail-select{padding:0 6px;text-align:center}.rail-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.rail-check-option{display:flex;min-width:0;min-height:39px;align-items:center;gap:5px;padding:6px 7px;border:1px solid #d9dee8;border-radius:9px;background:#fff;color:#263451;font-size:10px;font-weight:800;line-height:1.2;cursor:pointer}.rail-check-option input{width:15px;height:15px;flex:none;margin:0;accent-color:#6374e8}.rail-buttons{display:grid;gap:9px;margin-top:14px}.rail-button{display:flex;width:100%;min-height:41px;align-items:center;justify-content:center;gap:7px;padding:0 8px;border:1px solid #d9dee8;border-radius:9px;background:#fff;color:#263451;font-size:12px;font-weight:800}.rail-button:hover{background:#f4f6fb}.rail-button.add{border-color:#6f6af7;background:#7167f5;color:#fff}.rail-button.remove{border-color:#f27a7f;background:#f9787e;color:#fff}.rail-button.save{border-color:#6374e8;background:#6374e8;color:#fff}.rail-button.save:hover{background:#5365df}.rail-duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rail-row-actions .rail-button{font-size:10px}.rail-button:disabled{opacity:.45;cursor:not-allowed}
+    .terms-overlay{display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;padding:20px;background:rgba(20,28,42,.5);backdrop-filter:blur(3px)}.terms-overlay.open{display:flex}.terms-card{width:min(620px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:20px;border-radius:16px;background:#fff}.terms-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.term-edit-row{display:flex;gap:8px;margin-bottom:9px}.term-edit-row textarea{flex:1;min-height:70px;padding:10px;border:1px solid #d9dee8;border-radius:9px;font-size:12px}.term-remove{color:#e5484d;font-weight:800}.terms-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+    @media(max-width:1050px){.edit-workspace{grid-template-columns:1fr}.right-control-column{position:static;grid-row:1}.rail-buttons{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:720px){.document-editor{--document-gutter:5px;height:calc(100dvh - 6.5rem);padding:0 var(--document-gutter) 5px}.document-meta,.bill-section,.amount-summary{grid-template-columns:1fr}.editor-toolbar{align-items:stretch}.document-items th:last-child,.document-items td:last-child{width:130px}.rail-buttons{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+    <main class="flex-1 px-8 pt-3 pb-8">
+      <form id="invoiceDocumentEditForm" th:action="@{/invoice/create}" th:object="${invoice}" method="post">
+        <input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{sacCode}">
+
+        <div class="edit-shell">
+        <div class="edit-workspace">
+        <section class="document-editor">
+          <div class="document-rule"></div>
+          <div class="document-meta">
+            <div class="doc-field"><label for="editInvNo">Invoice No.:</label><input id="editInvNo" class="doc-input" th:field="*{invNo}" required></div>
+            <div class="doc-field"><label for="editDate">Invoice Date:</label><input id="editDate" class="doc-input" type="date" th:field="*{date}"></div>
+            <div class="doc-field"><label for="editPoNo">PO No.:</label><input id="editPoNo" class="doc-input" th:field="*{poNo}"></div>
+          </div>
+          <div class="bill-section">
+            <div>
+              <span class="doc-label">BILL TO</span>
+              <input class="doc-input font-bold" th:field="*{name}" aria-label="Customer name">
+              <textarea class="doc-input doc-textarea" rows="4" th:field="*{address}" aria-label="Billing address"></textarea>
+              <div class="doc-field"><label for="editGstin">GSTIN:</label><input id="editGstin" class="doc-input" th:field="*{gstin}"></div>
+            </div>
+            <div>
+              <label for="documentBankSelect" class="doc-label">CHOOSE BANK</label>
+              <select id="documentBankSelect" class="document-bank-select" th:field="*{bankType}">
+                <option value="">Choose Bank</option>
+                <option th:each="bank : ${banks}" th:value="${bank.id}" th:text="${@bankNameResolver.resolve(bank.bankName)} + ' - ' + ${bank.bankAcc}">Bank Name - Account Number</option>
+              </select>
+              <div class="doc-field" style="margin-top:5px"><label for="editPanNo">PAN No.:</label><input id="editPanNo" class="doc-input" th:field="*{panNo}"></div>
+            </div>
+          </div>
+          <table class="document-items">
+            <thead><tr><th>PARTICULAR</th><th th:text="${invoice.isInr != null and invoice.isInr == 1 ? 'AMOUNT (INR)' : 'AMOUNT (USD)'}">AMOUNT (USD)</th></tr></thead>
+            <tbody id="documentItemsBody">
+              <tr th:each="item : ${lineItems}" class="document-item-row">
+                <td><input name="title" class="doc-input item-title" th:value="${item.title}" placeholder="Particular title"><textarea name="particular" class="doc-input doc-textarea" rows="2" th:text="${item.particular}" placeholder="Description"></textarea><button type="button" class="remove-line">Remove</button></td>
+                <td><input name="amtD" type="number" step="0.01" class="doc-input text-right font-bold document-amount" th:value="${item.amount}"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="amount-summary">
+            <div class="amount-summary-row"><label for="editNetAmount" class="doc-label">NET AMOUNT</label><input id="editNetAmount" class="doc-input net-amount-input" th:field="*{netAmt}" readonly></div>
+            <div class="amount-summary-row"><label for="editExtraServices" class="doc-label">ENTER EXTRA SERVICES <span class="font-normal">(optional)</span></label><input id="editExtraServices" class="doc-input" th:field="*{extraServices}" placeholder="Enter Extra Services"></div>
+            <div class="amount-summary-row"><label for="editExtraAmount" class="doc-label">EXTRA SERVICES AMOUNT <span class="font-normal">(optional)</span></label><input id="editExtraAmount" type="number" step="0.01" class="doc-input net-amount-input" th:field="*{extraAmt}"></div>
+            <div class="amount-summary-row"><label for="editFinalAmount" class="doc-label">FINAL AMOUNT</label><input id="editFinalAmount" class="doc-input net-amount-input" th:field="*{finalAmt}" readonly></div>
+          </div>
+          <div class="remarks-section"><label for="editRemarks" class="doc-label">REMARKS</label><textarea id="editRemarks" class="doc-input doc-textarea" rows="3" th:field="*{remarks}"></textarea></div>
+        </section>
+        <div class="right-control-column">
+        <div class="editor-toolbar"><a th:href="@{/invoice}" class="editor-button">← Back</a></div>
+        <aside class="edit-control-rail" aria-label="Invoice editing controls">
+          <div class="rail-company-currency">
+            <div><label class="rail-label" for="editCompanySelect">Company</label><select id="editCompanySelect" class="rail-select" th:field="*{invType}"><option value="1">EVTL</option><option value="2">Prolix</option><option value="3">Government</option></select></div>
+            <div class="rail-currency"><label class="rail-label" for="editCurrency">Currency</label><select id="editCurrency" class="rail-select" th:field="*{isInr}"><option value="0">USD</option><option value="1">INR</option></select></div>
+          </div>
+          <label class="rail-label" for="editHeadingType" style="margin-top:12px">Invoice Heading</label>
+          <select id="editHeadingType" class="rail-select" th:field="*{invTypes}"><option value="1">Export Invoice</option><option value="2">Tax Invoice</option></select>
+          <input type="hidden" id="editSignatureValue" name="isSign" th:value="${invoice.isSign == null ? 0 : invoice.isSign}">
+          <input type="hidden" id="editTermsVisibilityValue" name="isTerms" th:value="${invoice.isTerms == null ? 0 : invoice.isTerms}">
+          <div class="rail-check-grid" aria-label="PDF visibility options">
+            <label class="rail-check-option" for="editSignature"><input id="editSignature" type="checkbox" th:checked="${invoice.isSign == null or invoice.isSign == 0}"><span>Signature</span></label>
+            <label class="rail-check-option" for="editTermsVisibility"><input id="editTermsVisibility" type="checkbox" th:checked="${invoice.isTerms != null and invoice.isTerms == 1}"><span>Terms on PDF</span></label>
+          </div>
+          <div class="rail-buttons">
+            <div class="rail-duo rail-row-actions"><button type="button" id="addDocumentRow" class="rail-button add">+ Add Row</button><button type="button" id="removeDocumentRow" class="rail-button remove">− Remove Row</button></div>
+            <div class="rail-duo"><button type="button" id="undoDocumentEdit" class="rail-button">↶ Undo</button><button type="button" id="redoDocumentEdit" class="rail-button">↷ Redo</button></div>
+            <div class="rail-duo"><button type="submit" class="rail-button save"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Save</span></button><button type="button" id="openEditTerms" class="rail-button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg><span>Terms</span></button></div>
+          </div>
+        </aside>
+        </div>
+        </div>
+        </div>
+      </form>
+    </main>
+  </div>
+  <div id="editTermsOverlay" class="terms-overlay" aria-hidden="true">
+    <section class="terms-card" role="dialog" aria-modal="true" aria-labelledby="editTermsTitle">
+      <div class="terms-head"><div><h2 id="editTermsTitle" class="text-[17px] font-extrabold text-[#17213f]">Terms</h2><p class="text-[11px] text-[#73809b]">Terms for the selected company</p></div><button type="button" id="closeEditTerms" class="editor-button" aria-label="Close terms">×</button></div>
+      <div id="editTermsList"></div>
+      <button type="button" id="addEditTerm" class="editor-button">+ Add Term</button>
+      <div class="terms-footer"><button type="button" id="cancelEditTerms" class="editor-button">Cancel</button><button type="button" id="saveEditTerms" class="editor-button primary">Save Terms</button></div>
+    </section>
+  </div>
+  <template id="documentRowTemplate"><tr class="document-item-row"><td><input name="title" class="doc-input item-title" placeholder="Particular title"><textarea name="particular" class="doc-input doc-textarea" rows="2" placeholder="Description"></textarea><button type="button" class="remove-line">Remove</button></td><td><input name="amtD" type="number" step="0.01" class="doc-input text-right font-bold document-amount" value="0.00"></td></tr></template>
+  <script>
+    const editForm=document.getElementById('invoiceDocumentEditForm');
+    const itemsBody=document.getElementById('documentItemsBody');
+    const companySelect=document.getElementById('editCompanySelect');
+    const signatureCheckbox=document.getElementById('editSignature');
+    const termsVisibilityCheckbox=document.getElementById('editTermsVisibility');
+    function syncPdfVisibilityFields(){document.getElementById('editSignatureValue').value=signatureCheckbox.checked?'0':'1';document.getElementById('editTermsVisibilityValue').value=termsVisibilityCheckbox.checked?'1':'0'}
+    function recalculateDocumentTotals(){const net=Array.from(document.querySelectorAll('.document-amount')).reduce((sum,input)=>sum+(Number(input.value)||0),0);const extra=Number(document.getElementById('editExtraAmount').value)||0;document.getElementById('editNetAmount').value=net.toFixed(2);document.getElementById('editFinalAmount').value=(net+extra).toFixed(2)}
+    function addDocumentRow(){itemsBody.appendChild(document.getElementById('documentRowTemplate').content.cloneNode(true));recalculateDocumentTotals();recordSnapshot()}
+    function removeDocumentRow(){const rows=itemsBody.querySelectorAll('tr');if(rows.length>1){rows[rows.length-1].remove();recalculateDocumentTotals();recordSnapshot()}}
+    document.getElementById('addDocumentRow').addEventListener('click',addDocumentRow);
+    document.getElementById('removeDocumentRow').addEventListener('click',removeDocumentRow);
+    itemsBody.addEventListener('click',event=>{if(!event.target.classList.contains('remove-line'))return;if(itemsBody.querySelectorAll('tr').length>1)event.target.closest('tr').remove();recalculateDocumentTotals();recordSnapshot()});
+    itemsBody.addEventListener('input',event=>{if(event.target.classList.contains('document-amount'))recalculateDocumentTotals()});
+    document.getElementById('editExtraAmount').addEventListener('input',recalculateDocumentTotals);
+    document.getElementById('editCurrency').addEventListener('change',event=>{document.querySelector('.document-items th:last-child').textContent=event.target.value==='1'?'AMOUNT (INR)':'AMOUNT (USD)'});
+    signatureCheckbox.addEventListener('change',syncPdfVisibilityFields);
+    termsVisibilityCheckbox.addEventListener('change',syncPdfVisibilityFields);
+    syncPdfVisibilityFields();
+    editForm.addEventListener('submit',()=>{syncPdfVisibilityFields();recalculateDocumentTotals()});
+
+    function captureState(){return{company:companySelect.value,heading:document.getElementById('editHeadingType').value,currency:document.getElementById('editCurrency').value,signature:signatureCheckbox.checked,termsVisibility:termsVisibilityCheckbox.checked,bank:document.getElementById('documentBankSelect').value,panNo:document.getElementById('editPanNo').value,invNo:document.getElementById('editInvNo').value,date:document.getElementById('editDate').value,poNo:document.getElementById('editPoNo').value,name:document.getElementById('name').value,address:document.getElementById('address').value,gstin:document.getElementById('editGstin').value,extraServices:document.getElementById('editExtraServices').value,extraAmount:document.getElementById('editExtraAmount').value,remarks:document.getElementById('editRemarks').value,items:Array.from(itemsBody.querySelectorAll('tr')).map(row=>({title:row.querySelector('[name="title"]').value,particular:row.querySelector('[name="particular"]').value,amount:row.querySelector('[name="amtD"]').value}))}}
+    let snapshots=[];let snapshotIndex=-1;let restoring=false;let snapshotTimer;
+    function recordSnapshot(){if(restoring)return;const state=JSON.stringify(captureState());if(snapshotIndex>=0&&JSON.stringify(snapshots[snapshotIndex])===state)return;snapshots=snapshots.slice(0,snapshotIndex+1);snapshots.push(JSON.parse(state));snapshotIndex=snapshots.length-1;updateHistoryButtons()}
+    function restoreState(state){restoring=true;companySelect.value=state.company;document.getElementById('editHeadingType').value=state.heading;document.getElementById('editCurrency').value=state.currency;document.getElementById('editCurrency').dispatchEvent(new Event('change'));signatureCheckbox.checked=state.signature;termsVisibilityCheckbox.checked=state.termsVisibility;syncPdfVisibilityFields();document.getElementById('documentBankSelect').value=state.bank;document.getElementById('editPanNo').value=state.panNo;document.getElementById('editInvNo').value=state.invNo;document.getElementById('editDate').value=state.date;document.getElementById('editPoNo').value=state.poNo;document.getElementById('name').value=state.name;document.getElementById('address').value=state.address;document.getElementById('editGstin').value=state.gstin;document.getElementById('editExtraServices').value=state.extraServices;document.getElementById('editExtraAmount').value=state.extraAmount;document.getElementById('editRemarks').value=state.remarks;itemsBody.replaceChildren();state.items.forEach(item=>{const fragment=document.getElementById('documentRowTemplate').content.cloneNode(true);fragment.querySelector('[name="title"]').value=item.title;fragment.querySelector('[name="particular"]').value=item.particular;fragment.querySelector('[name="amtD"]').value=item.amount;itemsBody.appendChild(fragment)});recalculateDocumentTotals();restoring=false;updateHistoryButtons()}
+    function updateHistoryButtons(){document.getElementById('undoDocumentEdit').disabled=snapshotIndex<=0;document.getElementById('redoDocumentEdit').disabled=snapshotIndex>=snapshots.length-1}
+    editForm.addEventListener('input',()=>{clearTimeout(snapshotTimer);snapshotTimer=setTimeout(recordSnapshot,250)});
+    editForm.addEventListener('change',recordSnapshot);
+    document.getElementById('undoDocumentEdit').addEventListener('click',()=>{if(snapshotIndex>0)restoreState(snapshots[--snapshotIndex])});
+    document.getElementById('redoDocumentEdit').addEventListener('click',()=>{if(snapshotIndex<snapshots.length-1)restoreState(snapshots[++snapshotIndex])});
+    recordSnapshot();
+
+    const termsOverlay=document.getElementById('editTermsOverlay');const termsList=document.getElementById('editTermsList');
+    function closeTerms(){termsOverlay.classList.remove('open');termsOverlay.setAttribute('aria-hidden','true')}
+    function addTerm(value=''){const row=document.createElement('div');row.className='term-edit-row';const input=document.createElement('textarea');input.value=value;input.placeholder='Enter term or condition';const remove=document.createElement('button');remove.type='button';remove.className='term-remove';remove.textContent='Remove';remove.addEventListener('click',()=>row.remove());row.append(input,remove);termsList.appendChild(row)}
+    document.getElementById('openEditTerms').addEventListener('click',async()=>{termsList.innerHTML='<p class="text-[12px] text-[#73809b]">Loading terms...</p>';termsOverlay.classList.add('open');termsOverlay.setAttribute('aria-hidden','false');try{const response=await fetch('/invoice/terms?invType='+encodeURIComponent(companySelect.value));if(!response.ok)throw new Error();const terms=await response.json();termsList.replaceChildren();if(!terms.length)addTerm();terms.forEach(term=>addTerm(term.terms_condtions||''))}catch(error){termsList.innerHTML='<p class="text-[12px] text-[#e5484d]">Unable to load terms.</p>'}});
+    document.getElementById('addEditTerm').addEventListener('click',()=>addTerm());document.getElementById('closeEditTerms').addEventListener('click',closeTerms);document.getElementById('cancelEditTerms').addEventListener('click',closeTerms);termsOverlay.addEventListener('click',event=>{if(event.target===termsOverlay)closeTerms()});
+    document.getElementById('saveEditTerms').addEventListener('click',async()=>{const terms=Array.from(termsList.querySelectorAll('textarea')).map(input=>input.value.trim()).filter(Boolean);const csrf=editForm.querySelector('input[name="_csrf"]');const headers={'Content-Type':'application/json'};if(csrf)headers['X-CSRF-TOKEN']=csrf.value;const response=await fetch('/invoice/terms',{method:'POST',headers,body:JSON.stringify({invType:Number(companySelect.value),terms})});if(response.ok)closeTerms()});
+  </script>
+</body>
+</html>
