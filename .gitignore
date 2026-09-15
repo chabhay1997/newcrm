@@ -52,3 +52,5 @@ tailwindcss.exe.exe
 
 .env
 application-local.properties
+src/main/resources/application.properties
+.gradle-local/
