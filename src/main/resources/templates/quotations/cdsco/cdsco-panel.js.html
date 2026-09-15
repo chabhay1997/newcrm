@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="cdsco-panel-script" th:inline="none">
+  let cdscoEditingRevisionId = null;
+  const cdscoCommercialMap = [
+    ['commercialAlias5','commercialValue5','commercialCurrency5'],
+    ['consultancyAlias1','consultancyValue1','consultancyCurrency1'],
+    ['consultancyAlias2','consultancyValue2','consultancyCurrency2'],
+    ['consultancyAlias3','consultancyValue3','consultancyCurrency3'],
+    ['commercialAlias1','commercialValue1','commercialCurrency1'],
+    ['commercialAlias2','commercialValue2','commercialCurrency2'],
+    ['commercialAlias9','commercialValue9','commercialCurrency9'],
+    ['commercialAlias3','commercialValue3','commercialCurrency3'],
+    ['commercialAlias6','commercialValue6','commercialCurrency6'],
+    ['commercialAlias4','commercialValue4','commercialCurrency4']
+  ];
+  const cdscoDefaults = {
+    commercialAlias5:'Govt. fee per product for class A', consultancyAlias1:'Govt. fee per product for class B', consultancyAlias2:'Govt. fee per product for class C', consultancyAlias3:'Govt. fee per product for class D',
+    commercialAlias1:'Govt. fee site registration for class A', commercialAlias2:'Govt. fee site registration for class B', commercialAlias9:'Govt. fee site registration for class C', commercialAlias3:'Govt. fee site registration for class D', commercialAlias6:'Import License for MD-15', commercialAlias4:'Total Cost + GST (18%)'
+  };
+  const cdscoSchemeLabels = {
+    base:Object.values(cdscoDefaults),
+    md1213:['Test License MD-13','Government Fee per Product','Total Cost + GST (18%)'],
+    md35:['Manufacturing License MD-3/5','Government Fees per Product Registration','Government Fee Manufacturing Site Registration','Total Cost + GST (18%)'],
+    md79:['Manufacturing License MD-7/9','Government Fees per Product Registration','Government Fee Manufacturing Site Registration','Total Cost + GST (18%)'],
+    md46:['Loan License MD-4/6','Government Fee per Product','Manufacturing Site Registration','Total Cost + GST (18%)'],
+    md810:['Loan License MD-8/10','Government Fee per Product','Government Fee Manufacturing Site Registration','Total Cost + GST (18%)'],
+    md42:['Wholesale License MD-42','Government Fee','Total Cost + GST (18%)'],
+    'md14/15':['Govt. fee per product for class A','Govt. fee per product for class B','Govt. fee per product for class C','Govt. fee per product for class D','Govt. fee site registration for class A','Govt. fee site registration for class B','Govt. fee site registration for class C','Govt. fee site registration for class D','Import License for MD-15','Total Cost + GST (18%)']
+  };
+  const cdscoDefaultTimeline = ['Documentation Preparation: 2-3 Weeks','Application Processing & Approval: 4-8 Weeks','Total Expected Timeline: 30-60 Working Days'];
+  const cdscoDefaultDocuments = ['Covering Letter','Brief description of the medical device including 1. Intended use 2. Material of Construction 3. Design','Undertaking stating that the required Facilities including equipment, instruments, and personnel have been provided to manufacture such medical devices','List of equipment, instruments','List of qualified personnel','Justification of quantity proposed to be manufactured','Test protocol/ Quality Plan','Approval letter authorizing to undertake research and development activities issued by any government organization, if any (Registration Certificate)/ Manufacturing License','Detailed description of how the raw material will be procured so as the entire process is scrutinized (Process Flow Chart)'];
+  const cdscoIds = ['referenceNo','quotationDate','clientName','companyName','productName','productCategoryClass','certificateName','manufacturingLocation','productModels'].concat(cdscoCommercialMap.flat());
+  function cdscoEl(name){ return document.getElementById('cdsco'+name.charAt(0).toUpperCase()+name.slice(1)+'Input') || document.getElementById('cdsco'+name.charAt(0).toUpperCase()+name.slice(1)); }
+  function cdscoSet(name,value){const el=cdscoEl(name);if(el)el.value=value==null?'':value;}
+  function cdscoRadio(name,value){const el=document.querySelector('input[name="cdscoCurrency'+name.replace('commercialCurrency','').replace('consultancyCurrency','Consultancy')+'"][value="'+(value||'INR')+'"]');if(el)el.checked=true;}
+  function renderCdscoTimeline(items){const body=document.getElementById('cdscoTimelineBody');body.innerHTML='';(items&&items.length?items:cdscoDefaultTimeline).forEach(function(item){const tr=document.createElement('tr');tr.innerHTML='<td>'+ (body.children.length+1) +'</td><td><input class="cdsco-input cdsco-timeline-input" value=""></td><td><button type="button" class="cdsco-remove">Clear</button></td>';tr.querySelector('input').value=item;tr.querySelector('button').onclick=function(){tr.remove();};body.appendChild(tr);});}
+  function renderCdscoDocuments(items){const body=document.getElementById('cdscoDocumentsBody');body.innerHTML='';(items&&items.length?items:cdscoDefaultDocuments).forEach(function(item){const tr=document.createElement('tr');tr.innerHTML='<td>'+ (body.children.length+1) +'</td><td><input class="cdsco-input cdsco-document-input" value=""></td><td><button type="button" class="cdsco-remove">Clear</button></td>';tr.querySelector('input').value=item;tr.querySelector('button').onclick=function(){tr.remove();};body.appendChild(tr);});}
+  function addCdscoTimelineRow(){renderCdscoTimeline(Array.from(document.querySelectorAll('.cdsco-timeline-input')).map(x=>x.value).concat(''));}
+  function clearCdscoField(alias,value){cdscoSet(alias,'');cdscoSet(value,'');}
+  function applyCdscoScheme(){const set=document.getElementById('cdscoCommercialSetInput').value;const labels=cdscoSchemeLabels[set]||cdscoSchemeLabels.base;cdscoCommercialMap.forEach(function(pair,index){const el=cdscoEl(pair[0]);if(el && set!=='base' && labels[index])el.value=labels[index];});}
+  function renderCdscoRevisions(quotations,leadId,activeId){const box=document.getElementById('cdscoRevisionButtons');if(!box)return;box.innerHTML='';(quotations||[]).forEach(function(item,index){const b=document.createElement('button');b.type='button';b.className='quotation-revision-button'+(item.id===activeId?' active':'');b.textContent='R'+(index+1);b.onclick=function(event){event.preventDefault();event.stopPropagation();closeModal('cdscoEditModal');setTimeout(function(){openCdscoEditPanel(leadId,'CDSCO Registration','',item.id);},50);};box.appendChild(b);});}
+  function openCdscoEditPanel(leadId,quotationType,companyName,revisionId){if((quotationType||'').trim().toLowerCase()!=='cdsco registration')return;cdscoEditingRevisionId=revisionId||null;document.querySelector('#cdscoEditModal form').reset();document.getElementById('cdscoLeadIdInput').value=leadId;cdscoSet('referenceNo','REF-'+leadId);cdscoSet('quotationDate',new Date().toISOString().slice(0,10));cdscoSet('companyName',companyName||'');renderCdscoTimeline(cdscoDefaultTimeline);renderCdscoDocuments(cdscoDefaultDocuments);openModal('cdscoEditModal');fetch('/leads/'+leadId+'/cdsco-quotation'+(revisionId?'?revisionId='+encodeURIComponent(revisionId):'')).then(r=>r.json()).then(function(data){if(!data.success)return;const q=data.quotation||{},lead=data.lead||{};renderCdscoRevisions(data.quotations,leadId,revisionId?q.id:null);if(!revisionId){cdscoSet('companyName',companyName||lead.companyName||'');return;}cdscoIds.forEach(function(name){if(q[name]!=null)cdscoSet(name,q[name]);});if(!q.companyName)cdscoSet('companyName',companyName||lead.companyName||'');if(!q.clientName)cdscoSet('clientName',lead.isName||'');document.getElementById('cdscoCommercialSetInput').value=q.commercialSet||'base';document.getElementById('cdscoDocsSetInput').value=q.docsSet||'md1213';cdscoCommercialMap.forEach(function(pair){if(!q[pair[0]])cdscoSet(pair[0],cdscoDefaults[pair[0]]||'');cdscoRadio(pair[2],q[pair[2]]);});renderCdscoTimeline(parseJson(q.timelineItems,cdscoDefaultTimeline));renderCdscoDocuments(parseJson(q.requiredDocuments,cdscoDefaultDocuments));});}
+  function parseJson(value,fallback){try{const parsed=JSON.parse(value||'');return Array.isArray(parsed)?parsed:fallback;}catch(e){return fallback;}}
+  function cdscoPayload(){const p={};cdscoIds.forEach(function(name){const el=cdscoEl(name);if(el)p[name]=el.value;});p.id=cdscoEditingRevisionId;p.leadId=document.getElementById('cdscoLeadIdInput').value;p.certificateType='CDSCO Registration';p.commercialSet=document.getElementById('cdscoCommercialSetInput').value;p.docsSet=document.getElementById('cdscoDocsSetInput').value;p.timelineItems=JSON.stringify(Array.from(document.querySelectorAll('.cdsco-timeline-input')).map(x=>x.value));p.requiredDocuments=JSON.stringify(Array.from(document.querySelectorAll('.cdsco-document-input')).map(x=>x.value));p.extraRows='[]';p.commercialRowOrder=JSON.stringify(cdscoCommercialMap.map(x=>x[0]));return p;}
+  function saveCdscoQuotation(){const id=document.getElementById('cdscoLeadIdInput').value;if(!id)return;const csrfHeader=document.querySelector('meta[name="_csrf_header"]')?.content,csrfToken=document.querySelector('meta[name="_csrf"]')?.content;fetch('/leads/'+id+'/cdsco-quotation',{method:'POST',headers:{'Content-Type':'application/json',...(csrfHeader&&csrfToken?{[csrfHeader]:csrfToken}:{})},body:JSON.stringify(cdscoPayload())}).then(r=>r.json()).then(function(data){if(!data.success){alert('Failed to save CDSCO quotation: '+(data.message||'Unknown error'));return;}showLeadToast('CDSCO quotation saved successfully');closeModal('cdscoEditModal');}).catch(function(){alert('Something went wrong while saving the CDSCO quotation.');});}
+  document.addEventListener('DOMContentLoaded',function(){renderCdscoTimeline(cdscoDefaultTimeline);renderCdscoDocuments(cdscoDefaultDocuments);document.getElementById('cdscoCommercialSetInput').addEventListener('change',applyCdscoScheme);});
+</script>
+</body>
+</html>

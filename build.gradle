@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '3.2.3'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'com.evtl.crm.EvtlCrmApplication'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Web APIs banane ke liye
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    
+    // Database ORM (Laravel Eloquent ki tarah)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+ 
+    // For Auth Login Middleware
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // HTML-to-PDF rendering for quotation documents.
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    
+    // MySQL Database Connector
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
+    testImplementation platform('org.junit:junit-bom:6.0.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+}
+
+// Keep source resources on the runtime classpath so template edits are visible
+// without running a separate Gradle command after every change.
+bootRun {
+    sourceResources sourceSets.main
+}
+
+test {
+    useJUnitPlatform()
+}

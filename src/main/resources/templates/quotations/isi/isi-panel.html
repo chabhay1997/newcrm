@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ISI CERTIFICATION EDIT PANEL -->
+<div th:fragment="isi-panel" id="isiEditModal" class="modal-overlay" onclick="closeModal('isiEditModal')">
+  <div class="modal-box glass rounded-2xl w-[980px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+       style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">BIS-ISI Certification &mdash; Quotation Details</p>
+      <button onclick="closeModal('isiEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="isiQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="isiLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="isiRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="isiReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="BIS-ISI Certification" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="isiQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Company Name <span class="text-red-500">*</span></label>
+          <input id="isiCompanyNameInput" type="text" placeholder="Enter Company Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Name <span class="text-red-500">*</span></label>
+          <input id="isiCertificateNameInput" type="text" placeholder="Enter Certificate Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name <span class="text-red-500">*</span></label>
+          <input id="isiClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- COMMERCIAL BIS FEE STRUCTURE -->
+      <p class="text-[13px] font-bold text-[#171923] mb-2">Commercial BIS Fee Structure</p>
+      <div class="overflow-x-auto mb-6 rounded-xl border border-black/10">
+        <table class="w-full text-left" style="border-collapse: collapse;">
+          <thead>
+            <tr class="bg-[#5B8DEF]">
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[6%]">SR</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[38%]">Expense</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[28%]">Extra Alias</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[28%]">Value</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12.5px] text-[#3A4B63]">
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">1</td>
+              <td class="py-2 px-3">BIS Application fee</td>
+              <td class="py-2 px-3"><input id="isiCommercialAlias1" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiCommercialValue1" type="number" min="0" value="1000" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">2</td>
+              <td class="py-2 px-3">Charge for visit (BIS Officer)</td>
+              <td class="py-2 px-3"><input id="isiCommercialAlias2" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiCommercialValue2" type="number" min="0" value="7000" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">3</td>
+              <td class="py-2 px-3">
+                Minimum marking fee for one year
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px]">
+                  <label class="flex items-center gap-1.5"><input type="checkbox" id="isiCheckbox80" name="isiScaleConcession" value="1" class="isiConcessionCheckbox"> Micro Scale <b>80%</b></label>
+                  <label class="flex items-center gap-1.5"><input type="checkbox" id="isiCheckbox50" name="isiScaleConcession" value="2" class="isiConcessionCheckbox"> Small Scale <b>50%</b></label>
+                  <label class="flex items-center gap-1.5"><input type="checkbox" id="isiCheckbox20" name="isiScaleConcession" value="3" class="isiConcessionCheckbox"> Medium Scale <b>20%</b></label>
+                  <label class="flex items-center gap-1.5"><input type="checkbox" id="isiCheckboxFull" name="isiScaleConcession" value="4" class="isiConcessionCheckbox"> Large Scale <b>0%</b></label>
+                </div>
+              </td>
+              <td class="py-2 px-3 align-top"><input id="isiCommercialAlias3" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3 align-top"><input id="isiCommercialValue3" type="text" readonly class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] bg-[#F3F5F8]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">4</td>
+              <td class="py-2 px-3">License fee</td>
+              <td class="py-2 px-3"><input id="isiCommercialAlias4" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiCommercialValue4" type="number" min="0" value="1000" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">5</td>
+              <td class="py-2 px-3">Sample testing charges</td>
+              <td class="py-2 px-3"><input id="isiCommercialAlias5" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiCommercialValue5" type="text" value="0" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CONSULTANCY FEE STRUCTURE -->
+      <p class="text-[13px] font-bold text-[#171923] mb-2">Consultancy Fee Structure</p>
+      <div class="overflow-x-auto mb-6 rounded-xl border border-black/10">
+        <table class="w-full text-left" style="border-collapse: collapse;">
+          <thead>
+            <tr class="bg-[#5B8DEF]">
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[6%]">SR</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[38%]">Expense</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[28%]">Extra Alias</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[28%]">Value</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12.5px] text-[#3A4B63]">
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">1</td>
+              <td class="py-2 px-3"><input id="isiConsultancyCharge" type="text" value="Consultancy charge for entire contract" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyAlias1" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyValue1" type="number" value="45000" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">2</td>
+              <td class="py-2 px-3"><input id="isiCalibrationFees" type="text" value="Engineer visit travel and food" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyAlias2" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyValue2" type="text" placeholder="Enter Value" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">3</td>
+              <td class="py-2 px-3"><input id="isiOtherExpense" type="text" value="Other expenses BIS Officer" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyAlias3" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="isiConsultancyValue3" type="text" placeholder="Enter Value" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lab Setup Cost</label>
+          <input id="isiLabSetupCost" type="text" placeholder="Lab Setup Cost" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lead Time</label>
+          <input id="isiLabTime" type="text" placeholder="Lead Time" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mb-4">
+        <input type="checkbox" id="isiAsPerMsme" checked class="w-4 h-4">
+        <label for="isiAsPerMsme" class="text-[12.5px] font-semibold text-[#3A4B63]">As Per MSME</label>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4 mb-5">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Advance Fee</label>
+          <input id="isiAdvanceFee" type="text" placeholder="Advance fee" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Registration App. Fee</label>
+          <input id="isiRegistrationFee" type="text" placeholder="Registration Application fee" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Inspection Stage Fee</label>
+          <input id="isiInspectionFee" type="text" placeholder="Inspection Stage fee" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Granting Stage Fee</label>
+          <input id="isiGrantingFee" type="text" placeholder="Granting Stage fee" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Notes / Remarks</label>
+        <textarea id="isiNotes" rows="3" placeholder="Enter any additional notes or remarks here..." class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]"></textarea>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('isiEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadIsiQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button type="button" onclick="saveIsiQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MEDIUM SCALE (20%) CONCESSION CONFIRM MODAL -->
+<div th:fragment="isi-concession-modal" id="isiCustom20Modal" class="modal-overlay">
+  <div class="modal-box glass rounded-2xl w-[420px] max-w-[92vw] p-6" onclick="event.stopPropagation()"
+       style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+    <p class="text-[14px] font-bold text-[#171923] mb-4">Concession for Medium (20%)</p>
+    <select id="isiScaleMediumInput" class="w-full mb-4 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white">
+      <option value="">--select--</option>
+      <option value="1">Yes</option>
+      <option value="2">No</option>
+    </select>
+    <div class="flex gap-2">
+      <button type="button" onclick="document.getElementById('isiCustom20Modal').classList.remove('open')" class="flex-1 py-2 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Close</button>
+      <button type="button" onclick="submitIsiConcession()" class="flex-1 py-2 rounded-full text-[12.5px] font-semibold text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
