@@ -226,6 +226,30 @@ function togglePwd(){
   const p = document.getElementById('password');
   p.type = p.type === 'password' ? 'text' : 'password';
 }
+
+const loginForm = document.querySelector('form[action$="/login"]');
+const loginLatitude = document.getElementById('loginLatitude');
+const loginLongitude = document.getElementById('loginLongitude');
+let locationRequested = false;
+
+function captureLoginLocation(done) {
+  if (!navigator.geolocation) {
+    done();
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function (position) {
+    loginLatitude.value = position.coords.latitude;
+    loginLongitude.value = position.coords.longitude;
+    done();
+  }, done, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+loginForm.addEventListener('submit', function (event) {
+  if (locationRequested) return;
+  event.preventDefault();
+  locationRequested = true;
+  captureLoginLocation(function () { loginForm.submit(); });
+});
 </script>
 </body>
 </html>

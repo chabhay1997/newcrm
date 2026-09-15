@@ -1,6 +1,7 @@
 package config;
 
 import service.CustomUserDetailsService;
+import service.LoginSuccessHandler;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,21 +14,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.http.HttpStatus;
 
 @Configuration
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final LoginSuccessHandler loginSuccessHandler;
 
 
     // Constructor Injection
     public SecurityConfig(
-            CustomUserDetailsService customUserDetailsService) {
+            CustomUserDetailsService customUserDetailsService,
+            LoginSuccessHandler loginSuccessHandler) {
 
         this.customUserDetailsService = customUserDetailsService;
+        this.loginSuccessHandler = loginSuccessHandler;
     }
 
 
@@ -104,12 +105,6 @@ public class SecurityConfig {
                 .authenticated()
             )
 
-            .exceptionHandling(exceptions -> exceptions
-                .defaultAuthenticationEntryPointFor(
-                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                    new AntPathRequestMatcher("/api/**")
-                )
-            )
 
             // -------------------------------------------------
             // LOGIN
@@ -124,10 +119,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
 
                 // Successful login
-                .defaultSuccessUrl(
-                        "/dashboard",
-                        true
-                )
+                .successHandler(loginSuccessHandler)
 
                 // Failed login
                 .failureUrl(

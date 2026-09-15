@@ -16,6 +16,10 @@ public class User {
     @Column(name = "role_id", nullable = false)
     private Integer roleId = 1;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", insertable = false, updatable = false)
+    private Role role;
+
     @Column(name = "type_id", nullable = false)
     private Long typeId;
 
@@ -76,6 +80,9 @@ public class User {
 
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
     public Long getTypeId() { return typeId; }
     public void setTypeId(Long typeId) { this.typeId = typeId; }

@@ -10,7 +10,7 @@ public class DashboardController {
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
         model.addAttribute("activePage", "dashboard");
-        return "dashboard/index";
+        return "dashboard/dashboard";
     }
 
 }

@@ -42,12 +42,13 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-### Local runtime data and tooling ###
-uploads/
-__MACOSX/
-.qodo/
-.idea/
+# Tailwind CLI binaries
+tailwindcss
+tailwindcss.exe
 tailwindcss.exe.exe
 
-### Local application configuration ###
-src/main/resources/application.properties
+*.log
+.DS_Store
+
+.env
+application-local.properties

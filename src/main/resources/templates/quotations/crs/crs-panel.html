@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="crs-panel" id="crsEditModal" class="modal-overlay" onclick="closeModal('crsEditModal')">
+  <div class="modal-box glass crs-modal-box" onclick="event.stopPropagation()" style="backdrop-filter:blur(20px);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 32px rgba(31,38,135,.15);">
+    <style>
+      #crsEditModal .crs-modal-box{width:980px;max-width:96vw;max-height:90vh;overflow-y:auto;padding:24px;border-radius:16px;color:#171923}
+      #crsEditModal .crs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+      #crsEditModal .crs-label{display:block;font-size:11.5px;font-weight:700;color:#3A4B63;margin-bottom:6px}
+      #crsEditModal .crs-input,#crsEditModal .crs-select{display:block;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;font-size:13px;color:#171923;background:rgba(255,255,255,.75);outline:none}
+      #crsEditModal .crs-input:focus,#crsEditModal .crs-select:focus{border-color:#8A5CF6;box-shadow:0 0 0 3px rgba(138,92,246,.12)}
+      #crsEditModal .crs-section{font-size:13px;font-weight:800;color:#171923;margin:22px 0 10px}
+      #crsEditModal .crs-card{padding:16px;border:1px solid rgba(0,0,0,.07);border-radius:14px;background:linear-gradient(135deg,#FAFBFF,#F5F7FC)}
+      #crsEditModal .crs-check{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-weight:700;color:#3A4B63}
+      #crsEditModal .crs-help{font-size:11px;color:#718096;margin-top:6px}
+      #crsEditModal .crs-footer{display:flex;gap:8px;margin-top:24px}
+      @media(max-width:760px){#crsEditModal .crs-grid{grid-template-columns:1fr}#crsEditModal .crs-modal-box{padding:18px;max-width:94vw}}
+    </style>
+    <div class="flex items-center justify-between mb-5"><p class="text-[16px] font-bold text-[#171923]">BIS CRS &mdash; Quotation Details</p><button type="button" onclick="closeModal('crsEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">&#10005;</button></div>
+    <form onsubmit="return false;">
+      <input type="hidden" id="crsLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="crsRevisionButtons" class="quotation-revision-buttons"></div></div>
+      <div class="crs-grid">
+        <div><label class="crs-label">Reference No</label><input id="crsReferenceNoInput" readonly class="crs-input" style="background:#F3F5F8"></div>
+        <div><label class="crs-label">Certificate Type</label><input value="BIS CRS" readonly class="crs-input" style="background:#F3F5F8"></div>
+        <div><label class="crs-label">Quotation Date</label><input id="crsQuotationDateInput" type="date" class="crs-input"></div>
+      </div>
+      <div class="crs-grid">
+        <div><label class="crs-label">Product Name</label><input id="crsProductNameInput" placeholder="Enter Product Name" class="crs-input"></div>
+        <div><label class="crs-label">Client Name</label><input id="crsClientNameInput" placeholder="Enter Client Name" class="crs-input"></div>
+        <div><label class="crs-label">Quantity</label><input id="crsQuantityInput" type="number" min="0" placeholder="Enter Quantity" class="crs-input"></div>
+      </div>
+      <div class="crs-grid">
+        <div><label class="crs-label">Subject</label><input id="crsSubjectInput" placeholder="Enter Subject Detail" class="crs-input"></div>
+        <div><label class="crs-label">Step 1 to 3</label><input id="crsStep1Input" placeholder="Enter Step 1 to 3" class="crs-input"></div>
+        <div><label class="crs-label">Step 4 to 7</label><input id="crsStep2Input" placeholder="Enter Step 4 to 7" class="crs-input"></div>
+      </div>
+      <div class="crs-grid"><div><label class="crs-label">Total Duration</label><input id="crsStep3Input" placeholder="Enter Total Duration" class="crs-input"></div></div>
+
+      <p class="crs-section">BIS CRS Fees</p>
+      <div class="crs-grid">
+        <div class="crs-card"><label class="crs-label">BIS Application Fees</label><select id="crsBisAppFeesInput" class="crs-select"><option value="1">First Test Report</option><option value="2">Second Test Report</option><option value="3">Custom</option></select><input id="crsBisCustomInput" placeholder="Enter custom fees" class="crs-input" style="display:none;margin-top:8px"></div>
+        <div class="crs-card"><label class="crs-label">Product Testing Fees</label><select id="crsProTestFeesInput" class="crs-select"><option value="1">First Test Report</option><option value="2">Second Test Report</option><option value="3">Custom</option></select><input id="crsProCustomInput" placeholder="Enter custom fees" class="crs-input" style="display:none;margin-top:8px"></div>
+        <div class="crs-card"><label class="crs-label">Currency (INR/USD)</label><label class="crs-check"><input type="checkbox" id="crsCurrencyUsdInput"> Show as USD</label><p class="crs-help">Default: INR. Enable this to show the quotation in USD.</p></div>
+      </div>
+      <div class="crs-grid">
+        <div><label class="crs-label">Application Fees</label><input id="crsApplicationFeeInput" placeholder="Enter Application Fees" class="crs-input"></div>
+        <div><label class="crs-label">Testing Fees</label><input id="crsTestingFeeInput" placeholder="Enter Testing Fees" class="crs-input"></div>
+        <div><label class="crs-label">Service Fees</label><input id="crsServiceFeeInput" placeholder="Enter Service Fees" class="crs-input"></div>
+      </div>
+      <div class="crs-card"><label class="crs-check"><input type="checkbox" id="crsLiaisoningApplicableInput"> Apply Liaisoning Fees</label><input id="crsLiaisoningFeeInput" placeholder="Enter Liaisoning Fees" class="crs-input"></div>
+      <div class="crs-footer"><button type="button" onclick="closeModal('crsEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold bg-white border border-black/10">Cancel</button><button type="button" onclick="saveCrsQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button></div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

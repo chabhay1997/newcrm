@@ -184,4 +184,190 @@
 
 </body>
 
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<header th:fragment="topbar" class="sticky top-0 z-30 pt-3 pb-4 px-8 shrink-0 bg-[#F3F6FB]">
+
+  <div class="topbar-pill relative h-14 flex items-center justify-between px-3 gap-4">
+
+    <div class="relative w-56 focus-within:w-80 shrink-0 ml-3 transition-[width] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+           width="13"
+           height="13"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="#6B87A8"
+           stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+
+      <input
+          type="text"
+          placeholder="Search..."
+          class="bg-white w-full h-8 pl-10 pr-3 rounded-full text-[12.5px] placeholder-[#6B87A8] text-[#17324F] focus:outline-none focus:ring-2 focus:ring-white/60">
+
+    </div>
+
+
+    <nav class="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
+
+      <a href="#" class="topnav-link active text-[13px] font-semibold">
+        AI Chat
+      </a>
+
+      <a href="#" class="topnav-link text-[13px] font-semibold">
+        Employee Chart
+      </a>
+
+      <a href="#" class="topnav-link text-[13px] font-semibold">
+        Analytics
+      </a>
+
+      <a href="#" class="topnav-link text-[13px] font-semibold">
+        Settings
+      </a>
+
+    </nav>
+
+
+    <div class="flex items-center gap-3 shrink-0">
+
+      <button
+          type="button"
+          class="w-8 h-8 rounded-full flex items-center justify-center relative bg-white hover:bg-white/90 transition">
+
+        <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#17324F"
+            stroke-width="2">
+
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+
+        </svg>
+
+        <span class="absolute top-1.5 right-2 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+
+      </button>
+
+
+      <div class="relative">
+
+        <button
+            type="button"
+            onclick="document.getElementById('profileMenu').classList.toggle('open')"
+            class="flex items-center gap-1.5">
+
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[12px] font-extrabold bg-gradient-to-br from-[#6D8CFF] to-[#8A5CF6]">
+            A
+          </div>
+
+          <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              stroke-width="2.5">
+
+            <path d="m6 9 6 6 6-6"/>
+
+          </svg>
+
+        </button>
+
+
+        <div
+            id="profileMenu"
+            class="profile-dropdown absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
+
+          <div class="px-3 py-2 border-b border-black/5">
+
+            <p class="text-[12px] font-semibold text-[#17324F] truncate">
+              Admin User
+            </p>
+
+            <p class="text-[10.5px] text-[#6B87A8] truncate">
+              admin@evtl.com
+            </p>
+
+          </div>
+
+
+          <a
+              href="#"
+              class="flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-[#3A4B63] hover:bg-[#F3F6FB] transition">
+
+            <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6B87A8"
+                stroke-width="2">
+
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+
+            </svg>
+
+            Profile
+
+          </a>
+
+
+          <div class="h-px bg-black/5"></div>
+
+
+          <!-- LOGOUT -->
+
+          <form
+              th:action="@{/logout}"
+              method="post"
+              style="margin: 0;">
+
+            <button
+                type="submit"
+                class="flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-rose-600 hover:bg-rose-50 transition w-full text-left">
+
+              <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <path d="M16 17l5-5-5-5"/>
+                <path d="M21 12H9"/>
+
+              </svg>
+
+              Logout
+
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
+</body>
+
 </html>
