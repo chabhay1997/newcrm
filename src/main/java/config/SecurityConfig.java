@@ -1,6 +1,7 @@
 package config;
 
 import service.CustomUserDetailsService;
+import service.LoginSuccessHandler;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +19,16 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final LoginSuccessHandler loginSuccessHandler;
 
 
     // Constructor Injection
     public SecurityConfig(
-            CustomUserDetailsService customUserDetailsService) {
+            CustomUserDetailsService customUserDetailsService,
+            LoginSuccessHandler loginSuccessHandler) {
 
         this.customUserDetailsService = customUserDetailsService;
+        this.loginSuccessHandler = loginSuccessHandler;
     }
 
 
@@ -115,10 +119,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
 
                 // Successful login
-                .defaultSuccessUrl(
-                        "/dashboard",
-                        true
-                )
+                .successHandler(loginSuccessHandler)
 
                 // Failed login
                 .failureUrl(

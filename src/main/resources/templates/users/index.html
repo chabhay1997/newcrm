@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Users</title>
+<link rel="stylesheet" th:href="@{/css/output.css}">
+<th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+<style>
+	#usersTable { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
+	#usersTableWrap { width: 100%; overflow-x: auto; border: 1px solid #D9DCE3; border-radius: 14px; background: #fff; }
+	#usersTable th, #usersTable td { font-size: 13px !important; }
+	#usersTable th { text-align: center; letter-spacing: .04em; border-right: 1px solid #D9DCE3; border-bottom: 2px solid #D9DCE3; }
+	#usersTable th:last-child, #usersTable td:last-child { border-right: none; }
+	#usersTable td { border-right: 1px solid #E4E7EE; border-bottom: 1px solid #E4E7EE; }
+	#usersTable tbody tr:last-child td { border-bottom: none; }
+	#usersTable tbody tr:nth-child(even) { background: #FAFBFC; }
+	#usersTable tbody tr { transition: box-shadow .22s ease, transform .22s ease; }
+	#usersTable tbody tr:hover { position: relative; z-index: 5; transform: translateY(-2px); box-shadow: 0 18px 34px rgba(31, 41, 55, .16); }
+	.users-control { height: 36px; border-radius: 9px; border: 1px solid rgba(0, 0, 0, .08); box-shadow: 0 5px 12px rgba(31, 41, 55, .12); font-size: 12px; font-weight: 700; white-space: nowrap; padding:8px;}
+	.users-control:focus { outline: none; box-shadow: 0 0 0 2px rgba(91, 141, 239, .25), 0 5px 12px rgba(31, 41, 55, .12); }
+	#exportUsersButton { min-width: 66px; padding-left: 12px; padding-right: 12px; }
+	.user-name-form { display: flex; align-items: center; gap: 4px; }
+	.user-name-input { width: 100%; min-width: 0; border: 1px solid transparent; border-radius: 6px; background: transparent; padding: 5px 6px; color: #3A4B63; font-size: 12.5px; font-weight: 600; }
+	.user-name-input:hover { background: #F7F9FC; }
+	.user-name-input:focus { outline: none; border-color: #8A5CF6; background: #fff; box-shadow: 0 0 0 2px rgba(138, 92, 246, .12); }
+	.user-name-save { display: inline-flex; opacity: 0; pointer-events: none; border-radius: 6px; padding: 5px; color: #269B61; transition: opacity .15s ease, background .15s ease; }
+	.user-name-form:focus-within .user-name-save { opacity: 1; pointer-events: auto; }
+	.user-name-save:hover { background: #E7F9F0; }
+	.delete-user-button { display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; padding: 6px; color: #D14343; transition: background .15s ease, color .15s ease; }
+	.delete-user-button:hover { background: #FDEBEB; color: #B42323; }
+	.user-name-link { color: #0D6EFD !important; text-decoration: none; }
+	.user-name-link:hover { color: #5B8DEF !important; text-decoration: underline; }
+	.status-select { border: 1px solid transparent; border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
+	.status-select:focus { outline: none; border-color: #8A5CF6; }
+	.status-active { background: #E7F9F0; color: #1F9D5C; }
+	.status-inactive { background: #FDEBEB; color: #D14343; }
+	.role-badge { display: inline-block; border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 700; }
+	.role-color-0 { background: #E5E7EB; color: #374151; }
+	.role-color-1 { background: #DBEAFE; color: #1D4ED8; }
+	.role-color-2 { background: #DCFCE7; color: #15803D; }
+	.role-color-3 { background: #FEF3C7; color: #B45309; }
+	.role-color-4 { background: #FCE7F3; color: #BE185D; }
+	.role-color-5 { background: #EDE9FE; color: #6D28D9; }
+	.role-color-6 { background: #CFFAFE; color: #0E7490; }
+	.role-color-7 { background: #FFEDD5; color: #C2410C; }
+	.table-black-cell { color: #000 !important; }
+	.status-updated-row { background: #FFFBEA !important; box-shadow: inset 4px 0 0 #F59E0B; }
+	.user-name-link { font-size: 14.5px; }
+	.action-header-icon { display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+	.users-pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+	.users-pagination-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+	.users-page-button { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 10px; background: #fff; color: #3A4B63; font-size: 13px; font-weight: 600; box-shadow: 0 1px 2px rgba(31, 41, 55, .04); }
+	.users-page-button:hover { border-color: #BFC7D8; background: #F8FAFD; }
+	.users-page-button.active { border-color: #7561F5; background: linear-gradient(135deg, #8068F6, #6955ED); color: #fff; box-shadow: 0 5px 12px rgba(105, 85, 237, .24); }
+	.users-page-button.disabled { color: #B9C0CC; pointer-events: none; background: #fff; }
+	.users-page-jump { display: flex; align-items: center; gap: 8px; }
+	.users-page-input { width: 110px; height: 38px; border: 1px solid #E1E4EA; border-radius: 10px; padding: 0 12px; color: #3A4B63; font-size: 13px; }
+	.users-page-input:focus { outline: none; border-color: #7561F5; box-shadow: 0 0 0 3px rgba(117, 97, 245, .12); }
+	.users-page-go { height: 38px; border: 0; border-radius: 10px; padding: 0 14px; background: linear-gradient(135deg, #8068F6, #6955ED); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 5px 12px rgba(105, 85, 237, .24); }
+	@media (max-width: 900px) { #usersTable { min-width: 760px; table-layout: auto; } }
+</style>
+</head>
+
+<body>
+	<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+	<div class="min-h-screen flex flex-col pl-[6.5rem]">
+		<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+		<main class="flex-1 px-8 pt-3 pb-8 space-y-5">
+	
+			<div class="glass rounded-2xl p-5">
+				<div th:if="${temporaryStatusUpdate}" id="statusUpdateNotice" class="mb-4 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-[13px] font-semibold text-[#92400E]">
+					User is inactive. You have 10 seconds to change the status back to Active.
+				</div>
+				<form id="usersFilterForm" method="get" th:action="@{/users/index}" class="flex items-center justify-between mb-8 flex-wrap gap-3">
+					<p class="text-[15px] font-bold text-[#171923]">Users List</p>
+					<div class="flex items-center gap-3 flex-wrap">
+						<a th:if="${authRole}" th:href="@{/users/export(search=${search},status=${status})}" class="users-control inline-flex items-center text-white" style="background:#55BE70;">Excel</a>
+						<select id="usersRowsSelect" name="size" class="users-control px-4 text-white" style="background:#698BC4;" onchange="this.form.submit()">
+							<option value="25" th:selected="${size == '25'}">Show 25 rows</option>
+							<option value="50" th:selected="${size == '50'}">Show 50 rows</option>
+							<option value="100" th:selected="${size == '100'}">Show 100 rows</option>
+							<option value="all" th:selected="${size == 'all'}">Show all rows</option>
+						</select>
+						<select id="usersStatusFilter" name="status" aria-label="Filter users by status" class="users-control px-4 text-[#273142] bg-white" onchange="this.form.submit()">
+							<option value="all" th:selected="${status == 'all'}">All Users</option>
+							<option value="active" th:selected="${status == 'active'}">Active Users</option>
+							<option value="inactive" th:selected="${status == 'inactive'}">Inactive Users</option>
+						</select>
+						<div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-black/10 bg-white focus-within:border-[#8A5CF6] focus-within:ring-2 focus-within:ring-[#8A5CF6]/30">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+							<input id="usersSearchInput" name="search" th:value="${search}" type="text" placeholder="Search users..." class="text-[12.5px] text-[#171923] focus:outline-none bg-transparent w-40">
+						</div>
+						<a th:href="@{/users/index(status='active',size=25,page=0)}" class="users-control inline-flex items-center bg-white px-3 text-[#3A4B63] hover:bg-[#F8FAFD]">Clear Filters</a>
+						<input type="hidden" name="page" value="0">
+							<a th:if="${authRole}" th:href="@{/users/create}" class="users-control inline-flex items-center text-white bg-black"> Create  New User</a>
+					</div>
+				</form>
+
+				<div id="usersTableWrap">
+					<table id="usersTable" class="w-full text-left">
+						<thead>
+							<tr class="bg-[#5B8DEF]">
+								<th class="py-5 px-2 font-bold text-white w-[5%]">Sn</th>
+								<th class="py-5 px-3 font-bold text-white w-[20%]">Name</th>
+								<th class="py-5 px-3 font-bold text-white w-[14%]">Role</th>
+								<th class="py-5 px-3 font-bold text-white w-[22%]">Email</th>
+								<th class="py-5 px-3 font-bold text-white w-[14%]">Phone</th>
+								<th class="py-5 px-3 font-bold text-white w-[12%]">Profile</th>
+								<th class="py-5 px-3 font-bold text-white w-[16%]">Last Login</th>
+								<th class="py-5 px-3 font-bold text-white w-[15%]">Status</th>
+								<th th:if="${authRole}" class="py-5 px-2 font-bold text-white w-[5%]"><span class="action-header-icon" title="Delete user"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></span></th>
+							</tr>
+						</thead>
+						<tbody id="usersTableBody">
+							<tr th:each="user, userStat : ${users}" class="user-table-row" th:classappend="${highlightId == user.id.toString()} ? ' status-updated-row'" th:attr="data-status=${user.status != null and user.status == 1 ? 'active' : 'inactive'}">
+								<td class="py-4 px-2 text-center font-semibold table-black-cell" th:text="${serialOffset + userStat.count}">1</td>
+								<td class="py-4 px-3">
+									<div class="flex flex-col gap-1">
+											<div class="flex flex-col items-start gap-1">
+											<a th:if="${authRole}" th:href="@{/users/{id}/edit(id=${user.id})}" class="user-name-link font-semibold" th:text="${user.name}">User Name</a>
+											<span th:unless="${authRole}" class="user-name-link font-semibold" th:text="${user.name}">User Name</span>
+											<a th:if="${user.latitude != null and user.longitude != null}" th:href="@{'https://www.google.com/maps?q=' + ${user.latitude} + ',' + ${user.longitude}}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 rounded-full bg-[#EAF2FF] px-2 py-0.5 text-[10px] font-bold text-[#3057D5] no-underline hover:bg-[#DFEAFF]" title="View live location on Google Maps">
+												<span aria-hidden="true">📍</span> Live Location
+											</a>
+										</div>
+									</div>
+								</td>
+								<td class="py-4 px-3 text-[12px] table-black-cell">
+									<span class="role-badge" th:classappend="${user.role != null ? 'role-color-' + (user.role.id % 8) : 'role-color-0'}" th:text="${user.role != null ? user.role.name : '-'}">-</span>
+								</td>
+								<td class="py-4 px-3 text-[12px] table-black-cell truncate" th:text="${user.email ?: '-'}">-</td>
+								<td class="py-4 px-3 text-[12px] table-black-cell" th:text="${user.phone ?: '-'}">-</td>
+								<td class="py-4 px-3 text-[12px] table-black-cell" th:text="${user.profile ?: '-'}">-</td>
+								<td class="py-4 px-3 text-[12px] table-black-cell" th:text="${user.lastLogin != null ? #temporals.format(user.lastLogin, 'MMM dd, yyyy HH:mm') : '-'}">-</td>
+								<td class="py-4 px-3 text-center table-black-cell">
+									<form th:if="${authRole}" method="post" th:action="@{/users/{id}/status(id=${user.id})}" class="inline-flex">
+										<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+										<input type="hidden" name="search" th:value="${search}">
+										<input type="hidden" name="filterStatus" th:value="${status}">
+										<input type="hidden" name="size" th:value="${size}">
+										<input type="hidden" name="page" th:value="${currentPage}">
+										<select name="status" class="status-select" th:classappend="${user.status != null and user.status == 1} ? 'status-active' : 'status-inactive'" onchange="this.form.submit()" aria-label="Change user status">
+											<option value="1" th:selected="${user.status != null and user.status == 1}">Active</option>
+											<option value="0" th:selected="${user.status == null or user.status != 1}">Inactive</option>
+										</select>
+									</form>
+									<span th:unless="${authRole}" th:text="${user.status != null and user.status == 1 ? 'Active' : 'Inactive'}" th:classappend="${user.status != null and user.status == 1} ? 'status-active' : 'status-inactive'" class="status-select">Active</span>
+								</td>
+								<td th:if="${authRole}" class="py-4 px-2 text-center">
+									<form th:if="${authRole}" method="post" th:action="@{/users/{id}/delete(id=${user.id})}" onsubmit="return confirm('Delete this user?');" class="inline-flex">
+										<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+										<input type="hidden" name="search" th:value="${search}">
+										<input type="hidden" name="status" th:value="${status}">
+										<input type="hidden" name="size" th:value="${size}">
+										<input type="hidden" name="page" th:value="${currentPage}">
+										<button type="submit" title="Delete user" aria-label="Delete user" class="delete-user-button">
+											<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${users == null or #lists.isEmpty(users)}">
+								<td th:attr="colspan=${authRole ? 9 : 8}" class="py-6 text-center text-[12.5px] text-[#8C8FA3]">No users found.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="users-pagination mt-4 pt-4 border-t border-black/5">
+					<span class="text-[13px] text-[#3A4B63]" th:text="${'Showing ' + showingFrom + ' to ' + showingTo + ' of ' + totalUsers + ' entries'}">Showing 0 entries</span>
+					<div class="users-pagination-controls" th:if="${totalPages > 0}">
+						<form method="get" th:action="@{/users/index}" class="users-page-jump">
+							<input type="hidden" name="search" th:value="${search}">
+							<input type="hidden" name="status" th:value="${status}">
+							<input type="hidden" name="size" th:value="${size}">
+							<input class="users-page-input" type="number" name="pageNumber" min="1" th:max="${totalPages}" th:value="${currentPage + 1}" placeholder="Go to..." aria-label="Go to page">
+							<button type="submit" class="users-page-go">Go</button>
+						</form>
+						<a th:href="@{/users/index(search=${search},status=${status},size=${size},page=${currentPage - 1})}" th:classappend="${currentPage == 0} ? ' disabled' : ''" class="users-page-button">Previous</a>
+						<a th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}" th:if="${pageNumber < 5}"
+						   th:href="@{/users/index(search=${search},status=${status},size=${size},page=${pageNumber})}"
+						   th:text="${pageNumber + 1}" th:classappend="${pageNumber == currentPage} ? ' active' : ''" class="users-page-button">1</a>
+						<a th:href="@{/users/index(search=${search},status=${status},size=${size},page=${currentPage + 1})}" th:classappend="${currentPage + 1 >= totalPages} ? ' disabled' : ''" class="users-page-button">Next</a>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+
+</body>
+
+<script>
+	(function () {
+		const searchInput = document.getElementById('usersSearchInput');
+		const filterForm = document.getElementById('usersFilterForm');
+		const statusUpdateNotice = document.getElementById('statusUpdateNotice');
+		let searchTimer;
+
+		if (searchInput && filterForm) {
+			searchInput.addEventListener('input', function () {
+				clearTimeout(searchTimer);
+				searchTimer = setTimeout(function () {
+					filterForm.querySelector('input[name="page"]').value = '0';
+					filterForm.submit();
+				}, 350);
+			});
+		}
+
+		if (statusUpdateNotice) {
+			setTimeout(function () {
+				const url = new URL(window.location.href);
+								url.searchParams.set('status', 'active');
+				url.searchParams.set('page', '0');
+				url.searchParams.delete('highlightId');
+				window.location.href = url.toString();
+			}, 10000);
+		}
+	}());
+</script>
+</html>
+ 
