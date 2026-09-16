@@ -31,6 +31,14 @@ import model.BisCrsQuotation;
 import repository.quotations.BisCrsQuotationRepository;
 import model.CosmeticsQuotation;
 import repository.quotations.CosmeticsQuotationRepository;
+import model.BisWpcQuotation;
+import repository.quotations.BisWpcQuotationRepository;
+import model.BisLmpcQuotation;
+import repository.quotations.BisLmpcQuotationRepository;
+import model.BisDpiitQuotation;
+import repository.quotations.BisDpiitQuotationRepository;
+import model.DrugQuotation;
+import repository.quotations.DrugQuotationRepository;
 import service.quotations.pdf.IsiQuotationPdfService;
 
 @Controller
@@ -42,11 +50,17 @@ public class LeadsController {
     private final CdscoQuotationRepository cdscoQuotationRepository;
     private final BisCrsQuotationRepository bisCrsQuotationRepository;
     private final CosmeticsQuotationRepository cosmeticsQuotationRepository;
+    private final BisWpcQuotationRepository bisWpcQuotationRepository;
+    private final BisLmpcQuotationRepository bisLmpcQuotationRepository;
+    private final BisDpiitQuotationRepository bisDpiitQuotationRepository;
+    private final DrugQuotationRepository drugQuotationRepository;
     private final IsiQuotationPdfService isiQuotationPdfService;
 
     public LeadsController(LeadRepository leadRepository, BisIsiQuotationRepository bisIsiQuotationRepository,
             BisFmcsQuotationRepository bisFmcsQuotationRepository, CdscoQuotationRepository cdscoQuotationRepository,
             BisCrsQuotationRepository bisCrsQuotationRepository, CosmeticsQuotationRepository cosmeticsQuotationRepository,
+            BisWpcQuotationRepository bisWpcQuotationRepository, BisLmpcQuotationRepository bisLmpcQuotationRepository,
+            BisDpiitQuotationRepository bisDpiitQuotationRepository, DrugQuotationRepository drugQuotationRepository,
             IsiQuotationPdfService isiQuotationPdfService) {
         this.leadRepository = leadRepository;
         this.bisIsiQuotationRepository = bisIsiQuotationRepository;
@@ -54,6 +68,10 @@ public class LeadsController {
         this.cdscoQuotationRepository = cdscoQuotationRepository;
         this.bisCrsQuotationRepository = bisCrsQuotationRepository;
         this.cosmeticsQuotationRepository = cosmeticsQuotationRepository;
+        this.bisWpcQuotationRepository = bisWpcQuotationRepository;
+        this.bisLmpcQuotationRepository = bisLmpcQuotationRepository;
+        this.bisDpiitQuotationRepository = bisDpiitQuotationRepository;
+        this.drugQuotationRepository = drugQuotationRepository;
         this.isiQuotationPdfService = isiQuotationPdfService;
     }
 
@@ -373,6 +391,174 @@ public class LeadsController {
         response.put("success", true);
         response.put("quotation", quotation);
         response.put("quotations", cosmeticsQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        return response;
+    }
+
+    @GetMapping("/leads/{id}/wpc-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> getWpcQuotation(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestParam(required = false) Long revisionId) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        response.put("success", true);
+        response.put("lead", lead);
+        response.put("quotations", bisWpcQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        response.put("quotation", revisionId == null ? bisWpcQuotationRepository.findFirstByLeadIdOrderByIdDesc(id).orElse(null) : bisWpcQuotationRepository.findById(revisionId).filter(q -> id.equals(q.leadId)).orElse(null));
+        return response;
+    }
+
+    @PostMapping("/leads/{id}/wpc-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> saveWpcQuotation(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestBody BisWpcQuotation quotation) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        quotation.leadId = id;
+        if (quotation.id != null && bisWpcQuotationRepository.findById(quotation.id).filter(q -> id.equals(q.leadId)).isEmpty()) {
+            response.put("success", false); response.put("message", "Quotation revision not found for this lead"); return response;
+        }
+        if (quotation.id == null) quotation.referenceNo = "REF-" + id + "-R" + (bisWpcQuotationRepository.findByLeadIdOrderByIdAsc(id).size() + 1);
+        bisWpcQuotationRepository.save(quotation);
+        response.put("success", true);
+        response.put("quotation", quotation);
+        response.put("quotations", bisWpcQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        return response;
+    }
+
+        @GetMapping("/leads/{id}/lmpc-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> getLmpcQuotation(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestParam(required = false) Long revisionId) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        response.put("success", true);
+        response.put("lead", lead);
+        response.put("quotations", bisLmpcQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        response.put("quotation", revisionId == null ? bisLmpcQuotationRepository.findFirstByLeadIdOrderByIdDesc(id).orElse(null) : bisLmpcQuotationRepository.findById(revisionId).filter(q -> id.equals(q.leadId)).orElse(null));
+        return response;
+    }
+
+    @PostMapping("/leads/{id}/lmpc-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> saveLmpcQuotation(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestBody BisLmpcQuotation quotation) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        quotation.leadId = id;
+        if (quotation.id != null && bisLmpcQuotationRepository.findById(quotation.id).filter(q -> id.equals(q.leadId)).isEmpty()) {
+            response.put("success", false); response.put("message", "Quotation revision not found for this lead"); return response;
+        }
+        if (quotation.id == null) quotation.referenceNo = "REF-" + id + "-R" + (bisLmpcQuotationRepository.findByLeadIdOrderByIdAsc(id).size() + 1);
+        bisLmpcQuotationRepository.save(quotation);
+        response.put("success", true);
+        response.put("quotation", quotation);
+        response.put("quotations", bisLmpcQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        return response;
+    }
+
+    @GetMapping("/leads/{id}/dpiit-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> getDpiitQuotation(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestParam(required = false) Long revisionId) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        response.put("success", true);
+        response.put("lead", lead);
+        response.put("quotations", bisDpiitQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        response.put("quotation", revisionId == null ? bisDpiitQuotationRepository.findFirstByLeadIdOrderByIdDesc(id).orElse(null) : bisDpiitQuotationRepository.findById(revisionId).filter(q -> id.equals(q.leadId)).orElse(null));
+        return response;
+    }
+
+    @PostMapping("/leads/{id}/dpiit-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> saveDpiitQuotation(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestBody BisDpiitQuotation quotation) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        quotation.leadId = id;
+        if (quotation.id != null && bisDpiitQuotationRepository.findById(quotation.id).filter(q -> id.equals(q.leadId)).isEmpty()) {
+            response.put("success", false); response.put("message", "Quotation revision not found for this lead"); return response;
+        }
+        if (quotation.id == null) quotation.referenceNo = "REF-" + id + "-R" + (bisDpiitQuotationRepository.findByLeadIdOrderByIdAsc(id).size() + 1);
+        bisDpiitQuotationRepository.save(quotation);
+        response.put("success", true);
+        response.put("quotation", quotation);
+        response.put("quotations", bisDpiitQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        return response;
+    }
+
+    @GetMapping("/leads/{id}/drug-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> getDrugQuotation(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestParam(required = false) Long revisionId) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        response.put("success", true);
+        response.put("lead", lead);
+        response.put("quotations", drugQuotationRepository.findByLeadIdOrderByIdAsc(id));
+        response.put("quotation", revisionId == null ? drugQuotationRepository.findFirstByLeadIdOrderByIdDesc(id).orElse(null) : drugQuotationRepository.findById(revisionId).filter(q -> id.equals(q.leadId)).orElse(null));
+        return response;
+    }
+
+    @PostMapping("/leads/{id}/drug-quotation")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> saveDrugQuotation(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestBody DrugQuotation quotation) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Lead lead = leadRepository.findById(id).orElse(null);
+        if (lead == null) {
+            response.put("success", false);
+            response.put("message", "Lead not found");
+            return response;
+        }
+        quotation.leadId = id;
+        if (quotation.id != null && drugQuotationRepository.findById(quotation.id).filter(q -> id.equals(q.leadId)).isEmpty()) {
+            response.put("success", false); response.put("message", "Quotation revision not found for this lead"); return response;
+        }
+        if (quotation.id == null) quotation.referenceNo = "REF-" + id + "-R" + (drugQuotationRepository.findByLeadIdOrderByIdAsc(id).size() + 1);
+        drugQuotationRepository.save(quotation);
+        response.put("success", true);
+        response.put("quotation", quotation);
+        response.put("quotations", drugQuotationRepository.findByLeadIdOrderByIdAsc(id));
         return response;
     }
 

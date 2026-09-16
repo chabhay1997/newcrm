@@ -94,6 +94,16 @@ public class LeadAssistantService {
             return response;
         }
 
+        if (isLatestLeadQuestion(message)) {
+            Map<String, Object> latestLead = findLatestLead(leadSnapshot);
+            if (latestLead != null) {
+                String reply = describeLatestLead(latestLead);
+                response.put("reply", reply);
+                saveMessage(sessionId, "assistant", reply, "groq", null, null);
+                return response;
+            }
+        }
+
         try {
             String reply = callGroq(message, leadSnapshot);
             response.put("reply", reply);
@@ -646,6 +656,15 @@ public class LeadAssistantService {
         context.put("totalLeadCount", leadSnapshot.size());
         context.put("statusCounts", statusCounts);
         context.put("sourceCounts", sourceCounts);
+
+        if (isLatestLeadQuestion(question)) {
+            Map<String, Object> latestLead = findLatestLead(leadSnapshot);
+            if (latestLead != null) {
+                context.put("latestLead", detailedGroqLead(latestLead));
+                context.put("latestLeadNote", "This is the most recently created lead, determined by creation timestamp.");
+            }
+        }
+
         if (!matchingLeads.isEmpty()) {
             context.put("matchedLeads", matchingLeads);
             context.put("matchNote", "These records were selected because they match the user's question.");
@@ -655,6 +674,41 @@ public class LeadAssistantService {
                     + " compact lead records are included; use totals for overall counts.");
         }
         return context;
+    }
+
+    /** True when the question is asking for the most recently added lead. */
+    private boolean isLatestLeadQuestion(String question) {
+        if (question == null) return false;
+        String normalized = question.toLowerCase();
+        return normalized.matches(".*\\b(latest|newest|most recent|last added|recently added|just added|new lead)\\b.*");
+    }
+
+    /** Finds the lead with the most recent creation timestamp (falls back to leadDate if missing). */
+    private Map<String, Object> findLatestLead(List<Map<String, Object>> leads) {
+        Map<String, Object> latest = null;
+        Comparable latestKey = null;
+        for (Map<String, Object> lead : leads) {
+            Object createdAt = lead.get("createdAt");
+            Object key = createdAt != null ? createdAt : lead.get("leadDate");
+            if (!(key instanceof Comparable comparableKey)) continue;
+            if (latestKey == null || comparableKey.compareTo(latestKey) > 0) {
+                latestKey = comparableKey;
+                latest = lead;
+            }
+        }
+        return latest;
+    }
+
+    private String describeLatestLead(Map<String, Object> lead) {
+        Object created = lead.get("createdAt") != null ? lead.get("createdAt") : lead.get("leadDate");
+        return "The latest lead is #" + lead.get("id") + " "
+                + valueOrFallback(lead.get("company"), lead.get("name"))
+                + " — " + valueOrFallback(lead.get("name"), "No contact name")
+                + ", " + valueOrFallback(lead.get("phone"), "No phone")
+                + ", " + valueOrFallback(lead.get("email"), "No email")
+                + ", status: " + lead.get("status")
+                + ", source: " + lead.get("source")
+                + ", added on " + created + ".";
     }
 
     /** Retrieves the records relevant to a specific lead question before calling Groq. */
@@ -686,7 +740,7 @@ public class LeadAssistantService {
     private Map<String, Object> detailedGroqLead(Map<String, Object> lead) {
         Map<String, Object> result = new LinkedHashMap<>();
         for (String field : List.of("name", "company", "email", "phone", "companyMobile", "officialEmail",
-                "status", "source", "category", "product", "requirements", "remarks", "address", "leadDate", "amount")) {
+                "status", "source", "category", "product", "requirements", "remarks", "address", "leadDate", "createdAt", "amount")) {
             Object value = lead.get(field);
             result.put(field, value instanceof String text ? text.length() > 500 ? text.substring(0, 500) + "…" : text : value);
         }

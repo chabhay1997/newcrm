@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="drug-panel-script" th:inline="none">
+  let drugEditingRevisionId = null;
+
+  function drugAddExtraRow(particular, amount, currency) {
+    const template = document.getElementById('drugExtraRowTemplate');
+    const container = document.getElementById('drugExtraRowsContainer');
+    if (!template || !container) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    if (particular !== undefined) row.querySelector('.drug-extra-particular').value = particular || '';
+    if (amount !== undefined) row.querySelector('.drug-extra-amount').value = amount || '';
+    const rowKey = 'drugExtraCurrency_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    row.querySelectorAll('input[type="radio"]').forEach(function (radio) { radio.name = rowKey; });
+    const selectedCurrency = currency === 'USD' ? 'USD' : 'INR';
+    row.querySelector('input[value="' + selectedCurrency + '"]').checked = true;
+    container.appendChild(row);
+  }
+
+  function drugAddTimelineRow(text) {
+    const template = document.getElementById('drugTimelineRowTemplate');
+    const container = document.getElementById('drugTimelineContainer');
+    if (!template || !container) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    if (text !== undefined) row.querySelector('.drug-timeline-text').value = text || '';
+    container.appendChild(row);
+  }
+
+  function drugAddDocumentRow(text) {
+    const template = document.getElementById('drugDocumentRowTemplate');
+    const container = document.getElementById('drugDocumentsContainer');
+    if (!template || !container) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    if (text !== undefined) row.querySelector('.drug-document-text').value = text || '';
+    container.appendChild(row);
+  }
+
+  const drugDefaultTimeline = [
+    'Documentation Preparation: 1-2 Weeks',
+    'Application Processing & Approval: 4-6 Weeks',
+    'Total Expected Timeline: 45-90 Working Days'
+  ];
+
+  const drugDefaultDocuments = [
+    'Firm constitution document',
+    'Details of proprietor/partner/Director/Trustee etc.',
+    'ID proof (Aadhar/Passport/Driving License/Election Id)',
+    'Rent/Lease agreement',
+    'Premises ownership documents',
+    'NOC',
+    'Electricity bill of the premises',
+    'Plan layout',
+    'Fee Challan',
+    'Appointment letter of the Competent Person',
+    'Legal Form',
+    'Acceptance Letter of the Competent Person',
+    'Residence proof of the Competent Person',
+    'Educational qualification of the Competent Person',
+    'Experience certificate of the Competent Person'
+  ];
+
+  function openDrugEditPanel(leadId, quotationType, companyName, revisionId) {
+    if ((quotationType || '').trim().toLowerCase() !== 'drug quotation') return;
+    document.getElementById('drugLeadIdInput').value = leadId;
+    drugEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('drugSaveRevisionButton', revisionId);
+    document.getElementById('drugQuotationForm').reset();
+    document.getElementById('drugExtraRowsContainer').innerHTML = '';
+    document.getElementById('drugTimelineContainer').innerHTML = '';
+    document.getElementById('drugDocumentsContainer').innerHTML = '';
+    document.getElementById('drugCommercialAlias1').value = 'Drug Wholesale License';
+    document.getElementById('drugCommercialAlias2').value = 'Government Fee';
+    document.getElementById('drugCommercialAlias3').value = 'Total Cost + GST (18%)';
+    document.getElementById('drugReferenceNoInput').value = 'REF-' + leadId;
+    if (!document.getElementById('drugQuotationDateInput').value) {
+      document.getElementById('drugQuotationDateInput').value = new Date().toISOString().slice(0, 10);
+    }
+    openModal('drugEditModal');
+    loadDrugQuotation(leadId, companyName, revisionId);
+  }
+
+  function setDrugFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value != null ? value : '';
+  }
+
+  function setDrugCurrency(rowNum, currency) {
+    const val = currency === 'USD' ? 'USD' : 'INR';
+    const el = document.getElementById('drugCommercialCurrency' + rowNum + '_' + (val === 'USD' ? 'usd' : 'inr'));
+    if (el) el.checked = true;
+  }
+
+  function getDrugCurrency(rowNum) {
+    const usd = document.getElementById('drugCommercialCurrency' + rowNum + '_usd');
+    return (usd && usd.checked) ? 'USD' : 'INR';
+  }
+
+  function renderDrugRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('drugRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      button.textContent = 'R' + (index + 1);
+      button.onclick = function (event) {
+        event.preventDefault(); event.stopPropagation();
+        closeModal('drugEditModal');
+        setTimeout(function () { openDrugEditPanel(leadId, 'Drug Quotation', '', item.id); }, 50);
+      };
+      box.appendChild(button);
+    });
+  }
+
+  function loadDrugQuotation(leadId, companyName, revisionId) {
+    fetch('/leads/' + leadId + '/drug-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) return;
+        const quotation = data.quotation || {};
+        const lead = data.lead || {};
+        if (revisionId) drugEditingRevisionId = quotation.id || null;
+        renderDrugRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+
+        document.getElementById('drugExtraRowsContainer').innerHTML = '';
+        document.getElementById('drugTimelineContainer').innerHTML = '';
+        document.getElementById('drugDocumentsContainer').innerHTML = '';
+
+        if (!revisionId) {
+          setDrugFieldValue('drugClientNameInput', companyName || lead.companyName || '');
+          drugDefaultTimeline.forEach(function (t) { drugAddTimelineRow(t); });
+          drugDefaultDocuments.forEach(function (d) { drugAddDocumentRow(d); });
+          return;
+        }
+
+        if (!quotation.id) {
+          setDrugFieldValue('drugClientNameInput', companyName || lead.companyName || '');
+          drugDefaultTimeline.forEach(function (t) { drugAddTimelineRow(t); });
+          drugDefaultDocuments.forEach(function (d) { drugAddDocumentRow(d); });
+          return;
+        }
+
+        setDrugFieldValue('drugReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
+        setDrugFieldValue('drugQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
+        setDrugFieldValue('drugClientNameInput', quotation.clientName || companyName || lead.companyName || '');
+        setDrugFieldValue('drugProductNameInput', quotation.productName || '');
+        setDrugFieldValue('drugCategoryClassInput', quotation.productCategoryClass || '');
+        setDrugFieldValue('drugCertificateNameInput', quotation.certificateName || '');
+        setDrugFieldValue('drugManufacturingLocationInput', quotation.manufacturingLocation || '');
+        setDrugFieldValue('drugProductModelsInput', quotation.productModels || '');
+
+        setDrugFieldValue('drugCommercialAlias1', quotation.commercialAlias1 || 'Drug Wholesale License');
+        setDrugFieldValue('drugCommercialValue1', quotation.commercialValue1 || '');
+        setDrugCurrency(1, quotation.commercialCurrency1);
+        setDrugFieldValue('drugCommercialAlias2', quotation.commercialAlias2 || 'Government Fee');
+        setDrugFieldValue('drugCommercialValue2', quotation.commercialValue2 || '');
+        setDrugCurrency(2, quotation.commercialCurrency2);
+        setDrugFieldValue('drugCommercialAlias3', quotation.commercialAlias3 || 'Total Cost + GST (18%)');
+        setDrugFieldValue('drugCommercialValue3', quotation.commercialValue3 || '');
+
+        let extraRows = [];
+        try { extraRows = quotation.extraRowsJson ? JSON.parse(quotation.extraRowsJson) : []; } catch (e) { extraRows = []; }
+        extraRows.forEach(function (row) { drugAddExtraRow(row.particular, row.amount, row.currency); });
+
+        let timelineItems = [];
+        try { timelineItems = quotation.timelineItemsJson ? JSON.parse(quotation.timelineItemsJson) : []; } catch (e) { timelineItems = []; }
+        (timelineItems.length ? timelineItems : drugDefaultTimeline).forEach(function (t) { drugAddTimelineRow(t); });
+
+        let documents = [];
+        try { documents = quotation.requiredDocumentsJson ? JSON.parse(quotation.requiredDocumentsJson) : []; } catch (e) { documents = []; }
+        (documents.length ? documents : drugDefaultDocuments).forEach(function (d) { drugAddDocumentRow(d); });
+      })
+      .catch(function () {
+        setDrugFieldValue('drugClientNameInput', companyName || '');
+        drugDefaultTimeline.forEach(function (t) { drugAddTimelineRow(t); });
+        drugDefaultDocuments.forEach(function (d) { drugAddDocumentRow(d); });
+      });
+  }
+
+  function collectDrugExtraRows() {
+    const rows = document.querySelectorAll('#drugExtraRowsContainer .drug-extra-row');
+    const items = [];
+    rows.forEach(function (row) {
+      const particular = row.querySelector('.drug-extra-particular').value;
+      const amount = row.querySelector('.drug-extra-amount').value;
+      const currency = row.querySelector('input[type="radio"]:checked')?.value || 'INR';
+      if (particular || amount) items.push({ particular: particular, amount: amount, currency: currency });
+    });
+    return items;
+  }
+
+  function collectDrugTimeline() {
+    const items = [];
+    document.querySelectorAll('#drugTimelineContainer .drug-timeline-text').forEach(function (input) {
+      if (input.value.trim()) items.push(input.value.trim());
+    });
+    return items;
+  }
+
+  function collectDrugDocuments() {
+    const items = [];
+    document.querySelectorAll('#drugDocumentsContainer .drug-document-text').forEach(function (input) {
+      if (input.value.trim()) items.push(input.value.trim());
+    });
+    return items;
+  }
+
+  function saveDrugQuotation() {
+    const leadId = document.getElementById('drugLeadIdInput').value;
+    if (!leadId) return;
+
+    const payload = {
+      id: drugEditingRevisionId,
+      referenceNo: document.getElementById('drugReferenceNoInput').value,
+      quotationDate: document.getElementById('drugQuotationDateInput').value || null,
+      clientName: document.getElementById('drugClientNameInput').value,
+      productName: document.getElementById('drugProductNameInput').value,
+      productCategoryClass: document.getElementById('drugCategoryClassInput').value,
+      certificateName: document.getElementById('drugCertificateNameInput').value,
+      manufacturingLocation: document.getElementById('drugManufacturingLocationInput').value,
+      productModels: document.getElementById('drugProductModelsInput').value,
+      commercialAlias1: document.getElementById('drugCommercialAlias1').value,
+      commercialValue1: document.getElementById('drugCommercialValue1').value,
+      commercialCurrency1: getDrugCurrency(1),
+      commercialAlias2: document.getElementById('drugCommercialAlias2').value,
+      commercialValue2: document.getElementById('drugCommercialValue2').value,
+      commercialCurrency2: getDrugCurrency(2),
+      commercialAlias3: document.getElementById('drugCommercialAlias3').value,
+      commercialValue3: document.getElementById('drugCommercialValue3').value,
+      extraRowsJson: JSON.stringify(collectDrugExtraRows()),
+      timelineItemsJson: JSON.stringify(collectDrugTimeline()),
+      requiredDocumentsJson: JSON.stringify(collectDrugDocuments())
+    };
+
+    fetch('/leads/' + leadId + '/drug-quotation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [document.querySelector('meta[name="_csrf_header"]')?.content]: document.querySelector('meta[name="_csrf"]')?.content
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          alert('Failed to save Drug quotation: ' + ((data && data.message) || 'Unknown error'));
+          return;
+        }
+        drugEditingRevisionId = data.quotation ? data.quotation.id : drugEditingRevisionId;
+        showLeadToast('Drug quotation saved successfully');
+        closeModal('drugEditModal');
+      })
+      .catch(function () {
+        alert('Something went wrong while saving the Drug quotation.');
+      });
+  }
+
+  function downloadDrugQuotationPdf() {
+    if (!drugEditingRevisionId) {
+      alert('Save the Drug quotation first before downloading its PDF.');
+      return;
+    }
+    alert('Drug quotation PDF export isn\'t wired up yet — say the word and I\'ll add a DrugQuotationPdfService + drug-pdf.html next.');
+  }
+</script>
+</body>
+</html>

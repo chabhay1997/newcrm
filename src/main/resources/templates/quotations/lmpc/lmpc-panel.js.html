@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="lmpc-panel-script" th:inline="none">
+  let lmpcEditingRevisionId = null;
+
+  function openLmpcEditPanel(leadId, quotationType, companyName, revisionId) {
+    if ((quotationType || '').trim().toLowerCase() !== 'lmpc') return;
+    document.getElementById('lmpcLeadIdInput').value = leadId;
+    lmpcEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('lmpcSaveRevisionButton', revisionId);
+    document.getElementById('lmpcQuotationForm').reset();
+    document.getElementById('lmpcReferenceNoInput').value = 'REF-' + leadId;
+    if (!document.getElementById('lmpcQuotationDateInput').value) {
+      document.getElementById('lmpcQuotationDateInput').value = new Date().toISOString().slice(0, 10);
+    }
+    openModal('lmpcEditModal');
+    loadLmpcQuotation(leadId, companyName, revisionId);
+  }
+
+  function setLmpcFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value != null ? value : '';
+  }
+
+  function renderLmpcRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('lmpcRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      button.textContent = 'R' + (index + 1);
+      button.onclick = function (event) {
+        event.preventDefault(); event.stopPropagation();
+        closeModal('lmpcEditModal');
+        setTimeout(function () { openLmpcEditPanel(leadId, 'LMPC', '', item.id); }, 50);
+      };
+      box.appendChild(button);
+    });
+  }
+
+  function loadLmpcQuotation(leadId, companyName, revisionId) {
+    fetch('/leads/' + leadId + '/lmpc-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) return;
+        const quotation = data.quotation || {};
+        const lead = data.lead || {};
+        if (revisionId) lmpcEditingRevisionId = quotation.id || null;
+        renderLmpcRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+        if (!revisionId) { setLmpcFieldValue('lmpcClientNameInput', companyName || lead.companyName || ''); return; }
+        if (!quotation.id) { setLmpcFieldValue('lmpcClientNameInput', companyName || lead.companyName || ''); return; }
+        setLmpcFieldValue('lmpcReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
+        setLmpcFieldValue('lmpcQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
+        setLmpcFieldValue('lmpcClientNameInput', quotation.clientName || companyName || lead.companyName || '');
+        setLmpcFieldValue('lmpcCertificationNameInput', quotation.certificationName || '');
+        setLmpcFieldValue('lmpcLeadTimeInput', quotation.leadTime || '');
+        setLmpcFieldValue('lmpcRegisInput', quotation.lmpcRegis || '');
+        setLmpcFieldValue('lmpcServiceLiaisonInput', quotation.serviceLiaison || '');
+      })
+      .catch(function () {
+        setLmpcFieldValue('lmpcClientNameInput', companyName || '');
+      });
+  }
+
+  function saveLmpcQuotation() {
+    const leadId = document.getElementById('lmpcLeadIdInput').value;
+    if (!leadId) return;
+    const payload = {
+      id: lmpcEditingRevisionId,
+      referenceNo: document.getElementById('lmpcReferenceNoInput').value,
+      quotationDate: document.getElementById('lmpcQuotationDateInput').value || null,
+      clientName: document.getElementById('lmpcClientNameInput').value,
+      certificationName: document.getElementById('lmpcCertificationNameInput').value,
+      leadTime: document.getElementById('lmpcLeadTimeInput').value,
+      lmpcRegis: document.getElementById('lmpcRegisInput').value,
+      serviceLiaison: document.getElementById('lmpcServiceLiaisonInput').value
+    };
+
+    fetch('/leads/' + leadId + '/lmpc-quotation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [document.querySelector('meta[name="_csrf_header"]')?.content]: document.querySelector('meta[name="_csrf"]')?.content
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          alert('Failed to save LMPC quotation: ' + ((data && data.message) || 'Unknown error'));
+          return;
+        }
+        lmpcEditingRevisionId = data.quotation ? data.quotation.id : lmpcEditingRevisionId;
+        showLeadToast('LMPC quotation saved successfully');
+        closeModal('lmpcEditModal');
+      })
+      .catch(function () {
+        alert('Something went wrong while saving the LMPC quotation.');
+      });
+  }
+
+  function downloadLmpcQuotationPdf() {
+    if (!lmpcEditingRevisionId) {
+      alert('Save the LMPC quotation first before downloading its PDF.');
+      return;
+    }
+    alert('LMPC PDF export isn\'t wired up yet — say the word and I\'ll add a LmpcQuotationPdfService + lmpc-pdf.html next, using the letter layout you pasted.');
+  }
+</script>
+</body>
+</html>

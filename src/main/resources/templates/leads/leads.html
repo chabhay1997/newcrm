@@ -24,6 +24,7 @@
   .quotation-revision-buttons{display:flex;gap:6px;flex-wrap:wrap}
   .quotation-revision-button{min-width:34px;padding:5px 10px;border:1px solid rgba(91,141,239,.28);border-radius:999px;background:#fff;color:#4567A2;font-size:11px;font-weight:800;cursor:pointer}
   .quotation-revision-button.active{background:#5B8DEF;color:#fff;border-color:#5B8DEF}
+  .quotation-revision-compact { width: min(760px, 96vw) !important; }
   .mini-toggle { position: relative; display: inline-block; width: 34px; height: 19px; cursor: pointer; }
   .mini-toggle input { display: none; }
   .mini-toggle-track { position: absolute; inset: 0; background: #E4E7EE; border-radius: 999px; transition: background .2s ease; }
@@ -929,6 +930,7 @@
         <button type="button" onclick="selectQuotation('BIS CRS','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS CRS</button>
         <button type="button" onclick="selectQuotation('LMPC','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">LMPC</button>
         <button type="button" onclick="selectQuotation('BIS-ISI Certification','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS-ISI Certification</button>
+        <button type="button" onclick="selectQuotation('BEE Certification','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BEE Certification</button>
         <button type="button" onclick="selectQuotation('BIS FMCS','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS FMCS</button>
         <button type="button" onclick="selectQuotation('WPC','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">WPC</button>
         <button type="button" onclick="selectQuotation('General Quotation','#F3F5F8','#3A4B63')" class="py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">General Quotation</button>
@@ -950,6 +952,10 @@
   <div th:replace="~{quotations/cdsco/cdsco-panel :: cdsco-panel}"></div>
   <div th:replace="~{quotations/crs/crs-panel :: crs-panel}"></div>
   <div th:replace="~{quotations/cosmetics/cosmetics-panel :: cosmetics-panel}"></div>
+  <div th:replace="~{quotations/wpc/wpc-panel :: wpc-panel}"></div>
+  <div th:replace="~{quotations/lmpc/lmpc-panel :: lmpc-panel}"></div>
+  <div th:replace="~{quotations/dpiit/dpiit-panel :: dpiit-panel}"></div>
+  <div th:replace="~{quotations/drug/drug-panel :: drug-panel}"></div>
 
 
   <script th:inline="none">
@@ -958,6 +964,31 @@
       document.body.classList.add('modal-open');
     }
     function closeModal(id) {
+      const revisionConfig = {
+        isiEditModal: ['isiLeadIdInput', 'openIsiEditPanel', 'BIS-ISI Certification'],
+        fmcsEditModal: ['fmcsLeadIdInput', 'openFmcsEditPanel', 'BIS FMCS'],
+        cdscoEditModal: ['cdscoLeadIdInput', 'openCdscoEditPanel', 'CDSCO Registration'],
+        crsEditModal: ['crsLeadIdInput', 'openCrsEditPanel', 'BIS CRS'],
+        cosmeticsEditModal: ['cosmeticsLeadIdInput', 'openCosmeticsEditPanel', 'Cosmetics'],
+        wpcEditModal: ['wpcLeadIdInput', 'openWpcEditPanel', 'WPC'],
+        lmpcEditModal: ['lmpcLeadIdInput', 'openLmpcEditPanel', 'LMPC'],
+        dpiitEditModal: ['dpiitLeadIdInput', 'openDpiitEditPanel', 'DPIIT'],
+        drugEditModal: ['drugLeadIdInput', 'openDrugEditPanel', 'Drug Quotation']
+      };
+      const config = revisionConfig[id];
+      const modal = document.getElementById(id);
+      const activeRevision = modal?.querySelector('.quotation-revision-button.active');
+      const switchingRevision = document.activeElement?.closest('.quotation-revision-buttons');
+      if (config && activeRevision && !switchingRevision) {
+        modal.querySelector('.quotation-revision-button.active')?.classList.remove('active');
+        modal.querySelector('.modal-box')?.classList.remove('quotation-revision-compact');
+        const leadId = document.getElementById(config[0])?.value;
+        const openPanel = window[config[1]];
+        if (leadId && typeof openPanel === 'function') {
+          openPanel(leadId, config[2], '');
+          return;
+        }
+      }
       document.getElementById(id).classList.remove('open');
       document.body.classList.remove('modal-open');
     }
@@ -1077,6 +1108,7 @@
     function openQuotationEditPanel(trigger) {
       if (!trigger) return;
       const quotationType = (trigger.dataset.quotationType || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      resetQuotationRevisionView(quotationType);
       if (quotationType === 'bisfmcs') {
         openFmcsEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
       } else if (quotationType === 'cdscoregistration') {
@@ -1085,10 +1117,66 @@
         openCrsEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
       } else if (quotationType === 'cosmetics' || quotationType === 'cosmeticsregistration') {
         openCosmeticsEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
+      } else if (quotationType === 'wpc') {
+        openWpcEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
+      } else if (quotationType === 'lmpc') {
+        openLmpcEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
+      } else if (quotationType === 'dpiit') {
+        openDpiitEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
+      } else if (quotationType === 'drugquotation') {
+        openDrugEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
       } else {
         openIsiEditPanel(trigger.dataset.leadId, trigger.dataset.quotationType, trigger.dataset.companyName);
       }
     }
+
+    function setQuotationRevisionButton(buttonId, revisionId) {
+      const button = document.getElementById(buttonId);
+      if (button) button.textContent = revisionId ? 'Submit' : 'Save as New Revision';
+    }
+
+    function resetQuotationRevisionView(quotationType) {
+      const map = {
+        bisfmcs: ['fmcsRevisionButtons', 'fmcsEditModal'],
+        cdscoregistration: ['cdscoRevisionButtons', 'cdscoEditModal'],
+        biscrs: ['crsRevisionButtons', 'crsEditModal'],
+        cosmetics: ['cosmeticsRevisionButtons', 'cosmeticsEditModal'],
+        cosmeticsregistration: ['cosmeticsRevisionButtons', 'cosmeticsEditModal'],
+        wpc: ['wpcRevisionButtons', 'wpcEditModal'],
+        lmpc: ['lmpcRevisionButtons', 'lmpcEditModal'],
+        dpiit: ['dpiitRevisionButtons', 'dpiitEditModal'],
+        drugquotation: ['drugRevisionButtons', 'drugEditModal'],
+        bisisicertification: ['isiRevisionButtons', 'isiEditModal']
+      };
+      const entry = map[quotationType];
+      if (!entry) return;
+      document.querySelectorAll('#' + entry[0] + ' .quotation-revision-button.active').forEach(function (button) { button.classList.remove('active'); });
+      document.querySelector('#' + entry[1] + ' .modal-box')?.classList.remove('quotation-revision-compact');
+    }
+
+    (function watchQuotationRevisionButtons() {
+      const pairs = [
+        ['isiRevisionButtons', 'isiSaveRevisionButton'], ['fmcsRevisionButtons', 'fmcsSaveRevisionButton'],
+        ['cdscoRevisionButtons', 'cdscoSaveRevisionButton'], ['crsRevisionButtons', 'crsSaveRevisionButton'],
+        ['cosmeticsRevisionButtons', 'cosmeticsSaveRevisionButton'], ['wpcRevisionButtons', 'wpcSaveRevisionButton'],
+        ['lmpcRevisionButtons', 'lmpcSaveRevisionButton'], ['dpiitRevisionButtons', 'dpiitSaveRevisionButton'],
+        ['drugRevisionButtons', 'drugSaveRevisionButton']
+      ];
+      pairs.forEach(function (pair) {
+        const revisions = document.getElementById(pair[0]);
+        if (!revisions) return;
+        const update = function () {
+          const button = document.getElementById(pair[1]);
+          const activeRevision = revisions.querySelector('.quotation-revision-button.active');
+          if (button) button.textContent = activeRevision ? 'Submit' : 'Save as New Revision';
+          const modal = revisions.closest('.modal-overlay');
+          const modalBox = modal ? modal.querySelector('.modal-box') : null;
+          if (modalBox) modalBox.classList.toggle('quotation-revision-compact', !!activeRevision);
+        };
+        new MutationObserver(update).observe(revisions, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        update();
+      });
+    })();
 
     function toggleLeadsCharts(show) {
       localStorage.setItem('leadsChartsVisible', show ? '1' : '0');
@@ -1274,6 +1362,10 @@
   <th:block th:replace="~{quotations/cdsco/cdsco-panel.js.html :: cdsco-panel-script}"></th:block>
   <th:block th:replace="~{quotations/crs/crs-panel.js.html :: crs-panel-script}"></th:block>
   <th:block th:replace="~{quotations/cosmetics/cosmetics-panel.js.html :: cosmetics-panel-script}"></th:block>
+  <th:block th:replace="~{quotations/wpc/wpc-panel.js.html :: wpc-panel-script}"></th:block>
+  <th:block th:replace="~{quotations/lmpc/lmpc-panel.js.html :: lmpc-panel-script}"></th:block>
+  <th:block th:replace="~{quotations/dpiit/dpiit-panel.js.html :: dpiit-panel-script}"></th:block>
+  <th:block th:replace="~{quotations/drug/drug-panel.js.html :: drug-panel-script}"></th:block>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/

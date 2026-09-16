@@ -7,6 +7,7 @@
     if ((quotationType || '').trim().toLowerCase() !== 'bis-isi certification') return;
     document.getElementById('isiLeadIdInput').value = leadId;
     isiEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('isiSaveRevisionButton', revisionId);
     document.getElementById('isiQuotationForm').reset();
     document.getElementById('isiReferenceNoInput').value = 'REF-' + leadId;
     if (!document.getElementById('isiQuotationDateInput').value) {
@@ -41,8 +42,9 @@
         if (!data || !data.success) return;
         const quotation = data.quotation || {};
         const lead = data.lead || {};
-        isiEditingRevisionId = quotation.id || null;
-        renderIsiRevisions(data.quotations, leadId, quotation.id || null);
+        if (revisionId) isiEditingRevisionId = quotation.id || null;
+        renderIsiRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+        if (!revisionId) { setIsiFieldValue('isiCompanyNameInput', companyName || lead.companyName || ''); return; }
         if (!quotation.id) { setIsiFieldValue('isiCompanyNameInput', companyName || lead.companyName || ''); return; }
         setIsiFieldValue('isiReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
         setIsiFieldValue('isiQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));

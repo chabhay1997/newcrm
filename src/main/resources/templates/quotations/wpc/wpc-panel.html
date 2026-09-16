@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- WPC CERTIFICATION EDIT PANEL -->
+<div th:fragment="wpc-panel" id="wpcEditModal" class="modal-overlay" onclick="closeModal('wpcEditModal')">
+  <div class="modal-box glass rounded-2xl w-[820px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+       style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">WPC Certification &mdash; Quotation Details</p>
+      <button onclick="closeModal('wpcEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="wpcQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="wpcLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="wpcRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="wpcReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="WPC" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="wpcQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="col-span-2">
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Name</label>
+          <input id="wpcCertificateNameInput" type="text" placeholder="Enter Certificate Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name</label>
+          <input id="wpcClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quantity <span class="text-red-500">*</span></label>
+          <input id="wpcQtyInput" type="number" min="0" placeholder="Qty" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Equipment Type</label>
+          <input id="wpcEquipmentInput" type="text" placeholder="Enter Equipment Type" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- LINE ITEMS -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-[13px] font-bold text-[#171923]">Amount &amp; Description Items</p>
+        <button type="button" onclick="wpcAddItemRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Item
+        </button>
+      </div>
+
+      <div id="wpcItemsContainer" class="flex flex-col gap-2 mb-6"></div>
+
+      <div class="mb-2">
+        <button type="button" onclick="closeModal('wpcEditModal')" class="hidden"></button>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('wpcEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadWpcQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="wpcSaveRevisionButton" type="button" onclick="saveWpcQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+    </form>
+
+    <template id="wpcItemRowTemplate">
+      <div class="wpc-item-row flex gap-3 items-start p-3 rounded-xl border border-black/10 bg-[#F8FAFF]">
+        <div class="w-[140px]">
+          <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Amount</label>
+          <input type="number" min="0" placeholder="0.00" class="wpc-item-amt w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+        </div>
+        <div class="flex-1">
+          <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Description</label>
+          <textarea rows="1" placeholder="Enter description" class="wpc-item-desc w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white resize-none"></textarea>
+        </div>
+        <button type="button" onclick="this.closest('.wpc-item-row').remove()" title="Remove item"
+                class="mt-[22px] w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </template>
+  </div>
+</div>
+
+</body>
+</html>

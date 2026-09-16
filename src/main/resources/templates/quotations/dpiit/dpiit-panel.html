@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- DPIIT TRANSITIONAL FACILITATION QCO EDIT PANEL -->
+<div th:fragment="dpiit-panel" id="dpiitEditModal" class="modal-overlay" onclick="closeModal('dpiitEditModal')">
+    <div class="modal-box glass rounded-2xl w-[1100px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+      style="width:min(1400px,96vw); max-width:96vw; backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">DPIIT Transitional Facilitation QCO &mdash; Quotation Details</p>
+      <button onclick="closeModal('dpiitEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="dpiitQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="dpiitLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="dpiitRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="dpiitReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="DPIIT Transitional Facilitation QCO" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="dpiitQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Company Name</label>
+          <input id="dpiitCompanyNameInput" type="text" placeholder="Enter Company Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name <span class="text-red-500">*</span></label>
+          <input id="dpiitClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Product / Standard Name <span class="text-red-500">*</span></label>
+          <input id="dpiitProductNameInput" type="text" placeholder="Name of product & standard" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- COMMERCIAL DPIIT FEE STRUCTURE -->
+      <p class="text-[13px] font-bold text-[#171923] mb-2">Commercial DPIIT Fee Structure</p>
+      <div class="overflow-x-auto mb-3 rounded-xl border border-black/10">
+        <table class="w-full text-left" style="border-collapse: collapse;">
+          <thead>
+            <tr class="bg-[#5B8DEF]">
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[6%]">SR</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[38%]">Expense</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[28%]">Extra Alias</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[22%]">Value</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[10%]">Currency</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12.5px] text-[#3A4B63]">
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">1</td>
+              <td class="py-2 px-3"><input id="dpiitCommercialExpense1" type="text" value="BIS TF QCO application fee" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] bg-white"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialAlias1" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialValue1" type="text" placeholder="0" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><select id="dpiitCommercialCurrency1" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"><option>INR</option><option>USD</option></select></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">2</td>
+              <td class="py-2 px-3"><input id="dpiitCommercialExpense2" type="text" value="Minimum marking fee for one year Micro" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] bg-white"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialAlias2" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialValue2" type="text" placeholder="0" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><select id="dpiitCommercialCurrency2" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"><option>INR</option><option>USD</option></select></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">3</td>
+              <td class="py-2 px-3"><input id="dpiitCommercialExpense3" type="text" value="License fee" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] bg-white"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialAlias3" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialValue3" type="text" placeholder="0" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><select id="dpiitCommercialCurrency3" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"><option>INR</option><option>USD</option></select></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">4</td>
+              <td class="py-2 px-3"><input id="dpiitCommercialExpense5" type="text" value="Sample testing charges (Per type)" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] bg-white"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialAlias5" type="text" placeholder="Extra Alias" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><input id="dpiitCommercialValue5" type="text" placeholder="0" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3"><select id="dpiitCommercialCurrency5" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"><option>INR</option><option>USD</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[11.5px] font-semibold text-[#3A4B63]">Extra Commercial Rows</span>
+        <button type="button" onclick="dpiitAddExtraRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Row
+        </button>
+      </div>
+      <div id="dpiitExtraRowsContainer" class="flex flex-col gap-2 mb-3"></div>
+
+      <div class="mb-6">
+        <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Total Fees (Commercial)</label>
+        <div class="flex gap-2">
+          <input id="dpiitTotalFeesInput" type="text" placeholder="Total commercial fees" class="flex-1 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-[#EAF1FF] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+          <select id="dpiitTotalFeesCurrencyInput" class="w-28 px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-[#EAF1FF]"><option>INR</option><option>USD</option></select>
+        </div>
+      </div>
+
+      <!-- CONSULTANCY FEE STRUCTURE -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-[13px] font-bold text-[#171923]">Consultancy Fee Structure</p>
+        <button type="button" onclick="dpiitAddConsultancyRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Item
+        </button>
+      </div>
+      <div id="dpiitConsultancyContainer" class="flex flex-col gap-2 mb-3"></div>
+
+      <div class="mb-6">
+        <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Total Consultancy Fees</label>
+        <input id="dpiitTotalConsultancyInput" type="text" placeholder="Total consultancy fees" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-[#EAF1FF] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lab Setup Cost</label>
+          <input id="dpiitLabSetupCostInput" type="text" placeholder="e.g. Optional" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lead Time</label>
+          <input id="dpiitLeadTimeInput" type="text" placeholder="e.g. 60 - 70 business days" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('dpiitEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadDpiitQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="dpiitSaveRevisionButton" type="button" onclick="saveDpiitQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+
+      <template id="dpiitExtraRowTemplate">
+        <div class="dpiit-extra-row flex gap-3 items-start p-3 rounded-xl border border-black/10 bg-[#F8FAFF]">
+          <div class="flex-1">
+            <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Particular</label>
+            <input type="text" placeholder="Expense name" class="dpiit-extra-particular w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+          </div>
+          <div class="w-[130px]">
+            <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Amount</label>
+            <input type="text" placeholder="0.00" class="dpiit-extra-amount w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+          </div>
+          <div class="w-[90px]">
+            <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Currency</label>
+            <select class="dpiit-extra-currency w-full px-2 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white"><option value="INR">INR</option><option value="USD">USD</option></select>
+          </div>
+          <button type="button" onclick="this.closest('.dpiit-extra-row').remove()" title="Remove row" class="mt-[22px] w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </template>
+
+      <template id="dpiitConsultancyRowTemplate">
+        <div class="dpiit-consultancy-row flex gap-3 items-start p-3 rounded-xl border border-black/10 bg-[#F8FAFF]">
+          <div class="flex-1">
+            <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Expense</label>
+            <input type="text" placeholder="e.g. Consultancy charge for entire contract" class="dpiit-consultancy-expense w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+          </div>
+          <div class="w-[150px]">
+            <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Amount</label>
+            <input type="text" placeholder="0.00" class="dpiit-consultancy-amount w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+          </div>
+          <button type="button" onclick="this.closest('.dpiit-consultancy-row').remove()" title="Remove item" class="mt-[22px] w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </template>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>
