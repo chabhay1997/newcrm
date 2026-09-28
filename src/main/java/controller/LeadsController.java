@@ -1,24 +1,5 @@
 package controller;
 
-<<<<<<< HEAD
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import service.ConvertedLeadOperationSyncService;
-
-@Controller
-public class LeadsController {
-    private final ConvertedLeadOperationSyncService leadSync;
-    public LeadsController(ConvertedLeadOperationSyncService leadSync){this.leadSync=leadSync;}
-
-    @GetMapping("/leads")
-    public String showLeads(Model model) {
-        leadSync.sync();
-        model.addAttribute("activePage", "leads");
-        return "leads/leads";
-    }
-
-=======
 import model.Lead;
 import repository.LeadRepository;
 import util.LeadStatus;
@@ -439,5 +420,4 @@ public class LeadsController {
         return response;
     }
 
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 }

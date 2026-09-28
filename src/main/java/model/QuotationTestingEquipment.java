@@ -38,10 +38,7 @@ public class QuotationTestingEquipment {
     private String desQtyPrice;
 
     public Integer getId() { return id; }
-<<<<<<< HEAD
     public Integer getTestingEquipmentId() { return testingEquipmentId; }
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     public void setTestingEquipmentId(Integer testingEquipmentId) { this.testingEquipmentId = testingEquipmentId; }
     public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
     public void setDate(LocalDate date) { this.date = date; }

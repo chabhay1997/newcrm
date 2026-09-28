@@ -1,38 +1,3 @@
-<<<<<<< HEAD
-package model;
-
-import jakarta.persistence.*;
-import java.time.LocalDate;
-
-@Entity
-@Table(name="leads")
-public class Lead {
-    @Id private Long id;
-    @Column(name="created_by") private Long createdBy;
-    @Column(name="is_deleted") private Integer deleted;
-    @Column(name="lead_date") private LocalDate leadDate;
-    @Column(name="converted_date") private LocalDate convertedDate;
-    @Column(name="leads") private String leadName;
-    @Column(name="company_name") private String companyName;
-    @Column(name="company_mobile") private String companyMobile;
-    private String phone;
-    private String email;
-    @Column(name="official_mail_id") private String officialEmail;
-    private String address;
-    @Column(name="state_id") private String stateId;
-    private String status;
-    @Column(name="is_number") private String isNumber;
-    private String remarks;
-
-    public Long getId(){return id;} public Long getCreatedBy(){return createdBy;} public Integer getDeleted(){return deleted;}
-    public LocalDate getLeadDate(){return leadDate;} public LocalDate getConvertedDate(){return convertedDate;}
-    public String getLeadName(){return leadName;} public String getCompanyName(){return companyName;}
-    public String getCompanyMobile(){return companyMobile;} public String getPhone(){return phone;}
-    public String getEmail(){return email;} public String getOfficialEmail(){return officialEmail;}
-    public String getAddress(){return address;} public String getStateId(){return stateId;}
-    public String getStatus(){return status;} public String getIsNumber(){return isNumber;} public String getRemarks(){return remarks;}
-}
-=======
 package model;
 
 import jakarta.persistence.Column;
@@ -273,5 +238,7 @@ public class Lead {
 
     public String getQuotationType() { return quotationType; }
     public void setQuotationType(String quotationType) { this.quotationType = quotationType; }
+
+    public Long getCreatedBy() { return createdBy; }
+    public String getIsNumber() { return isNumber; }
 }
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4

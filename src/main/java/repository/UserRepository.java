@@ -1,15 +1,12 @@
 package repository;
 
 import model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-<<<<<<< HEAD
-=======
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -17,8 +14,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
-<<<<<<< HEAD
-=======
 
     @Query("""
             select u from User u
@@ -39,5 +34,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
                             @Param("status") String status,
                             @Param("highlightId") Long highlightId,
                             Pageable pageable);
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 }

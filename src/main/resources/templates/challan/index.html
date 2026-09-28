@@ -7,11 +7,7 @@
   <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <title>Challan | EVTL CRM</title>
   <link rel="stylesheet" th:href="@{/css/output.css}">
-<<<<<<< HEAD
-  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block><link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
-=======
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
   <style>
     .challan-page-title { display:flex; align-items:center; gap:14px; }
     .challan-list-heading { flex:none; white-space:nowrap; }.challan-list-heading h2 { font-size:16px; }
@@ -22,11 +18,7 @@
     .challan-analytics-button { display:inline-flex; height:40px; align-items:center; justify-content:center; gap:8px; padding:0 17px; border:1px solid #bfdbfe; border-radius:12px; background:#eff6ff; color:#1d4ed8; font-size:13px; font-weight:800; text-decoration:none; transition:background .16s ease,border-color .16s ease,transform .16s ease; }.challan-analytics-button:hover { border-color:#93c5fd; background:#dbeafe; transform:translateY(-1px); }.challan-analytics-button svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .challan-table-scroll { width:100%; overflow-x:auto; overflow-y:hidden; scrollbar-gutter:stable; -webkit-overflow-scrolling:touch; }
     .challan-table { width:100%; min-width:1280px; border-collapse:separate; border-spacing:0; border:1px solid #dce5f1; border-radius:0 0 15px 15px; overflow:hidden; table-layout:fixed; background:#fff; }
-<<<<<<< HEAD
-    .challan-table th { height:64px; padding:0 13px; border-right:1px solid rgba(255,255,255,.32); background:linear-gradient(135deg,#6092ec,#5686e2); color:#fff; font-size:11px; font-weight:800; letter-spacing:.075em; text-transform:uppercase; }
-=======
     .challan-table th { height:64px; padding:0 13px; border-right:1px solid rgba(223,234,248,.22); background:linear-gradient(135deg,#173456,#294972); color:#f8fbff; font-size:11px; font-weight:800; letter-spacing:.075em; text-transform:uppercase; }
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     .challan-table th > span { display:inline-flex; align-items:center; gap:7px; }.challan-table th svg { width:15px; height:15px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
     .challan-table th:last-child { position:sticky; right:0; z-index:2; min-width:110px; border-right:0; box-shadow:-2px 0 5px rgba(14,42,76,.14); white-space:nowrap; }
     .challan-table td { height:74px; padding:8px 13px; border-right:1px solid #e1e9f3; border-bottom:1px solid #e1e9f3; color:#162e52; font-size:12px; vertical-align:middle; overflow-wrap:anywhere; word-break:normal; }
@@ -126,15 +118,9 @@
             <tbody id="challanRows"><tr><td colspan="7" class="px-5 py-12 text-center text-[12px] text-[#6B87A8]">Loading challan records...</td></tr></tbody>
           </table>
         </div>
-<<<<<<< HEAD
-        <div class="classic-pagination">
-          <p id="challanSummary" class="text-[11px] text-[#6B87A8]">Loading records...</p>
-          <nav id="challanPagination" class="classic-pagination-controls" aria-label="Challan pagination"></nav>
-=======
         <div class="px-5 py-3.5 border-t border-[#EEF1F5] flex items-center justify-between gap-3">
           <p id="challanSummary" class="text-[11px] text-[#6B87A8]">Loading records...</p>
           <nav id="challanPagination" class="flex items-center gap-1.5" aria-label="Challan pagination"></nav>
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         </div>
       </section>
     </main>
@@ -404,18 +390,7 @@
       function renderPagination(current, total) {
         pagination.replaceChildren();
         if (total < 1) return;
-<<<<<<< HEAD
-        const goInput = document.createElement('input');
-        goInput.type = 'number'; goInput.min = '1'; goInput.max = String(total); goInput.placeholder = 'Go to...'; goInput.setAttribute('aria-label','Go to page');
-        const goButton = document.createElement('button');
-        goButton.type = 'button'; goButton.textContent = 'Go'; goButton.className = 'go-button';
-        const go = () => { const target = Number.parseInt(goInput.value,10); if (target >= 1 && target <= total) loadPage(target); };
-        goButton.addEventListener('click',go); goInput.addEventListener('keydown',event=>{if(event.key==='Enter')go();});
-        pagination.append(goInput,goButton);
-        const previousButton = pageButton('Previous', current - 1, false, current === 1, 'Previous page');
-=======
         const previousButton = pageButton('\u2039', current - 1, false, current === 1, 'Previous page');
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         previousButton.className += ' border border-[#E1E5EB]';
         pagination.appendChild(previousButton);
         pageSequence(current, total).forEach(entry => {
@@ -429,11 +404,7 @@
             pagination.appendChild(pageButton(String(entry), entry, entry === current, false));
           }
         });
-<<<<<<< HEAD
-        const nextButton = pageButton('Next', current + 1, false, current === total, 'Next page');
-=======
         const nextButton = pageButton('\u203a', current + 1, false, current === total, 'Next page');
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         nextButton.className += ' border border-[#E1E5EB]';
         pagination.appendChild(nextButton);
       }
@@ -645,11 +616,7 @@
           }
           const first = data.totalRecords ? ((data.currentPage - 1) * data.pageSize) + 1 : 0;
           const last = first ? first + data.records.length - 1 : 0;
-<<<<<<< HEAD
-          summary.textContent = data.totalRecords ? `Showing ${first} to ${last} of ${data.totalRecords} entries` : 'Showing 0 entries';
-=======
           summary.textContent = data.totalRecords ? `Showing ${first} to ${last} of ${data.totalRecords} challans` : 'No challans found';
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
           renderPagination(data.currentPage, data.totalPages);
           const browserUrl = new URL(window.location.href);
           browserUrl.searchParams.set('page', data.currentPage);

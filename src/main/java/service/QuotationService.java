@@ -2,7 +2,6 @@ package service;
 
 import dto.QuotationPageResponse;
 import dto.QuotationResponse;
-<<<<<<< HEAD
 import dto.QuotationSummary;
 import dto.QuotationEditRequest;
 import dto.QuotationLineItemRequest;
@@ -10,10 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.TestingEquipment;
 import model.User;
 import model.QuotationEditHistory;
-=======
-import model.TestingEquipment;
-import model.User;
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -21,16 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repository.TestingEquipmentRepository;
 import repository.UserRepository;
-<<<<<<< HEAD
 import repository.QuotationTestingEquipmentRepository;
 import repository.QuotationEditHistoryRepository;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-=======
-
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -42,7 +33,6 @@ public class QuotationService {
 
     private final TestingEquipmentRepository testingEquipmentRepository;
     private final UserRepository userRepository;
-<<<<<<< HEAD
     private final QuotationTestingEquipmentRepository quotationTestingEquipmentRepository;
     private final QuotationEditHistoryRepository quotationEditHistoryRepository;
     private final ObjectMapper objectMapper;
@@ -75,30 +65,12 @@ public class QuotationService {
                             .findByInvoiceNoContainingIgnoreCaseOrAttentionContainingIgnoreCaseOrClientNameContainingIgnoreCaseOrIsCodeContainingIgnoreCaseOrCompanyNameContainingIgnoreCase(
                                     search, search, search, search, search, pageable);
         }
-=======
-
-    public QuotationService(TestingEquipmentRepository testingEquipmentRepository, UserRepository userRepository) {
-        this.testingEquipmentRepository = testingEquipmentRepository;
-        this.userRepository = userRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public QuotationPageResponse findQuotations(int requestedPage, String query) {
-        String search = query == null ? "" : query.trim();
-        PageRequest pageable = PageRequest.of(requestedPage - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "id"));
-        Page<TestingEquipment> result = search.isBlank()
-                ? testingEquipmentRepository.findAll(pageable)
-                : testingEquipmentRepository
-                        .findByInvoiceNoContainingIgnoreCaseOrAttentionContainingIgnoreCaseOrClientNameContainingIgnoreCaseOrIsCodeContainingIgnoreCaseOrCompanyNameContainingIgnoreCase(
-                                search, search, search, search, search, pageable);
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
         Set<Long> creatorIds = result.getContent().stream().map(TestingEquipment::getCreatedBy)
                 .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
         Map<Long, User> creators = userRepository.findAllById(creatorIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-<<<<<<< HEAD
         List<TestingEquipment> summaryRecords = month == null ? testingEquipmentRepository.findAll()
                 : testingEquipmentRepository.findByDateBetween(startDate, endDate);
         QuotationSummary summary = new QuotationSummary(summaryRecords.size(),
@@ -110,12 +82,6 @@ public class QuotationService {
                 .map(equipment -> toResponse(equipment, creators)).toList(),
                 result.getNumber() + 1, result.getSize(), result.getTotalPages(), result.getTotalElements(),
                 result.hasPrevious(), result.hasNext(), summary);
-=======
-        return new QuotationPageResponse(result.getContent().stream()
-                .map(equipment -> toResponse(equipment, creators)).toList(),
-                result.getNumber() + 1, result.getSize(), result.getTotalPages(), result.getTotalElements(),
-                result.hasPrevious(), result.hasNext());
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     }
 
     private QuotationResponse toResponse(TestingEquipment equipment, Map<Long, User> creators) {
@@ -125,7 +91,6 @@ public class QuotationService {
                 equipment.getInvoiceNo(), equipment.getDate(), equipment.getAttention(), equipment.getClientName(),
                 equipment.getIsCode(), equipment.getCompanyName());
     }
-<<<<<<< HEAD
 
     @Transactional(readOnly = true)
     public QuotationResponse findQuotation(long id) {
@@ -188,6 +153,4 @@ public class QuotationService {
     public List<QuotationEditHistory> history(long id) { return quotationEditHistoryRepository.findByTestingEquipmentIdOrderByEditedAtDesc(equipment(id).getId()); }
     private TestingEquipment equipment(long id) { return testingEquipmentRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new IllegalArgumentException("Quotation not found")); }
     private String clean(String value) { return value == null || value.isBlank() ? null : value.trim(); }
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 }

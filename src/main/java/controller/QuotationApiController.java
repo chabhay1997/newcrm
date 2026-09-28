@@ -3,10 +3,7 @@ package controller;
 import dto.QuotationPageResponse;
 import dto.QuotationCreateRequest;
 import dto.QuotationCreateResponse;
-<<<<<<< HEAD
 import dto.QuotationEditRequest;
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,27 +13,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-<<<<<<< HEAD
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 import service.QuotationService;
 import service.QuotationCreationService;
-<<<<<<< HEAD
 import service.QuotationPdfService;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
 @RestController
 @RequestMapping("/api/lab-equipment/quotations")
@@ -46,37 +37,25 @@ public class QuotationApiController {
 
     private final QuotationService quotationService;
     private final QuotationCreationService quotationCreationService;
-<<<<<<< HEAD
     private final QuotationPdfService quotationPdfService;
 
     public QuotationApiController(QuotationService quotationService, QuotationCreationService quotationCreationService, QuotationPdfService quotationPdfService) {
         this.quotationService = quotationService;
         this.quotationCreationService = quotationCreationService;
         this.quotationPdfService = quotationPdfService;
-=======
-
-    public QuotationApiController(QuotationService quotationService, QuotationCreationService quotationCreationService) {
-        this.quotationService = quotationService;
-        this.quotationCreationService = quotationCreationService;
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     }
 
     @GetMapping
     public ResponseEntity<QuotationPageResponse> getQuotations(
             @RequestParam(defaultValue = "1") int page,
-<<<<<<< HEAD
             @RequestParam(name = "q", defaultValue = "") String query,
             @RequestParam(name = "month", required = false) String monthValue) {
-=======
-            @RequestParam(name = "q", defaultValue = "") String query) {
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         if (page < 1 || page > MAX_PAGE_NUMBER) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page must be between 1 and 10000");
         }
         if (query != null && query.length() > MAX_SEARCH_LENGTH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search query must not exceed 100 characters");
         }
-<<<<<<< HEAD
         YearMonth month = parseMonth(monthValue);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
@@ -118,11 +97,6 @@ public class QuotationApiController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(quotationPdfService.preview(id));
-=======
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
-                .body(quotationService.findQuotations(page, query));
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
