@@ -11,6 +11,9 @@ import java.util.List;
 @Repository
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
+    @Query("select l from Lead l where lower(l.status)='converted' and (l.isDeleted is null or l.isDeleted = false)")
+    List<Lead> findConvertedActive();
+
     @Query("SELECT l FROM Lead l WHERE (:status IS NULL OR l.status = :status) AND (:sourceId IS NULL OR l.sourceId = :sourceId)")
     List<Lead> findByFilters(@Param("status") String status, @Param("sourceId") Long sourceId);
 

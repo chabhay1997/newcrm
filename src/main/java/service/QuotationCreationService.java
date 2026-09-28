@@ -63,6 +63,7 @@ public class QuotationCreationService {
                 equipment.setDescription(clean(item.description()));
                 String lineData = objectMapper.writeValueAsString(item);
                 equipment.setDesQtyPrice(lineData);
+                equipment.setQuotationStatus(0);
                 equipment = testingEquipmentRepository.saveAndFlush(equipment);
 
                 QuotationTestingEquipment quotation = new QuotationTestingEquipment();

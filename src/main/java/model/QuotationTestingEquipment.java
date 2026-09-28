@@ -38,6 +38,7 @@ public class QuotationTestingEquipment {
     private String desQtyPrice;
 
     public Integer getId() { return id; }
+    public Integer getTestingEquipmentId() { return testingEquipmentId; }
     public void setTestingEquipmentId(Integer testingEquipmentId) { this.testingEquipmentId = testingEquipmentId; }
     public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
     public void setDate(LocalDate date) { this.date = date; }

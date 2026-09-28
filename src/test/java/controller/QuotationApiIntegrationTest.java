@@ -75,6 +75,36 @@ class QuotationApiIntegrationTest {
 
     @Test
     @WithMockUser
+    @Transactional
+    void downloadsAnExistingQuotationAsPdf() throws Exception {
+        model.TestingEquipment quotation = new model.TestingEquipment();
+        quotation.setInvoiceNo("EVTL/TEST-EQ/PDF");
+        quotation.setDate(java.time.LocalDate.of(2026, 8, 1));
+        quotation.setClientName("PDF Test Client");
+        quotation.setCompanyName("PDF Test Company");
+        quotation.setIsCode("IS 302");
+        quotation.setDesQtyPrice("{\"description\":\"PDF Test Equipment\",\"hsnCode\":\"9027\",\"quantity\":\"1\",\"price\":\"100.00\"}");
+        int quotationId = testingEquipmentRepository.saveAndFlush(quotation).getId();
+
+        byte[] pdf = mockMvc.perform(get("/api/lab-equipment/quotations/{id}/download", quotationId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/pdf"))
+                .andExpect(header().string("Content-Disposition", containsString("attachment; filename=")))
+                .andReturn().getResponse().getContentAsByteArray();
+        org.assertj.core.api.Assertions.assertThat(pdf).startsWith('%', 'P', 'D', 'F');
+
+        mockMvc.perform(get("/api/lab-equipment/quotations/{id}/preview", quotationId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(header().string("Cache-Control", containsString("no-store")))
+                .andExpect(jsonPath("$.invoiceNo").value("EVTL/TEST-EQ/PDF"))
+                .andExpect(jsonPath("$.items[0].description").value("PDF Test Equipment"))
+                .andExpect(jsonPath("$.items[0].total").value("100.00"))
+                .andExpect(jsonPath("$.subtotal").value("100.00"));
+    }
+
+    @Test
+    @WithMockUser
     void rejectsInvalidInputAndTreatsInjectionLikeSearchAsData() throws Exception {
         mockMvc.perform(get("/api/lab-equipment/quotations").param("page", "0"))
                 .andExpect(status().isBadRequest());

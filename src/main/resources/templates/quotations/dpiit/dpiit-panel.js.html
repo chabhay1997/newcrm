@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="dpiit-panel-script" th:inline="none">
+  let dpiitEditingRevisionId = null;
+
+  function dpiitAddExtraRow(particular, amount, currency) {
+    const template = document.getElementById('dpiitExtraRowTemplate');
+    const container = document.getElementById('dpiitExtraRowsContainer');
+    if (!template || !container) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    if (particular !== undefined) row.querySelector('.dpiit-extra-particular').value = particular || '';
+    if (amount !== undefined) row.querySelector('.dpiit-extra-amount').value = amount || '';
+    if (currency) row.querySelector('.dpiit-extra-currency').value = currency;
+    container.appendChild(row);
+  }
+
+  function dpiitAddConsultancyRow(expense, amount) {
+    const template = document.getElementById('dpiitConsultancyRowTemplate');
+    const container = document.getElementById('dpiitConsultancyContainer');
+    if (!template || !container) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    if (expense !== undefined) row.querySelector('.dpiit-consultancy-expense').value = expense || '';
+    if (amount !== undefined) row.querySelector('.dpiit-consultancy-amount').value = amount || '';
+    container.appendChild(row);
+  }
+
+  function openDpiitEditPanel(leadId, quotationType, companyName, revisionId) {
+    if ((quotationType || '').trim().toLowerCase() !== 'dpiit') return;
+    document.getElementById('dpiitLeadIdInput').value = leadId;
+    dpiitEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('dpiitSaveRevisionButton', revisionId);
+    document.getElementById('dpiitQuotationForm').reset();
+    document.getElementById('dpiitExtraRowsContainer').innerHTML = '';
+    document.getElementById('dpiitConsultancyContainer').innerHTML = '';
+    document.getElementById('dpiitReferenceNoInput').value = 'REF-' + leadId;
+    if (!document.getElementById('dpiitQuotationDateInput').value) {
+      document.getElementById('dpiitQuotationDateInput').value = new Date().toISOString().slice(0, 10);
+    }
+    openModal('dpiitEditModal');
+    loadDpiitQuotation(leadId, companyName, revisionId);
+  }
+
+  function setDpiitFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value != null ? value : '';
+  }
+
+  function renderDpiitRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('dpiitRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      button.textContent = 'R' + (index + 1);
+      button.onclick = function (event) {
+        event.preventDefault(); event.stopPropagation();
+        closeModal('dpiitEditModal');
+        setTimeout(function () { openDpiitEditPanel(leadId, 'DPIIT', '', item.id); }, 50);
+      };
+      box.appendChild(button);
+    });
+  }
+
+  function loadDpiitQuotation(leadId, companyName, revisionId) {
+    fetch('/leads/' + leadId + '/dpiit-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) return;
+        const quotation = data.quotation || {};
+        const lead = data.lead || {};
+        if (revisionId) dpiitEditingRevisionId = quotation.id || null;
+        renderDpiitRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+
+        document.getElementById('dpiitExtraRowsContainer').innerHTML = '';
+        document.getElementById('dpiitConsultancyContainer').innerHTML = '';
+
+        if (!revisionId) {
+          setDpiitFieldValue('dpiitCompanyNameInput', companyName || lead.companyName || '');
+          dpiitAddConsultancyRow('Consultancy charge for entire contract', '');
+          dpiitAddConsultancyRow('Miscellaneous expenses BIS Officer', '');
+          return;
+        }
+
+        if (!quotation.id) {
+          setDpiitFieldValue('dpiitCompanyNameInput', companyName || lead.companyName || '');
+          dpiitAddConsultancyRow('Consultancy charge for entire contract', '');
+          dpiitAddConsultancyRow('Miscellaneous expenses BIS Officer', '');
+          return;
+        }
+
+        setDpiitFieldValue('dpiitReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
+        setDpiitFieldValue('dpiitQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
+        setDpiitFieldValue('dpiitCompanyNameInput', quotation.companyName || companyName || lead.companyName || '');
+        setDpiitFieldValue('dpiitClientNameInput', quotation.clientName || '');
+        setDpiitFieldValue('dpiitProductNameInput', quotation.productName || quotation.certificateName || '');
+
+        setDpiitFieldValue('dpiitCommercialExpense1', quotation.commercialExpense1 || 'BIS TF QCO application fee');
+        setDpiitFieldValue('dpiitCommercialAlias1', quotation.commercialAlias1 || '');
+        setDpiitFieldValue('dpiitCommercialValue1', quotation.commercialValue1 || '');
+        setDpiitFieldValue('dpiitCommercialCurrency1', quotation.commercialCurrency1 || 'INR');
+        setDpiitFieldValue('dpiitCommercialExpense2', quotation.commercialExpense2 || 'Minimum marking fee for one year Micro');
+        setDpiitFieldValue('dpiitCommercialAlias2', quotation.commercialAlias2 || '');
+        setDpiitFieldValue('dpiitCommercialValue2', quotation.commercialValue2 || '');
+        setDpiitFieldValue('dpiitCommercialCurrency2', quotation.commercialCurrency2 || 'INR');
+        setDpiitFieldValue('dpiitCommercialExpense3', quotation.commercialExpense3 || 'License fee');
+        setDpiitFieldValue('dpiitCommercialAlias3', quotation.commercialAlias3 || '');
+        setDpiitFieldValue('dpiitCommercialValue3', quotation.commercialValue3 || '');
+        setDpiitFieldValue('dpiitCommercialCurrency3', quotation.commercialCurrency3 || 'INR');
+        setDpiitFieldValue('dpiitCommercialExpense5', quotation.commercialExpense5 || 'Sample testing charges (Per type)');
+        setDpiitFieldValue('dpiitCommercialAlias5', quotation.commercialAlias5 || '');
+        setDpiitFieldValue('dpiitCommercialValue5', quotation.commercialValue5 || '');
+        setDpiitFieldValue('dpiitCommercialCurrency5', quotation.commercialCurrency5 || 'INR');
+        setDpiitFieldValue('dpiitTotalFeesInput', quotation.totalFees || '');
+        setDpiitFieldValue('dpiitTotalFeesCurrencyInput', quotation.totalFeesCurrency || 'INR');
+
+        let extraRows = [];
+        try { extraRows = quotation.extraRowsJson ? JSON.parse(quotation.extraRowsJson) : []; } catch (e) { extraRows = []; }
+        extraRows.forEach(function (row) { dpiitAddExtraRow(row.particular, row.amount, row.currency); });
+
+        let consultancyItems = [];
+        try { consultancyItems = quotation.consultancyItemsJson ? JSON.parse(quotation.consultancyItemsJson) : []; } catch (e) { consultancyItems = []; }
+        if (consultancyItems.length === 0) {
+          dpiitAddConsultancyRow('Consultancy charge for entire contract', '');
+          dpiitAddConsultancyRow('Miscellaneous expenses BIS Officer', '');
+        } else {
+          consultancyItems.forEach(function (row) { dpiitAddConsultancyRow(row.expense, row.amount); });
+        }
+        setDpiitFieldValue('dpiitTotalConsultancyInput', quotation.totalConsultancyFees || '');
+
+        setDpiitFieldValue('dpiitLabSetupCostInput', quotation.labSetupCost || '');
+        setDpiitFieldValue('dpiitLeadTimeInput', quotation.leadTime || '');
+      })
+      .catch(function () {
+        setDpiitFieldValue('dpiitCompanyNameInput', companyName || '');
+        dpiitAddConsultancyRow('Consultancy charge for entire contract', '');
+        dpiitAddConsultancyRow('Miscellaneous expenses BIS Officer', '');
+      });
+  }
+
+  function collectDpiitExtraRows() {
+    const rows = document.querySelectorAll('#dpiitExtraRowsContainer .dpiit-extra-row');
+    const items = [];
+    rows.forEach(function (row) {
+      const particular = row.querySelector('.dpiit-extra-particular').value;
+      const amount = row.querySelector('.dpiit-extra-amount').value;
+      const currency = row.querySelector('.dpiit-extra-currency').value;
+      if (particular || amount) items.push({ particular: particular, amount: amount, currency: currency });
+    });
+    return items;
+  }
+
+  function collectDpiitConsultancyRows() {
+    const rows = document.querySelectorAll('#dpiitConsultancyContainer .dpiit-consultancy-row');
+    const items = [];
+    rows.forEach(function (row) {
+      const expense = row.querySelector('.dpiit-consultancy-expense').value;
+      const amount = row.querySelector('.dpiit-consultancy-amount').value;
+      if (expense || amount) items.push({ expense: expense, amount: amount });
+    });
+    return items;
+  }
+
+  function saveDpiitQuotation() {
+    const leadId = document.getElementById('dpiitLeadIdInput').value;
+    if (!leadId) return;
+    const clientName = document.getElementById('dpiitClientNameInput').value;
+    const productName = document.getElementById('dpiitProductNameInput').value;
+    if (!clientName || !productName) { alert('Client Name and Product / Standard Name are required'); return; }
+
+    const payload = {
+      id: dpiitEditingRevisionId,
+      referenceNo: document.getElementById('dpiitReferenceNoInput').value,
+      quotationDate: document.getElementById('dpiitQuotationDateInput').value || null,
+      companyName: document.getElementById('dpiitCompanyNameInput').value,
+      clientName: clientName,
+      certificateName: productName,
+      productName: productName,
+      commercialExpense1: document.getElementById('dpiitCommercialExpense1').value,
+      commercialAlias1: document.getElementById('dpiitCommercialAlias1').value,
+      commercialValue1: document.getElementById('dpiitCommercialValue1').value,
+      commercialCurrency1: document.getElementById('dpiitCommercialCurrency1').value,
+      commercialExpense2: document.getElementById('dpiitCommercialExpense2').value,
+      commercialAlias2: document.getElementById('dpiitCommercialAlias2').value,
+      commercialValue2: document.getElementById('dpiitCommercialValue2').value,
+      commercialCurrency2: document.getElementById('dpiitCommercialCurrency2').value,
+      commercialExpense3: document.getElementById('dpiitCommercialExpense3').value,
+      commercialAlias3: document.getElementById('dpiitCommercialAlias3').value,
+      commercialValue3: document.getElementById('dpiitCommercialValue3').value,
+      commercialCurrency3: document.getElementById('dpiitCommercialCurrency3').value,
+      commercialExpense5: document.getElementById('dpiitCommercialExpense5').value,
+      commercialAlias5: document.getElementById('dpiitCommercialAlias5').value,
+      commercialValue5: document.getElementById('dpiitCommercialValue5').value,
+      commercialCurrency5: document.getElementById('dpiitCommercialCurrency5').value,
+      totalFees: document.getElementById('dpiitTotalFeesInput').value,
+      totalFeesCurrency: document.getElementById('dpiitTotalFeesCurrencyInput').value,
+      extraRowsJson: JSON.stringify(collectDpiitExtraRows()),
+      consultancyItemsJson: JSON.stringify(collectDpiitConsultancyRows()),
+      totalConsultancyFees: document.getElementById('dpiitTotalConsultancyInput').value,
+      labSetupCost: document.getElementById('dpiitLabSetupCostInput').value,
+      leadTime: document.getElementById('dpiitLeadTimeInput').value
+    };
+
+    fetch('/leads/' + leadId + '/dpiit-quotation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [document.querySelector('meta[name="_csrf_header"]')?.content]: document.querySelector('meta[name="_csrf"]')?.content
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          alert('Failed to save DPIIT quotation: ' + ((data && data.message) || 'Unknown error'));
+          return;
+        }
+        dpiitEditingRevisionId = data.quotation ? data.quotation.id : dpiitEditingRevisionId;
+        showLeadToast('DPIIT quotation saved successfully');
+        closeModal('dpiitEditModal');
+      })
+      .catch(function () {
+        alert('Something went wrong while saving the DPIIT quotation.');
+      });
+  }
+
+  function downloadDpiitQuotationPdf() {
+    if (!dpiitEditingRevisionId) {
+      alert('Save the DPIIT quotation first before downloading its PDF.');
+      return;
+    }
+    alert('DPIIT PDF export isn\'t wired up yet — say the word and I\'ll add a DpiitQuotationPdfService + dpiit-pdf.html next, using the proposal-letter layout you pasted.');
+  }
+</script>
+</body>
+</html>

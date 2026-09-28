@@ -1,0 +1,55 @@
+.cdsco-form-page {
+  height: calc(100vh - 84px);
+  min-height: 520px;
+  padding: 8px 24px 9px;
+  grid-template-rows: 60px minmax(0, 1fr) 42px;
+  gap: 8px;
+}
+.cdsco-create-form {
+  align-content: start;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 8px 10px;
+}
+.company-card { grid-row: auto; }
+.status-card { grid-column: auto; }
+.cdsco-form-card {
+  padding: 7px 11px 9px;
+}
+.cdsco-form-card > header {
+  height: 48px;
+  margin-bottom: 7px;
+  padding: 6px 10px;
+}
+.section-badge { width: 34px; height: 34px; }
+.section-badge svg { width: 18px; height: 18px; }
+.field-grid { gap: 6px 13px; }
+.field-grid label > span { margin-bottom: 2px; }
+.control { height: 32px; }
+.company-card .field-grid { grid-template-columns: 1fr 1fr; }
+.access-card .field-grid.single { grid-template-columns: repeat(3, 1fr); }
+.status-card .field-grid { grid-template-columns: 1fr 1fr; }
+.cdsco-submit { height: 42px; }
+
+@media (max-width: 1050px) {
+  .cdsco-form-page { height: auto; min-height: calc(100vh - 84px); }
+  .cdsco-create-form { grid-template-columns: 1fr; }
+  .status-card { grid-column: auto; }
+  .company-card .field-grid { grid-template-columns: 1fr 1fr; }
+  .access-card .field-grid.single { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 650px) {
+  .company-card .field-grid,
+  .access-card .field-grid.single,
+  .status-card .field-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-height: 720px) and (min-width: 1051px) {
+  .cdsco-form-page { grid-template-rows: 52px minmax(0, 1fr) 38px; padding-top: 6px; padding-bottom: 6px; gap: 6px; }
+  .cdsco-form-card { padding: 5px 9px 7px; }
+  .cdsco-form-card > header { height: 42px; margin-bottom: 4px; padding: 4px 8px; }
+  .field-grid { gap: 4px 10px; }
+  .control { height: 29px; }
+  .cdsco-submit { height: 38px; }
+}

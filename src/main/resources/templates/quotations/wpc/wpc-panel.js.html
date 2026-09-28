@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="wpc-panel-script" th:inline="none">
+	let wpcEditingRevisionId = null;
+
+	function wpcAddItemRow(amt, desc) {
+		const template = document.getElementById('wpcItemRowTemplate');
+		const container = document.getElementById('wpcItemsContainer');
+		if (!template || !container) return;
+		const row = template.content.firstElementChild.cloneNode(true);
+		if (amt !== undefined) row.querySelector('.wpc-item-amt').value = amt || '';
+		if (desc !== undefined) row.querySelector('.wpc-item-desc').value = desc || '';
+		container.appendChild(row);
+	}
+
+	function wpcSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function wpcRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('wpcRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				closeModal('wpcEditModal');
+				setTimeout(function () { openWpcEditPanel(leadId, 'WPC', '', quotation.id); }, 50);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function wpcPopulate(quotation, lead) {
+		const q = quotation || {};
+		wpcSetInput('wpcReferenceNoInput', q.referenceNo || '');
+		wpcSetInput('wpcQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		wpcSetInput('wpcCertificateNameInput', q.certificateName || '');
+		wpcSetInput('wpcClientNameInput', q.clientName || lead.isName || '');
+		wpcSetInput('wpcQtyInput', q.qty);
+		wpcSetInput('wpcEquipmentInput', q.equipment || '');
+		const items = document.getElementById('wpcItemsContainer');
+		items.innerHTML = '';
+		let parsedItems = [];
+		try { parsedItems = q.itemsJson ? JSON.parse(q.itemsJson) : []; } catch (error) { parsedItems = []; }
+		(parsedItems.length ? parsedItems : [{}]).forEach(function (item) { wpcAddItemRow(item.amt, item.desc); });
+	}
+
+	function openWpcEditPanel(leadId, quotationType, companyName, revisionId) {
+		if ((quotationType || '').trim().toLowerCase() !== 'wpc') return;
+		wpcEditingRevisionId = revisionId || null;
+		document.getElementById('wpcQuotationForm').reset();
+		document.getElementById('wpcLeadIdInput').value = leadId;
+		document.getElementById('wpcItemsContainer').innerHTML = '';
+		wpcSetInput('wpcReferenceNoInput', 'REF-' + leadId);
+		wpcSetInput('wpcQuotationDateInput', new Date().toISOString().slice(0, 10));
+		wpcAddItemRow();
+		openModal('wpcEditModal');
+		fetch('/leads/' + leadId + '/wpc-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				wpcRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					wpcPopulate(quotation, lead);
+				} else {
+					wpcSetInput('wpcClientNameInput', lead.isName || companyName || '');
+					wpcSetInput('wpcCertificateNameInput', lead.productName || '');
+				}
+			})
+			.catch(function () { wpcSetInput('wpcClientNameInput', companyName || ''); });
+	}
+
+	function wpcPayload() {
+		const items = Array.from(document.querySelectorAll('#wpcItemsContainer .wpc-item-row')).map(function (row) {
+			return { amt: row.querySelector('.wpc-item-amt')?.value || '', desc: row.querySelector('.wpc-item-desc')?.value || '' };
+		});
+		return {
+			id: wpcEditingRevisionId,
+			leadId: document.getElementById('wpcLeadIdInput').value,
+			referenceNo: document.getElementById('wpcReferenceNoInput').value,
+			quotationDate: document.getElementById('wpcQuotationDateInput').value || null,
+			certificateName: document.getElementById('wpcCertificateNameInput').value,
+			clientName: document.getElementById('wpcClientNameInput').value,
+			qty: document.getElementById('wpcQtyInput').value || null,
+			equipment: document.getElementById('wpcEquipmentInput').value,
+			itemsJson: JSON.stringify(items)
+		};
+	}
+
+	function saveWpcQuotation() {
+		const leadId = document.getElementById('wpcLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/wpc-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(wpcPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save WPC quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('WPC quotation saved successfully');
+				closeModal('wpcEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the WPC quotation.'); });
+	}
+
+	function downloadWpcQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

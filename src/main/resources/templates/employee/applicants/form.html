@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Application</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    :root { --form-blue:#2F78D7; --form-ink:#141414; --form-muted:#707070; --form-line:#E8E8E8; }
+    .application-shell { width:min(1400px,100%); min-height:720px; display:grid; grid-template-columns:280px minmax(0,1fr); overflow:hidden; border:1px solid #E5E7EB; border-radius:22px; background:#fff; box-shadow:0 22px 70px rgba(31,41,55,.12); }
+    .application-rail { padding:18px 14px; border-right:1px solid var(--form-line); background:#FCFCFC; }
+    .rail-brand { display:flex; align-items:center; gap:10px; padding:14px 12px 24px; color:#171923; font-size:16px; font-weight:800; }
+    .rail-brand-mark { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:10px; color:#fff; background:var(--form-blue); }
+    .step-nav { display:flex; flex-direction:column; gap:5px; }
+    .step-nav-item { width:100%; display:flex; align-items:center; gap:12px; border:0; border-radius:12px; padding:13px 12px; color:#555; background:transparent; font-size:14px; font-weight:700; text-align:left; cursor:pointer; }
+    .step-nav-item:hover { background:#F2F5F9; }
+    .step-nav-item.active { color:#1F5CAB; background:#EAF2FD; }
+    .step-nav-item.done { color:#2F78D7; }
+    .step-icon { width:20px; height:20px; flex:none; }
+    .application-content { min-width:0; padding:36px 56px 24px 64px; display:flex; flex-direction:column; }
+    .mobile-progress { display:none; }
+    .step-kicker { color:#858585; font-size:14px; font-weight:700; }
+    .step-heading { margin:5px 0 4px; color:var(--form-ink); font-size:31px; line-height:1.1; font-weight:850; letter-spacing:-.02em; }
+    .step-description { margin:0 0 24px; color:#5D5D5D; font-size:16px; }
+    .form-step .step-kicker { text-align:left; }
+    .form-step .step-heading,
+    .form-step .step-description { position:relative; top:-30px; text-align:right; }
+    .form-step { display:none; flex:1; }
+    .form-step.active { display:block; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 16px; }
+    .field-grid.single { grid-template-columns:1fr; }
+    .form-field { min-width:0; }
+    .field-label { display:block; margin-bottom:8px; color:#555; font-size:14px; font-weight:700; }
+    .required { color:#D14343; }
+    .field { width:100%; min-height:38px; border:1px solid #F0F0F0; border-radius:12px; padding:7px 12px; color:#222; background:#FBFBFB; font-size:15px; outline:none; transition:border-color .18s, box-shadow .18s, background .18s; }
+    .field::placeholder { color:#919191; }
+    .field:focus { border-color:#77A8E4; background:#fff; box-shadow:0 0 0 4px rgba(47,120,215,.12); }
+    textarea.field { min-height:54px; resize:vertical; }
+    .choice-label { margin-bottom:10px; color:#555; font-size:14px; font-weight:700; }
+    .choice-group { display:flex; flex-wrap:wrap; gap:10px; }
+    .choice-input { position:absolute; opacity:0; pointer-events:none; }
+    .choice-option { display:inline-flex; align-items:center; justify-content:center; min-height:48px; border:1px solid #DADADA; border-radius:999px; padding:0 22px; color:#222; background:#fff; font-size:15px; cursor:pointer; }
+    .choice-input:checked + .choice-option { border-color:var(--form-blue); color:#1557A8; background:#EAF2FD; box-shadow:0 0 0 2px var(--form-blue); }
+    .step-footer { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:24px; padding-top:16px; border-top:1px solid var(--form-line); }
+    .step-button { display:inline-flex; width:auto !important; min-width:0 !important; min-height:44px; height:44px; align-items:center; justify-content:center; border:1px solid #DADADA; border-radius:10px; padding:0 22px; color:#555; background:#fff; font-size:15px; font-weight:750; cursor:pointer; white-space:nowrap; }
+    .step-button.primary { border-color:var(--form-blue); color:#fff; background:var(--form-blue); box-shadow:0 8px 18px rgba(47,120,215,.2); }
+    .step-button:hover { filter:brightness(.97); }
+    .cancel-link { color:#777; font-size:13px; font-weight:700; text-decoration:none; }
+    .info-note { margin-bottom:20px; border-left:3px solid #77A8E4; border-radius:8px; padding:12px 14px; color:#5D6E83; background:#F5F9FE; font-size:13px; line-height:1.5; }
+    .application-table-wrap { width:100%; overflow-x:auto; }
+    .application-table { width:100%; min-width:940px; border:1px solid #F0F0F0; border-collapse:collapse; color:#111; background:#fff; }
+    .application-table th { height:64px; padding:12px 18px; border:1px solid #F0F0F0; color:#111; background:#F6F6F6; font-size:18px; font-weight:800; text-align:left; white-space:nowrap; }
+    .application-table td { height:58px; padding:7px 18px; border:1px solid #F0F0F0; background:#fff; }
+    .application-table th:nth-child(1) { width:17%; }
+    .application-table th:nth-child(2) { width:25%; }
+    .application-table th:nth-child(3) { width:29%; }
+    .application-table th:nth-child(4) { width:14%; }
+    .application-table th:nth-child(5) { width:15%; }
+    .employment-table th { width:25% !important; }
+    .certification-table th { width:33.33% !important; }
+    .application-table .field { width:100%; min-width:0; min-height:40px; border:1px solid #E2E6FF; border-radius:6px; padding:6px 12px; background:#FEFEFF; font-size:16px; box-shadow:none; }
+    .application-table .field:focus { border-color:#A8C9F4; box-shadow:0 0 0 2px rgba(47,120,215,.08); }
+    .array-table-actions { display:flex; justify-content:flex-end; margin-top:12px; }
+    .add-array-row { display:inline-flex; align-items:center; gap:7px; min-height:38px; border:1px dashed #77A8E4; border-radius:8px; padding:0 13px; color:#195da9; background:#f5faff; font-size:13px; font-weight:750; cursor:pointer; }
+    .add-array-row:hover { background:#e8f3ff; }
+    @media (max-width:900px) { .application-shell { grid-template-columns:220px minmax(0,1fr); } .application-content { padding:30px 28px 22px 36px; } }
+    @media (max-width:680px) {
+      .application-shell { display:block; min-height:0; border:0; border-radius:0; box-shadow:none; }
+      .application-rail { display:none; }
+      .application-content { padding:16px 14px 14px; }
+      .application-content form { width:100%; }
+      .mobile-progress { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+      .mobile-progress-track { height:5px; flex:1; overflow:hidden; border-radius:999px; background:#E7EDF5; }
+      .mobile-progress-value { display:block; width:14.28%; height:100%; border-radius:inherit; background:var(--form-blue); transition:width .2s ease; }
+      .mobile-progress-count { color:#777; font-size:12px; font-weight:800; white-space:nowrap; }
+      .step-kicker { font-size:13px; }
+      .step-heading { margin:2px 0 2px; font-size:24px; line-height:1.08; }
+      .step-description { margin-bottom:15px; font-size:14px; line-height:1.35; }
+      .field-grid { grid-template-columns:1fr; gap:11px; }
+      .field-label { margin-bottom:5px; font-size:13px; }
+      .field { min-height:38px; padding:8px 11px; font-size:14px; }
+      .application-table th { height:auto; padding:12px; font-size:14px; }
+      .application-table td { height:auto; padding:9px; }
+      .application-table .field { min-height:40px; padding:7px 10px; font-size:14px; }
+      textarea.field { min-height:62px; }
+      .choice-label { margin-bottom:7px; font-size:13px; }
+      .choice-group { gap:7px; }
+      .choice-option { min-height:42px; flex:1 1 calc(50% - 7px); padding:0 10px; font-size:13px; }
+      .form-step .mt-6 { margin-top:14px !important; }
+      .form-step .mt-5 { margin-top:14px !important; }
+      .step-footer { margin-top:16px; padding-top:10px; }
+      .step-footer > div { display:flex; width:auto; flex:0 0 auto; }
+      .step-button { min-height:42px; height:42px; padding:0 15px; font-size:14px; }
+      .step-button.primary { min-width:0; }
+    }
+    @media (max-width:380px) { .step-footer { gap:8px; } .step-button { padding:0 13px; font-size:13px; } .choice-option { flex-basis:100%; } }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen">
+    <main class="flex min-h-screen items-center justify-center bg-[#F4F5F7] p-4 sm:p-6">
+      <div class="application-shell">
+        <aside class="application-rail">
+          <div class="rail-brand"><span class="rail-brand-mark">E</span><span>Employee Application</span></div>
+          <nav class="step-nav" aria-label="Application steps">
+            <button type="button" class="step-nav-item active" data-step="0"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><span>Position</span></button>
+            <button type="button" class="step-nav-item" data-step="1"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.1-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span>Personal</span></button>
+            <button type="button" class="step-nav-item" data-step="2"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-4 9 4-9 4-9-4Z"/><path d="M7 11v5c2.7 2.2 7.3 2.2 10 0v-5M21 9v6"/></svg><span>Education</span></button>
+            <button type="button" class="step-nav-item" data-step="3"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg><span>Employment</span></button>
+            <button type="button" class="step-nav-item" data-step="4"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Certifications</span></button>
+            <button type="button" class="step-nav-item" data-step="5"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20c.5-3.5 2.2-5 5-5s4.5 1.5 5 5M14 15c3.5-.2 5.7 1.5 6.5 5"/></svg><span>References</span></button>
+            <button type="button" class="step-nav-item" data-step="6"><svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 13h6M9 17h6M9 9h3"/></svg><span>Declaration</span></button>
+          </nav>
+        </aside>
+
+        <section class="application-content">
+          <div class="mobile-progress"><div class="mobile-progress-track"><span class="mobile-progress-value"></span></div><span class="mobile-progress-count">Step 1 of 7</span></div>
+          <form id="applicationForm" th:object="${applicant}" th:action="${applicant.id == null ? '/emp-app-form' : '/emp-app-form/' + applicant.id}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:if="${applicant.id != null}" th:field="*{id}" id="applicantId">
+
+            <section class="form-step active" data-step-panel="0" data-title="Position" data-description="Role, type and expectations">
+              <span class="step-kicker">Step 1 of 7</span><h1 class="step-heading">Position</h1><p class="step-description">Role, type and expectations</p>
+              <div class="field-grid"><div class="form-field"><label class="field-label">Position applied for <span class="required">*</span></label><input class="field" th:field="*{position}" placeholder="e.g. Software Developer" required></div><div class="form-field"><label class="field-label">Job reference no.</label><input class="field" th:field="*{jobRef}" placeholder="Optional"></div><div class="form-field"><label class="field-label">Preferred start date <span class="required">*</span></label><input type="date" class="field" th:field="*{startDate}" required></div></div>
+              <div class="form-field mt-6"><p class="choice-label">Employment type <span class="required">*</span></p><div class="choice-group"><label><input class="choice-input" type="radio" th:field="*{employmentType}" value="1" required><span class="choice-option">Full-time</span></label><label><input class="choice-input" type="radio" th:field="*{employmentType}" value="2"><span class="choice-option">Part-time</span></label><label><input class="choice-input" type="radio" th:field="*{employmentType}" value="3"><span class="choice-option">Contract</span></label><label><input class="choice-input" type="radio" th:field="*{employmentType}" value="4"><span class="choice-option">Internship</span></label></div></div>
+              <div class="field-grid mt-6"><div class="form-field"><p class="choice-label">Do you have your own laptop? <span class="required">*</span></p><div class="choice-group"><label><input class="choice-input" type="radio" th:field="*{ownLaptop}" value="1" required><span class="choice-option">Yes</span></label><label><input class="choice-input" type="radio" th:field="*{ownLaptop}" value="2"><span class="choice-option">No</span></label></div></div><div class="form-field"><p class="choice-label">Do you agree to a 1-year bond? <span class="required">*</span></p><div class="choice-group"><label><input class="choice-input" type="radio" th:field="*{bond}" value="1" required><span class="choice-option">Yes</span></label><label><input class="choice-input" type="radio" th:field="*{bond}" value="2"><span class="choice-option">No</span></label></div></div></div>
+              <div class="field-grid mt-6"><div class="form-field"><label class="field-label">Last / current salary <span class="required">*</span></label><input class="field" th:field="*{lastSalary}" required></div><div class="form-field"><label class="field-label">Salary expectation <span class="required">*</span></label><input class="field" th:field="*{salaryExpect}" required></div></div>
+            </section>
+
+            <section class="form-step" data-step-panel="1" data-title="Personal" data-description="Tell us about yourself">
+              <span class="step-kicker">Step 2 of 7</span><h1 class="step-heading">Personal</h1><p class="step-description">Tell us about yourself</p>
+              <div class="field-grid"><div class="form-field"><label class="field-label">Full name <span class="required">*</span></label><input class="field" th:field="*{name}" required></div><div class="form-field"><label class="field-label">Date of birth</label><input type="date" class="field" th:field="*{dob}"></div><div class="form-field"><label class="field-label">Nationality <span class="required">*</span></label><select class="field" th:field="*{nationality}" required><option value="">-- Select --</option><option value="1">Indian</option><option value="2">Other</option></select></div><div class="form-field"><label class="field-label">National ID / passport number</label><input class="field" th:field="*{nationalId}"></div><div class="form-field"><label class="field-label">Phone <span class="required">*</span></label><input type="tel" class="field" th:field="*{phone}" required></div><div class="form-field"><label class="field-label">Email <span class="required">*</span></label><input type="email" class="field" th:field="*{email}" required></div></div><div class="form-field mt-5"><label class="field-label">Residential address</label><textarea class="field" rows="3" th:field="*{address}"></textarea></div>
+            </section>
+
+            <section class="form-step" data-step-panel="2" data-title="Education" data-description="Your academic background">
+              <span class="step-kicker">Step 3 of 7</span><h1 class="step-heading">Education</h1><p class="step-description">Your academic background</p><p class="info-note">Add up to four qualifications, as in the Laravel application form.</p>
+              <input type="hidden" th:field="*{instituteName}" class="array-store"><input type="hidden" th:field="*{qualification}" class="array-store"><input type="hidden" th:field="*{board}" class="array-store"><input type="hidden" th:field="*{year}" class="array-store"><input type="hidden" th:field="*{percentage}" class="array-store">
+              <div class="application-table-wrap mt-5"><table class="application-table" data-array-table="education"><thead><tr><th>Institute Name</th><th>Qualification</th><th>Board</th><th>Year</th><th>Percentage</th></tr></thead><tbody><tr th:each="row : ${#numbers.sequence(0, 3)}"><td><input class="field array-input" data-array-field="instituteName" th:attr="data-array-index=${row}"></td><td><select class="field array-input" data-array-field="qualification" th:attr="data-array-index=${row}"><option value="">-- Select Qualification --</option><option th:each="option : ${qualificationOptions}" th:value="${option.key}" th:text="${option.value}"></option></select></td><td><select class="field array-input" data-array-field="board" th:attr="data-array-index=${row}"><option value="">-- Select Board --</option><option th:each="option : ${boardOptions}" th:value="${option.key}" th:text="${option.value}"></option></select></td><td><select class="field array-input" data-array-field="year" th:attr="data-array-index=${row}"><option value="">-- Select year --</option><option th:each="value : ${#numbers.sequence(1990, T(java.time.Year).now().value)}" th:value="${value}" th:text="${value}"></option></select></td><td><input class="field array-input" data-array-field="percentage" th:attr="data-array-index=${row}"></td></tr></tbody></table><div class="array-table-actions"><button type="button" class="add-array-row" data-add-row="education">+ Add another qualification</button></div></div>
+            </section>
+
+            <section class="form-step" data-step-panel="3" data-title="Employment" data-description="Your previous experience">
+              <span class="step-kicker">Step 4 of 7</span><h1 class="step-heading">Employment</h1><p class="step-description">Your previous experience</p>
+              <input type="hidden" th:field="*{employerName}" class="array-store"><input type="hidden" th:field="*{jobTitle}" class="array-store"><input type="hidden" th:field="*{responsibilities}" class="array-store"><input type="hidden" th:field="*{employmentPeriod}" class="array-store">
+              <div class="application-table-wrap"><table class="application-table employment-table" data-array-table="employment"><thead><tr><th>Employer Name</th><th>Job Title</th><th>Major Role/Responsibilities</th><th>Employment Period</th></tr></thead><tbody><tr th:each="row : ${#numbers.sequence(0, 3)}"><td><input class="field array-input" data-array-field="employerName" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="jobTitle" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="responsibilities" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="employmentPeriod" th:attr="data-array-index=${row}"></td></tr></tbody></table><div class="array-table-actions"><button type="button" class="add-array-row" data-add-row="employment">+ Add another employer</button></div></div>
+              <div class="field-grid mt-5"><div class="form-field"><label class="field-label">Reason For Leaving <span class="required">*</span></label><textarea class="field" rows="4" th:field="*{reasonForLeave}" required></textarea></div><div class="form-field"><label class="field-label">List Up to 3 Relevant Skills</label><textarea class="field" rows="4" th:field="*{relevantSkill}"></textarea></div></div>
+            </section>
+
+            <section class="form-step" data-step-panel="4" data-title="Certifications" data-description="Courses and professional credentials">
+              <span class="step-kicker">Step 5 of 7</span><h1 class="step-heading">Certifications</h1><p class="step-description">Courses and professional credentials</p>
+              <input type="hidden" th:field="*{courseName}" class="array-store"><input type="hidden" th:field="*{specialization}" class="array-store"><input type="hidden" th:field="*{dateCompleted}" class="array-store">
+              <div class="application-table-wrap"><table class="application-table certification-table" data-array-table="certification"><thead><tr><th>Course/Certification</th><th>Specialization</th><th>Date Completed</th></tr></thead><tbody><tr th:each="row : ${#numbers.sequence(0, 1)}"><td><input class="field array-input" data-array-field="courseName" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="specialization" th:attr="data-array-index=${row}"></td><td><input type="date" class="field array-input" data-array-field="dateCompleted" th:attr="data-array-index=${row}"></td></tr></tbody></table><div class="array-table-actions"><button type="button" class="add-array-row" data-add-row="certification">+ Add another certification</button></div></div>
+            </section>
+
+            <section class="form-step" data-step-panel="5" data-title="References" data-description="Professional contacts who can recommend you">
+              <span class="step-kicker">Step 6 of 7</span><h1 class="step-heading">References</h1><p class="step-description">Professional contacts who can recommend you</p>
+              <input type="hidden" th:field="*{refName}" class="array-store"><input type="hidden" th:field="*{refDesignation}" class="array-store"><input type="hidden" th:field="*{refRelationship}" class="array-store"><input type="hidden" th:field="*{refContact}" class="array-store"><input type="hidden" th:field="*{refEmail}" class="array-store">
+              <div class="application-table-wrap"><table class="application-table references-table" data-array-table="reference"><thead><tr><th>Name</th><th>Designation</th><th>Relationship</th><th>Contact No.</th><th>Email</th></tr></thead><tbody><tr th:each="row : ${#numbers.sequence(0, 1)}"><td><input class="field array-input" data-array-field="refName" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="refDesignation" th:attr="data-array-index=${row}"></td><td><input class="field array-input" data-array-field="refRelationship" th:attr="data-array-index=${row}"></td><td><input type="tel" class="field array-input" data-array-field="refContact" th:attr="data-array-index=${row}"></td><td><input type="email" class="field array-input" data-array-field="refEmail" th:attr="data-array-index=${row}"></td></tr></tbody></table><div class="array-table-actions"><button type="button" class="add-array-row" data-add-row="reference">+ Add another reference</button></div></div>
+            </section>
+
+            <section class="form-step" data-step-panel="6" data-title="Declaration" data-description="Review and submit your application">
+              <span class="step-kicker">Step 7 of 7</span><h1 class="step-heading">Declaration</h1><p class="step-description">Review and submit your application</p><p class="info-note">I hereby declare that the information provided in this application is true and complete to the best of my knowledge.</p><div class="field-grid single"><div class="form-field"><label class="field-label">Signature <span class="required">*</span></label><input class="field" th:field="*{signature}" required></div><div class="form-field"><label class="field-label">Date <span class="required">*</span></label><input type="date" class="field" th:field="*{applicationDate}" required></div></div>
+            </section>
+
+            <div class="step-footer"><a href="/emp-app-form/index" class="cancel-link">Cancel</a><div class="flex gap-2"><button type="button" id="previousStep" class="step-button">Back</button><button type="button" id="nextStep" class="step-button primary">Continue</button><button type="submit" id="submitApplication" class="step-button primary" th:text="${applicant.id == null ? 'Submit application' : 'Save changes'}">Submit application</button></div></div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      const form = document.getElementById('applicationForm');
+      const navItems = Array.from(document.querySelectorAll('.step-nav-item'));
+      const panels = Array.from(document.querySelectorAll('.form-step'));
+      const previous = document.getElementById('previousStep');
+      const next = document.getElementById('nextStep');
+      const submit = document.getElementById('submitApplication');
+      const progress = document.querySelector('.mobile-progress-value');
+      const progressCount = document.querySelector('.mobile-progress-count');
+      const draftId = document.getElementById('applicantId')?.value || 'new';
+      const draftStorageKey = `employeeApplicationDraft:${draftId}`;
+      let current = 0;
+      let autosaveTimer;
+      let autosaveRequest;
+      function storedArray(field) {
+        const store = document.getElementById(field);
+        if (!store || !store.value) return [];
+        try { return JSON.parse(store.value); } catch (error) { return store.value.split('\n'); }
+      }
+      function restoreArrayInputs() {
+        document.querySelectorAll('.array-input').forEach((input) => {
+          const value = storedArray(input.dataset.arrayField)[Number(input.dataset.arrayIndex)] || '';
+          input.value = value;
+        });
+      }
+      function saveArrayInputs() {
+        document.querySelectorAll('.array-store').forEach((store) => {
+          const values = Array.from(document.querySelectorAll(`.array-input[data-array-field="${store.id}"]`))
+            .map((input) => input.value);
+          store.value = JSON.stringify(values);
+        });
+      }
+      const tableFields = {
+        education: ['instituteName', 'qualification', 'board', 'year', 'percentage'],
+        employment: ['employerName', 'jobTitle', 'responsibilities', 'employmentPeriod'],
+        certification: ['courseName', 'specialization', 'dateCompleted'],
+        reference: ['refName', 'refDesignation', 'refRelationship', 'refContact', 'refEmail']
+      };
+      function addArrayRow(tableName) {
+        const table = document.querySelector(`[data-array-table="${tableName}"]`);
+        const body = table?.querySelector('tbody');
+        const sample = body?.querySelector('tr:last-child');
+        if (!sample) return;
+        const row = sample.cloneNode(true);
+        const index = body.rows.length;
+        row.querySelectorAll('.array-input').forEach((input) => {
+          input.value = '';
+          input.dataset.arrayIndex = index;
+        });
+        body.appendChild(row);
+      }
+      function ensureStoredRows() {
+        Object.entries(tableFields).forEach(([tableName, fields]) => {
+          const expectedRows = Math.max(0, ...fields.map((field) => storedArray(field).length));
+          const table = document.querySelector(`[data-array-table="${tableName}"]`);
+          while (table && table.querySelectorAll('tbody tr').length < expectedRows) addArrayRow(tableName);
+        });
+      }
+      function saveLocalDraft() {
+        saveArrayInputs();
+        const values = {};
+        form.querySelectorAll('input, textarea, select').forEach((field) => {
+          if (!field.name) return;
+          if (field.type === 'radio' || field.type === 'checkbox') {
+            if (field.checked) values[field.name] = field.value;
+          } else {
+            values[field.name] = field.value;
+          }
+        });
+        try { localStorage.setItem(draftStorageKey, JSON.stringify(values)); } catch (error) { }
+      }
+      function restoreLocalDraft() {
+        try {
+          const values = JSON.parse(localStorage.getItem(draftStorageKey) || '{}');
+          form.querySelectorAll('input, textarea, select').forEach((field) => {
+            if (!(field.name in values)) return;
+            if (field.type === 'radio' || field.type === 'checkbox') {
+              field.checked = field.value === values[field.name];
+            } else {
+              field.value = values[field.name];
+            }
+          });
+        } catch (error) {
+          localStorage.removeItem(draftStorageKey);
+        }
+      }
+      function autosave() {
+        saveLocalDraft();
+        panels.forEach((panel) => panel.querySelectorAll('input, textarea, select').forEach((field) => { field.disabled = false; }));
+        const data = new FormData(form);
+        panels.forEach((panel) => panel.querySelectorAll('input, textarea, select').forEach((field) => { field.disabled = panel !== panels[current]; }));
+        autosaveRequest = fetch('/emp-app-form/autosave', {
+          method: 'POST',
+          body: data,
+          credentials: 'same-origin'
+        }).then((response) => {
+          if (!response.ok) throw new Error('Autosave failed');
+          return response.json();
+        }).then((result) => {
+          let id = document.getElementById('applicantId');
+          if (!id) {
+            id = document.createElement('input');
+            id.type = 'hidden';
+            id.name = 'id';
+            id.id = 'applicantId';
+            form.prepend(id);
+          }
+          id.value = result.id;
+        }).catch(() => {});
+      }
+      function scheduleAutosave() {
+        clearTimeout(autosaveTimer);
+        saveLocalDraft();
+        autosaveTimer = setTimeout(autosave, 700);
+      }
+      function currentFields() { return Array.from(panels[current].querySelectorAll('input, textarea, select')); }
+      function syncDisabled() { panels.forEach((panel, index) => panel.querySelectorAll('input, textarea, select').forEach((field) => { field.disabled = index !== current; })); }
+      function render() {
+        navItems.forEach((item, index) => { item.classList.toggle('active', index === current); item.classList.toggle('done', index < current); });
+        panels.forEach((panel, index) => panel.classList.toggle('active', index === current));
+        const activePanel = panels[current];
+        document.querySelector('.step-kicker').textContent = `Step ${current + 1} of ${panels.length}`;
+        document.querySelector('.step-heading').textContent = activePanel.dataset.title;
+        document.querySelector('.step-description').textContent = activePanel.dataset.description;
+        previous.style.visibility = current === 0 ? 'hidden' : 'visible';
+        next.style.display = current === panels.length - 1 ? 'none' : 'inline-flex';
+        submit.style.display = current === panels.length - 1 ? 'inline-flex' : 'none';
+        progress.style.width = `${((current + 1) / panels.length) * 100}%`;
+        progressCount.textContent = `Step ${current + 1} of ${panels.length}`;
+        syncDisabled();
+      }
+      function moveTo(index) { if (index < 0 || index >= panels.length) return; current = index; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      navItems.forEach((item, index) => item.addEventListener('click', () => moveTo(index)));
+      next.addEventListener('click', () => { if (currentFields().every((field) => field.checkValidity())) moveTo(current + 1); else currentFields().find((field) => !field.checkValidity())?.reportValidity(); });
+      previous.addEventListener('click', () => moveTo(current - 1));
+      form.addEventListener('input', scheduleAutosave);
+      form.addEventListener('change', scheduleAutosave);
+      document.querySelectorAll('.add-array-row').forEach((button) => button.addEventListener('click', () => {
+        addArrayRow(button.dataset.addRow);
+        saveArrayInputs();
+        scheduleAutosave();
+      }));
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearTimeout(autosaveTimer);
+        autosave();
+        if (autosaveRequest) await autosaveRequest;
+        saveArrayInputs();
+        panels.forEach((panel) => panel.querySelectorAll('input, textarea, select').forEach((field) => { field.disabled = false; }));
+        localStorage.removeItem(draftStorageKey);
+        form.submit();
+      });
+      window.addEventListener('pagehide', () => {
+        saveLocalDraft();
+        clearTimeout(autosaveTimer);
+        autosave();
+      });
+      ensureStoredRows();
+      restoreArrayInputs();
+      restoreLocalDraft();
+      saveArrayInputs();
+      render();
+    }());
+  </script>
+</body>
+</html>

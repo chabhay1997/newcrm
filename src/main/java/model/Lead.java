@@ -238,4 +238,7 @@ public class Lead {
 
     public String getQuotationType() { return quotationType; }
     public void setQuotationType(String quotationType) { this.quotationType = quotationType; }
+
+    public Long getCreatedBy() { return createdBy; }
+    public String getIsNumber() { return isNumber; }
 }

@@ -8,6 +8,11 @@
 <meta name="_csrf_header" th:content="${_csrf.headerName}">
 <title>Invoices</title>
 <link rel="stylesheet" th:href="@{/css/output.css}">
+<<<<<<< HEAD
+<link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
+<script defer th:src="@{/js/invoice-pagination.js}"></script>
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
 <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
 <style>
@@ -24,7 +29,11 @@
   .invoice-data-table td:last-child { position:relative; overflow:visible; z-index:2; }
   .invoice-data-table tr:has(.invoice-actions[open]) td:last-child { z-index:20; }
   .invoice-data-table tbody tr:last-child td { border-bottom:0; }
+<<<<<<< HEAD
+  .invoice-data-table th { height:48px; color:#fff; border-right-color:rgba(255,255,255,.32); font-size:11px; font-weight:800; text-transform:none; letter-spacing:.03em; background:linear-gradient(135deg,#6092ec,#5686e2); }
+=======
   .invoice-data-table th { height:38px; color:#263d60; font-size:11px; font-weight:800; text-transform:none; letter-spacing:0; background:linear-gradient(115deg,#edf2f8 0%,#f7f9fc 100%); }
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
   .invoice-data-table td { height:60px; overflow:hidden; background:#fff; color:#102343; }
   .invoice-data-table th:nth-child(1) { width:15%; }.invoice-data-table th:nth-child(2) { width:27%; }.invoice-data-table th:nth-child(3) { width:11%; }.invoice-data-table th:nth-child(4) { width:10%; }.invoice-data-table th:nth-child(5) { width:12%; }.invoice-data-table th:nth-child(6) { width:11%; }.invoice-data-table th:nth-child(7) { width:10%; }.invoice-data-table th:nth-child(8) { width:4%; }
   .invoice-data-table tbody tr { transition:background .16s ease; }

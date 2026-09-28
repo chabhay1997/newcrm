@@ -27,7 +27,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        String email = normalizeLogin(login);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
@@ -46,6 +47,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .disabled(!enabled)
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority(roleName)))
                 .build();
+    }
+
+    private String normalizeLogin(String login) {
+        String value = login == null ? "" : login.trim().toLowerCase();
+        return value.contains("@") ? value : value + "@evtlindia.com";
     }
 
     public void registerUser(

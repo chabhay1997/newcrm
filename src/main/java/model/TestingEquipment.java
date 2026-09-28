@@ -51,6 +51,10 @@ public class TestingEquipment {
     @Column(name = "des_qty_price", columnDefinition = "LONGTEXT")
     private String desQtyPrice;
 
+    /** 0 = pending review, 1 = approved, 2 = expired. */
+    @Column(name = "quotation_status")
+    private Integer quotationStatus = 0;
+
     public Integer getId() { return id; }
     public Long getCreatedBy() { return createdBy; }
     public String getInvoiceNo() { return invoiceNo; }
@@ -64,6 +68,7 @@ public class TestingEquipment {
     public BigDecimal getActualPrice() { return actualPrice; }
     public String getDescription() { return description; }
     public String getDesQtyPrice() { return desQtyPrice; }
+    public Integer getQuotationStatus() { return quotationStatus; }
 
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
     public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
@@ -77,4 +82,5 @@ public class TestingEquipment {
     public void setActualPrice(BigDecimal actualPrice) { this.actualPrice = actualPrice; }
     public void setDescription(String description) { this.description = description; }
     public void setDesQtyPrice(String desQtyPrice) { this.desQtyPrice = desQtyPrice; }
+    public void setQuotationStatus(Integer quotationStatus) { this.quotationStatus = quotationStatus; }
 }

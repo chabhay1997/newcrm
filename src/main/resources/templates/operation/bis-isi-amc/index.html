@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BIS ISI-AMC | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <link rel="stylesheet" th:href="@{/css/bis-isi-amc.css}">
+  <link rel="stylesheet" th:href="@{/css/bis-isi-amc-download.css}">
+  <link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
+  <link rel="stylesheet" th:href="@{/css/bis-isi-amc-cells.css}">
+  <script defer th:src="@{/js/bis-isi-amc.js}"></script>
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="amc-page">
+    <input type="hidden" id="amc-csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <div th:if="${success}" class="amc-alert success" role="status" th:text="${success}"></div>
+    <div th:if="${error}" class="amc-alert error" role="alert" th:text="${error}"></div>
+    <section class="amc-panel" aria-labelledby="amc-title">
+      <header class="amc-panel-head">
+        <div class="amc-title-wrap"><span class="amc-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span><div><h1 id="amc-title">BIS ISI-AMC</h1><p th:text="|${operations.totalElements} licensed operation${operations.totalElements == 1 ? '' : 's'}|">Licensed operations</p></div></div>
+        <a class="amc-back" th:href="@{/operation/bis-isi}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h12"/></svg>Back to BIS-ISI</a>
+      </header>
+      <div class="amc-toolbar">
+        <div class="amc-toolbar-left">
+          <a class="amc-excel" th:href="@{/operation/bis-isi-amc/export(search=${search})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Excel</a>
+          <form class="amc-size-form" method="get" th:action="@{/operation/bis-isi-amc}"><input type="hidden" name="search" th:value="${search}"><label for="amc-size">Show</label><select id="amc-size" name="size" onchange="this.form.submit()"><option value="10" th:selected="${size == 10}">10 rows</option><option value="25" th:selected="${size == 25}">25 rows</option><option value="50" th:selected="${size == 50}">50 rows</option><option value="100" th:selected="${size == 100}">100 rows</option></select></form>
+        </div>
+        <form class="amc-search" method="get" th:action="@{/operation/bis-isi-amc}" role="search"><input type="hidden" name="size" th:value="${size}"><label for="amc-search">Search</label><div class="amc-search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="amc-search" name="search" type="search" th:value="${search}" placeholder="Search operations" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="amc-search-suggestions"><button type="submit">Search</button><div id="amc-search-suggestions" class="amc-search-suggestions" role="listbox" hidden></div></div></form>
+      </div>
+      <div class="amc-table-wrap">
+        <table class="amc-table">
+          <thead><tr><th scope="col">SN</th><th scope="col">Details</th><th scope="col">Imp. Dates</th><th scope="col">Quotation</th></tr></thead>
+          <tbody>
+            <tr th:each="o,row:${operations.content}" th:with="quote=${amcQuotes.get(o.id)}">
+              <td class="amc-serial"><span class="amc-serial-badge" th:text="${operations.number * operations.size + row.index + 1}">1</span></td>
+              <td><div class="amc-details"><div><b>Company</b><strong class="amc-company-value" th:text="${o.companyName}">Company</strong></div><div><b>Client</b><span th:classappend="${o.clientName == null or o.clientName.isBlank() ? 'amc-missing' : ''}" th:text="${o.clientName == null or o.clientName.isBlank() ? 'N/A' : o.clientName}">N/A</span></div><div><b>IS No.</b><span class="amc-standard-value" th:text="${o.indianStandard == null or o.indianStandard.isBlank() ? 'N/A' : o.indianStandard}">N/A</span></div><div><b>Product</b><span class="amc-product-value" th:if="${quote != null and quote.product != null}" th:text="${quote.product}">Product</span><em th:unless="${quote != null and quote.product != null}">Not added</em></div></div></td>
+              <td><div class="amc-details"><div><b>CML No.</b><span th:text="${quote != null and quote.cmlNumber != null ? quote.cmlNumber : (o.cmlNumber == null or o.cmlNumber.isBlank() ? 'N/A' : o.cmlNumber)}">N/A</span></div><div><b>Grant</b><span th:text="${o.licenceDate == null ? 'N/A' : o.licenceDate}">N/A</span></div><div><b>Validity</b><span th:text="${quote == null or quote.licenceValidityDate == null ? 'N/A' : quote.licenceValidityDate}">N/A</span></div></div></td>
+              <td><div class="amc-quote-actions"><button type="button" class="amc-create" th:data-operation-id="${o.id}" th:text="${quote == null ? '+ Create' : '✎ Edit'}">+ Create</button><a th:if="${quote != null}" class="amc-download available" th:href="@{/operation/bis-isi-amc/{id}/quotation/download(id=${o.id},quotation_id=${quote.id})}" th:aria-label="|Download AMC/SIT quotation for ${o.companyName}|"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 18v2h14v-2"/></svg>Download</a><button th:unless="${quote != null}" type="button" class="amc-download" disabled title="Create a quotation to enable download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 18v2h14v-2"/></svg>Download</button></div></td>
+            </tr>
+            <tr th:if="${operations.empty}"><td class="amc-empty" colspan="4"><strong>No licensed operations found</strong><span th:text="${search.isBlank() ? 'Operations marked License Granted will appear here.' : 'Try a different search term.'}">No records</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="amc-footer classic-pagination" th:attr="data-current=${operations.number + 1},data-pages=${operations.totalPages == 0 ? 1 : operations.totalPages},data-total=${operations.totalElements},data-size=${operations.size}"><span th:text="|Showing ${operations.empty ? 0 : operations.number * operations.size + 1} to ${operations.number * operations.size + operations.numberOfElements} of ${operations.totalElements} entries|">Showing records</span><nav class="classic-pagination-controls" aria-label="AMC pages"><a th:if="${operations.hasPrevious()}" th:href="@{/operation/bis-isi-amc(page=${operations.number - 1},size=${size},search=${search})}">Previous</a><span th:text="|Page ${operations.number + 1} of ${operations.totalPages == 0 ? 1 : operations.totalPages}|"></span><a th:if="${operations.hasNext()}" th:href="@{/operation/bis-isi-amc(page=${operations.number + 1},size=${size},search=${search})}">Next</a></nav></footer>
+    </section>
+  </main>
+</div>
+</body>
+</html>
