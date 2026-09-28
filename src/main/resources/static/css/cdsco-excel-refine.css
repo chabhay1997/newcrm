@@ -16,6 +16,28 @@
 .cdsco-filter-actions .cdsco-excel-button.import:hover { color: #315fae; border-color: #5686e2; background: #eef4ff; box-shadow: none; }
 .cdsco-filter-actions .cdsco-excel-button.export:hover { color: #177451; border-color: #35a874; background: #dff5e9; box-shadow: none; }
 .cdsco-filter-actions select { height: 34px; }
+.cdsco-filter-primary-actions { margin-left: auto; display: flex; gap: 10px; }
+.cdsco-filter-actions .cdsco-filter-button {
+  height: 34px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  border: 1px solid;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 9.5px;
+  font-weight: 800;
+  transition: background .16s, border-color .16s;
+}
+.cdsco-filter-actions .cdsco-filter-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cdsco-filter-actions .cdsco-filter-button.clear { color: #d7253d; border-color: #f2b9c2; background: #fff; }
+.cdsco-filter-actions .cdsco-filter-button.clear:hover { background: #fff1f3; }
+.cdsco-filter-actions .cdsco-filter-button.add { color: #fff; border-color: #1769ef; background: #1769ef; }
+.cdsco-filter-actions .cdsco-filter-button.add:hover { border-color: #075bd8; background: #075bd8; }
+@media(max-width:760px){.cdsco-filter-primary-actions{width:100%;margin-left:0;}}
 .status-badge.status-na { color: #d7253d; background: #ffe4e8; }
 .status-badge.status-half { color: #a76a00; background: #fff1b8; }
 .date-badge { display: inline-block; padding: 4px 9px; border-radius: 12px; color: #315f9f; background: #eaf3ff; font-weight: 700; }

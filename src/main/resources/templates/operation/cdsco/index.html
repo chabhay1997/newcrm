@@ -22,12 +22,6 @@
     <div th:if="${success}" class="cdsco-alert success" role="status" th:text="${success}"></div>
     <div th:if="${error}" class="cdsco-alert error" role="alert" th:text="${error}"></div>
 
-    <header class="cdsco-hero">
-      <div class="cdsco-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/><path d="M3 6h3M18 6h3M3 18h3M18 18h3"/></svg></div>
-      <div><h1>CDSCO Dashboard</h1><p>Manage and monitor CDSCO records</p></div>
-      <div class="cdsco-head-actions"><a class="cdsco-add" href="/operation/cdsco/create"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add CDSCO</a><a class="cdsco-clear" href="/operation/cdsco"><svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M5.5 15a7 7 0 0 0 11.7 2.4L20 14M4 10l2.8-3.4A7 7 0 0 1 18.5 9"/></svg>Clear Filters</a></div>
-    </header>
-
     <section class="cdsco-stats" aria-label="CDSCO status filters">
       <a th:href="@{/operation/cdsco(size=${size})}" th:classappend="${status.isBlank()} ? ' active' : ''"><i class="total"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg></i><span><b>Total</b><strong th:text="${totalRecords}">0</strong><small>All CDSCO records</small></span></a>
       <a th:each="entry,loop : ${statusCounts}" th:if="${loop.index < 4}" th:href="@{/operation/cdsco(status=${entry.key},size=${size})}" th:classappend="${status.equalsIgnoreCase(entry.key)} ? ' active' : ''"><i th:class="|status tone-${loop.index % 4}|"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></i><span><b th:text="${entry.key}">Status</b><strong th:text="${entry.value}">0</strong><small>CDSCO applications</small></span></a>
@@ -38,7 +32,7 @@
       <label>End Date<input type="date" name="endDate" th:value="${endDate}"></label>
       <label>Status<select name="status"><option value="">All Statuses</option><option th:each="entry : ${statusCounts}" th:value="${entry.key}" th:text="${entry.key}" th:selected="${status.equalsIgnoreCase(entry.key)}"></option></select></label>
       <label>Search<div class="cdsco-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input type="search" name="search" th:value="${search}" placeholder="Search name, email, contact or user ID"></div></label>
-      <div class="cdsco-filter-actions"><input id="cdsco-import-file" type="file" accept=".xlsx,.xls" hidden><label class="cdsco-excel-button import" for="cdsco-import-file"><svg viewBox="0 0 24 24"><path d="M12 20V4m0 0L6 10m6-6 6 6M5 20h14"/></svg>Import Excel</label><a class="cdsco-excel-button export" href="/operation/cdsco/export"><svg viewBox="0 0 24 24"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a><select name="size" aria-label="Rows per page"><option value="10" th:selected="${size == 10}">Show 10 rows</option><option value="25" th:selected="${size == 25}">Show 25 rows</option><option value="50" th:selected="${size == 50}">Show 50 rows</option><option value="100" th:selected="${size == 100}">Show 100 rows</option></select></div>
+      <div class="cdsco-filter-actions"><input id="cdsco-import-file" type="file" accept=".xlsx,.xls" hidden><label class="cdsco-excel-button import" for="cdsco-import-file"><svg viewBox="0 0 24 24"><path d="M12 20V4m0 0L6 10m6-6 6 6M5 20h14"/></svg>Import Excel</label><a class="cdsco-excel-button export" href="/operation/cdsco/export"><svg viewBox="0 0 24 24"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a><select name="size" aria-label="Rows per page"><option value="10" th:selected="${size == 10}">Show 10 rows</option><option value="25" th:selected="${size == 25}">Show 25 rows</option><option value="50" th:selected="${size == 50}">Show 50 rows</option><option value="100" th:selected="${size == 100}">Show 100 rows</option></select><div class="cdsco-filter-primary-actions"><a class="cdsco-filter-button clear" href="/operation/cdsco"><svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M5.5 15a7 7 0 0 0 11.7 2.4L20 14M4 10l2.8-3.4A7 7 0 0 1 18.5 9"/></svg>Clear Filters</a><a class="cdsco-filter-button add" href="/operation/cdsco/create"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add CDSCO</a></div></div>
     </form>
 
     <section class="cdsco-table-card">

@@ -156,6 +156,15 @@
   cursor: pointer;
 }
 
+.tm-filter-primary-actions { display: flex; width: auto; height: auto; gap: 10px; margin-left: auto; padding: 0; border: 0; background: transparent; }
+.tm-filter-actions .tm-filter-button { display: inline-flex; height: 34px; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid; border-radius: 8px; font-size: 10px; font-weight: 800; text-decoration: none; }
+.tm-filter-actions .tm-filter-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tm-filter-actions .tm-filter-button.clear { border-color: #f2b9c2; color: #d7253d; background: #fff; }
+.tm-filter-actions .tm-filter-button.clear:hover { background: #fff1f3; }
+.tm-filter-actions .tm-filter-button.add { border-color: #1769ef; color: #fff; background: #1769ef; }
+.tm-filter-actions .tm-filter-button.add:hover { border-color: #075bd8; background: #075bd8; }
+@media(max-width:720px) { .tm-filter-primary-actions { width: 100%; margin-left: 0; } }
+
 .tm-filter .search-input {
   position: relative;
   display: flex;
