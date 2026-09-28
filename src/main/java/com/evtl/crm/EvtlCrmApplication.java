@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.evtl.crm", "config", "controller", "model", "repository", "service"})
-@EntityScan(basePackages = {"model"})
-@EnableJpaRepositories(basePackages = {"repository"})
+@ComponentScan(basePackages = {"com.evtl.crm", "com.evtl.crm.employeeinfo", "config", "controller", "model", "repository", "service"})
+@EntityScan(basePackages = {"model", "com.evtl.crm.employeeinfo"})
+@EnableJpaRepositories(basePackages = {"repository", "com.evtl.crm.employeeinfo"})
 @EnableScheduling
 public class EvtlCrmApplication {
 

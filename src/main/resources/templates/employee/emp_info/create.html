@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${isEdit ? 'Edit Employee Information' : 'Add Employee Information'}">Add Employee Information</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .emp-info-form-shell { width: min(1200px, 100%); margin: 0 auto; border: 1px solid #E5E7EB; border-radius: 22px; background: #fff; box-shadow: 0 22px 70px rgba(31, 41, 55, .12); }
+    .emp-info-form-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 24px; border-bottom:1px solid #E5E7EB; background:#F8FAFD; }
+    .emp-info-form-header h1 { font-size: 24px; font-weight: 800; color: #171923; margin:0; }
+    .emp-info-form-body { padding:26px 24px 24px; }
+    .emp-info-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:18px 16px; }
+    .emp-info-field { min-width: 0; }
+    .emp-info-field label { display:block; margin-bottom:8px; color:#555; font-size: 14px; font-weight:700; }
+    .emp-info-field input,
+    .emp-info-field select {
+      width:100%; min-height:42px; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 12px; color: #222; background: #FBFBFB; font-size: 14px; outline: none; transition: border-color .18s, box-shadow .18s, background .18s;
+    }
+    .emp-info-field input:focus,
+    .emp-info-field select:focus { border-color:#77A8E4; background:#fff; box-shadow:0 0 0 4px rgba(47,120,215,.12); }
+    .emp-info-actions { display:flex; justify-content:flex-end; margin-top:22px; }
+    .emp-info-primary-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 18px; border-radius: 10px; border:1px solid #2F78D7; background:#2F78D7; color:#fff; font-size:14px; font-weight:750; box-shadow:0 8px 18px rgba(47,120,215,.2); }
+    .emp-info-primary-btn:hover { filter: brightness(.97); }
+    .emp-info-secondary-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 16px; border-radius: 10px; border:1px solid #DADADA; background:#fff; color:#555; font-size:14px; font-weight:750; }
+    @media (max-width: 760px) {
+      .emp-info-grid { grid-template-columns:1fr; }
+      .emp-info-form-shell { border-radius:0; border-left:0; border-right:0; box-shadow:none; }
+      .emp-info-form-body { padding:18px 14px 20px; }
+      .emp-info-form-header { padding:16px 14px; }
+      .emp-info-form-header h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="flex-1 px-8 pt-4 pb-8">
+    <div class="emp-info-form-shell">
+      <div class="emp-info-form-header">
+        <h1 th:text="${isEdit ? 'Edit Employee Information' : 'Add Employee Information'}">Add Employee Information</h1>
+        <a th:href="@{/emp-info}" class="emp-info-secondary-btn">Back to list</a>
+      </div>
+
+      <div th:if="${success}" class="mx-6 mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" th:text="${success}"></div>
+      <div th:if="${error}" class="mx-6 mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" th:text="${error}"></div>
+
+      <div class="emp-info-form-body">
+        <form th:action="@{/emp-info}" th:object="${empInfo}" method="post">
+          <input type="hidden" th:field="*{id}" />
+
+          <div class="emp-info-grid">
+            <div class="emp-info-field">
+              <label for="empType">Employee Type <span class="text-red-500">*</span></label>
+              <select id="empType" th:field="*{empType}">
+                <option value="">-- Select --</option>
+                <option th:each="entry : ${employeeTypeOptions}" th:value="${entry.key}" th:text="${entry.value}"></option>
+              </select>
+            </div>
+
+            <div class="emp-info-field">
+              <label for="department">Department</label>
+              <select id="department" th:field="*{department}">
+                <option value="">-- Select --</option>
+                <option th:each="entry : ${departmentOptions}" th:value="${entry.key}" th:text="${entry.value}"></option>
+              </select>
+            </div>
+
+            <div class="emp-info-field">
+              <label for="designation">Designation</label>
+              <select id="designation" th:field="*{designation}">
+                <option value="">-- Select --</option>
+                <option th:each="entry : ${designationOptions}" th:value="${entry.key}" th:text="${entry.value}"></option>
+              </select>
+            </div>
+
+            <div class="emp-info-field">
+              <label for="name">Employee Name <span class="text-red-500">*</span></label>
+              <input id="name" th:field="*{name}" type="text" placeholder="Enter employee name" />
+            </div>
+
+            <div class="emp-info-field">
+              <label for="email">Office Email ID</label>
+              <input id="email" th:field="*{email}" type="email" placeholder="Enter email ID" />
+            </div>
+
+            <div class="emp-info-field">
+              <label for="mobileNo">Office Mobile No</label>
+              <input id="mobileNo" th:field="*{mobileNo}" type="text" placeholder="Enter mobile no" />
+            </div>
+
+            <div class="emp-info-field">
+              <label for="sim">SIM</label>
+              <select id="sim" th:field="*{sim}">
+                <option value="">-- Select --</option>
+                <option th:each="entry : ${simOptions}" th:value="${entry.key}" th:text="${entry.value}"></option>
+              </select>
+            </div>
+
+            <div class="emp-info-field">
+              <label for="laptop">Laptop</label>
+              <input id="laptop" th:field="*{laptop}" type="text" placeholder="Enter laptop" />
+            </div>
+
+            <div class="emp-info-field">
+              <label for="joinDate">Join Date <span class="text-red-500">*</span></label>
+              <input id="joinDate" th:field="*{joinDate}" type="date" />
+            </div>
+
+            <div class="emp-info-field">
+              <label for="leftDate">Left Date</label>
+              <input id="leftDate" th:field="*{leftDate}" type="date" />
+            </div>
+          </div>
+
+          <div class="emp-info-actions">
+            <button type="submit" class="emp-info-primary-btn" th:text="${isEdit ? 'Update' : 'Submit'}">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

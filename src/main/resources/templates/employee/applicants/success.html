@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Submitted</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .success-shell { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:linear-gradient(135deg,#F4F5F7,#E8EEF9); }
+    .success-card { width:min(520px,100%); padding:42px 30px; border:1px solid #E1E4EA; border-radius:20px; background:#fff; text-align:center; box-shadow:0 24px 60px rgba(43,61,91,.14); }
+    .success-icon { width:76px; height:76px; display:flex; align-items:center; justify-content:center; margin:0 auto 22px; border-radius:50%; color:#fff; background:#42B883; box-shadow:0 12px 24px rgba(66,184,131,.25); }
+  </style>
+</head>
+<body>
+  <main class="success-shell">
+    <section class="success-card">
+      <div class="success-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></div>
+      <p class="mb-2 text-[11px] font-extrabold uppercase tracking-[.16em] text-[#42B883]">Submission received</p>
+      <h1 class="text-[26px] font-extrabold text-[#273142]">Thank you for applying</h1>
+      <p class="mx-auto mt-3 max-w-[390px] text-[14px] leading-6 text-[#687386]">Your employee application has been submitted successfully. Our team will review your details and contact you if there is a suitable opportunity.</p>
+      <a href="/emp-app-form/create" class="mt-7 inline-flex rounded-lg bg-[#5B8DEF] px-5 py-2.5 text-[12px] font-bold text-white">Submit another application</a>
+    </section>
+  </main>
+</body>
+</html>

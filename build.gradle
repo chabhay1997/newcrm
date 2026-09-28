@@ -58,6 +58,10 @@ dependencies {
 
     // HTML-to-PDF rendering for quotation documents.
     implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+
+    // QR generation for the public employee application link.
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.google.zxing:javase:3.5.3'
     
     // MySQL Database Connector
     implementation 'com.mysql:mysql-connector-j:8.3.0'
