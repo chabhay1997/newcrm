@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- LMPC (LEGAL METROLOGY / PACKAGED COMMODITY) EDIT PANEL -->
+<div th:fragment="lmpc-panel" id="lmpcEditModal" class="modal-overlay" onclick="closeModal('lmpcEditModal')">
+  <div class="modal-box glass rounded-2xl w-[720px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+       style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">LMPC Registration &mdash; Quotation Details</p>
+      <button onclick="closeModal('lmpcEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="lmpcQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="lmpcLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="lmpcRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="lmpcReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="LMPC" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="lmpcQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Kind Attention / Client Name <span class="text-red-500">*</span></label>
+          <input id="lmpcClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Name of Certification <span class="text-red-500">*</span></label>
+          <input id="lmpcCertificationNameInput" type="text" placeholder="e.g. LMPC Registration" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- PROPOSAL DETAILS -->
+      <p class="text-[13px] font-bold text-[#171923] mb-2">Proposal Details</p>
+      <div class="overflow-x-auto mb-6 rounded-xl border border-black/10">
+        <table class="w-full text-left" style="border-collapse: collapse;">
+          <thead>
+            <tr class="bg-[#5B8DEF]">
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[35%]">Particular</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[65%]">Details</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12.5px] text-[#3A4B63]">
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3 font-semibold">Lead Time</td>
+              <td class="py-2 px-3"><input id="lmpcLeadTimeInput" type="text" placeholder="e.g. 15-20 working days" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3 font-semibold">LMPC Registration</td>
+              <td class="py-2 px-3"><input id="lmpcRegisInput" type="text" placeholder="Registration fee / details" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3 font-semibold">Services and Liaison Fees</td>
+              <td class="py-2 px-3"><input id="lmpcServiceLiaisonInput" type="text" placeholder="Service and liaison fee" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-[11px] text-[#8C8FA3] mb-6 leading-relaxed">
+        Note: liaison fees are paid by client as per actual, and 18% GST is charged extra on the quotation
+        amount at invoicing time — these lines are fixed boilerplate on the PDF and aren't editable here.
+      </p>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('lmpcEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadLmpcQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="lmpcSaveRevisionButton" type="button" onclick="saveLmpcQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

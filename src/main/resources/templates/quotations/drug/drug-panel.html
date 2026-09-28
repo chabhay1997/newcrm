@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- DRUG QUOTATION EDIT PANEL -->
+<div th:fragment="drug-panel" id="drugEditModal" class="modal-overlay" onclick="closeModal('drugEditModal')">
+    <div class="modal-box glass rounded-2xl w-[1400px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+      style="width:min(1400px,96vw); max-width:96vw; backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">Drug Quotation &mdash; Details</p>
+      <button onclick="closeModal('drugEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="drugQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="drugLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="drugRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation No.</label>
+          <input id="drugReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="Drug Quotation" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Date</label>
+          <input id="drugQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name</label>
+          <input id="drugClientNameInput" type="text" placeholder="Enter client name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Product Name</label>
+          <input id="drugProductNameInput" type="text" placeholder="Enter product name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Category / Class</label>
+          <input id="drugCategoryClassInput" type="text" placeholder="Enter category or class" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Custom Heading (Optional)</label>
+          <input id="drugCertificateNameInput" type="text" placeholder="e.g. Proposal Letter for Drug Wholesale License" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Manufacturing Location</label>
+          <input id="drugManufacturingLocationInput" type="text" placeholder="Enter manufacturing location" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Model(s)</label>
+          <input id="drugProductModelsInput" type="text" placeholder="Enter model names" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- COMMERCIAL DETAILS -->
+      <p class="text-[13px] font-bold text-[#171923] mb-2">Commercial Details</p>
+      <div class="overflow-x-auto mb-3 rounded-xl border border-black/10">
+        <table class="w-full text-left" style="border-collapse: collapse;">
+          <thead>
+            <tr class="bg-[#5B8DEF]">
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[6%]">SR</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[36%]">Particulars</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[38%]">Amount</th>
+              <th class="py-2.5 px-3 text-[11px] font-bold text-white w-[20%] text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12.5px] text-[#3A4B63]">
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">1</td>
+              <td class="py-2 px-3"><input id="drugCommercialAlias1" type="text" value="Drug Wholesale License" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3">
+                <input id="drugCommercialValue1" type="text" placeholder="Enter amount" class="drug-amount-input w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] mb-1.5">
+                <div class="flex gap-3 text-[11px] font-semibold text-[#4f46e5]">
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugCurrency1" value="INR" id="drugCommercialCurrency1_inr" checked> INR</label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugCurrency1" value="USD" id="drugCommercialCurrency1_usd"> USD</label>
+                </div>
+              </td>
+              <td class="py-2 px-3 text-center text-[#8C8FA3] text-[11px]">Fixed row</td>
+            </tr>
+            <tr class="border-t border-black/5">
+              <td class="py-2 px-3">2</td>
+              <td class="py-2 px-3"><input id="drugCommercialAlias2" type="text" value="Government Fee" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px]"></td>
+              <td class="py-2 px-3">
+                <input id="drugCommercialValue2" type="text" placeholder="Enter amount" class="drug-amount-input w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] mb-1.5">
+                <div class="flex gap-3 text-[11px] font-semibold text-[#4f46e5]">
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugCurrency2" value="INR" id="drugCommercialCurrency2_inr" checked> INR</label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugCurrency2" value="USD" id="drugCommercialCurrency2_usd"> USD</label>
+                </div>
+              </td>
+              <td class="py-2 px-3 text-center text-[#8C8FA3] text-[11px]">Fixed row</td>
+            </tr>
+            <tr id="drugExtraRowsAnchor" class="hidden"><td colspan="4"></td></tr>
+            <tr class="border-t border-black/5 bg-[#F3F5F8]">
+              <td class="py-2 px-3">3</td>
+              <td class="py-2 px-3"><input id="drugCommercialAlias3" type="text" value="Total Cost + GST (18%)" class="w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] font-bold"></td>
+              <td class="py-2 px-3">
+                <input id="drugCommercialValue3" type="text" placeholder="Auto-calculated on blur (+18% GST)" class="drug-total-input w-full px-2 py-1.5 rounded-lg border border-black/10 text-[12.5px] font-bold">
+              </td>
+              <td class="py-2 px-3 text-center text-[#8C8FA3] text-[11px]">Total</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[11.5px] font-semibold text-[#3A4B63]">Extra Commercial Rows</span>
+        <button type="button" onclick="drugAddExtraRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Row
+        </button>
+      </div>
+      <div id="drugExtraRowsContainer" class="flex flex-col gap-2 mb-6"></div>
+
+      <!-- TIMELINE -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-[13px] font-bold text-[#171923]">Timeline</p>
+        <button type="button" onclick="drugAddTimelineRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Timeline
+        </button>
+      </div>
+      <div id="drugTimelineContainer" class="flex flex-col gap-2 mb-6"></div>
+
+      <!-- REQUIRED DOCUMENTS -->
+      <div class="flex items-center justify-between mb-2 px-4 py-3 rounded-t-xl border border-[#B8D5E5] bg-[#EAF4FA]">
+        <div>
+          <p class="text-[13px] font-bold text-[#174A68]">List of Required Documents</p>
+          <p class="mt-0.5 text-[10.5px] font-medium text-[#5C7890]">Documents required for the drug quotation application</p>
+        </div>
+        <button type="button" onclick="drugAddDocumentRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-white px-3 py-1.5 rounded-full border border-[#246B91] bg-[#246B91] hover:bg-[#1B5878] transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Document
+        </button>
+      </div>
+      <div id="drugDocumentsContainer" class="flex flex-col gap-2 mb-6 px-4 py-3 rounded-b-xl border border-t-0 border-[#B8D5E5] bg-[#F4FAFD]"></div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('drugEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadDrugQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="drugSaveRevisionButton" type="button" onclick="saveDrugQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+
+      <template id="drugExtraRowTemplate">
+        <div class="drug-extra-row flex gap-3 items-start p-3 rounded-xl border border-black/10 bg-[#F8FAFF]"><div class="flex-1"><label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Particular</label><input type="text" placeholder="Enter particulars" class="drug-extra-particular w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white"></div><div class="w-[150px]"><label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Amount</label><input type="text" placeholder="Enter amount" class="drug-extra-amount drug-amount-input w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white"><div class="flex gap-3 mt-1 text-[11px] font-semibold text-[#4f46e5]"><label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugExtraCurrency__ROW__" value="INR" checked> INR</label><label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="drugExtraCurrency__ROW__" value="USD"> USD</label></div></div><button type="button" onclick="this.closest('.drug-extra-row').remove()" class="mt-[22px] w-8 h-8 shrink-0 rounded-lg text-[#C0304A] bg-[#FCE9EC]">&times;</button></div>
+      </template>
+      <template id="drugTimelineRowTemplate">
+        <div class="drug-timeline-row flex gap-3 items-center p-2.5 rounded-xl border border-black/10 bg-[#F8FAFF]"><input type="text" placeholder="Enter timeline" class="drug-timeline-text flex-1 px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white"><button type="button" onclick="this.closest('.drug-timeline-row').remove()" class="w-8 h-8 shrink-0 rounded-lg text-[#C0304A]">&times;</button></div>
+      </template>
+      <template id="drugDocumentRowTemplate">
+        <div class="drug-document-row flex gap-3 items-center p-2.5 rounded-xl border border-black/10 bg-[#F8FAFF]"><input type="text" placeholder="Enter document name" class="drug-document-text flex-1 px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white"><button type="button" onclick="this.closest('.drug-document-row').remove()" class="w-8 h-8 shrink-0 rounded-lg text-[#C0304A]">&times;</button></div>
+      </template>
+    </form>
+  </div>
+</div>
+
+<!-- template: one extra commercial row (particular + amount) -->
+<template id="drugExtraRowTemplate">
+  <div class="drug-extra-row flex gap-3 items-start p-3 rounded-xl border border-black/10 bg-[#F8FAFF]">
+    <div class="flex-1">
+      <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Particular</label>
+      <input type="text" placeholder="Enter particulars" class="drug-extra-particular w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+    </div>
+    <div class="w-[150px]">
+      <label class="block text-[10.5px] font-semibold text-[#3A4B63] mb-1">Amount</label>
+      <input type="text" placeholder="Enter amount" class="drug-extra-amount drug-amount-input w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+    </div>
+    <button type="button" onclick="this.closest('.drug-extra-row').remove()" title="Remove row"
+            class="mt-[22px] w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</template>
+
+<!-- template: one timeline row (single text line) -->
+<template id="drugTimelineRowTemplate">
+  <div class="drug-timeline-row flex gap-3 items-center p-2.5 rounded-xl border border-black/10 bg-[#F8FAFF]">
+    <input type="text" placeholder="Enter timeline" class="drug-timeline-text flex-1 px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+    <button type="button" onclick="this.closest('.drug-timeline-row').remove()" title="Remove"
+            class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</template>
+
+<!-- template: one required-document row (single text line) -->
+<template id="drugDocumentRowTemplate">
+  <div class="drug-document-row flex gap-3 items-center p-2.5 rounded-xl border border-black/10 bg-[#F8FAFF]">
+    <input type="text" placeholder="Enter document name" class="drug-document-text flex-1 px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white">
+    <button type="button" onclick="this.closest('.drug-document-row').remove()" title="Remove"
+            class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</template>
+
+<script>
+  function drugAddExtraRow(particular, amount) {
+    const tpl = document.getElementById('drugExtraRowTemplate');
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    if (particular !== undefined) node.querySelector('.drug-extra-particular').value = particular || '';
+    if (amount !== undefined) node.querySelector('.drug-extra-amount').value = amount || '';
+    document.getElementById('drugExtraRowsContainer').appendChild(node);
+  }
+
+  function drugAddTimelineRow(text) {
+    const tpl = document.getElementById('drugTimelineRowTemplate');
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    if (text !== undefined) node.querySelector('.drug-timeline-text').value = text || '';
+    document.getElementById('drugTimelineContainer').appendChild(node);
+  }
+
+  function drugAddDocumentRow(text) {
+    const tpl = document.getElementById('drugDocumentRowTemplate');
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    if (text !== undefined) node.querySelector('.drug-document-text').value = text || '';
+    document.getElementById('drugDocumentsContainer').appendChild(node);
+  }
+
+  // numeric-only guard on all amount inputs, same behavior as your original
+  document.addEventListener('input', function (e) {
+    if (e.target.classList && e.target.classList.contains('drug-amount-input')) {
+      e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+    }
+  });
+
+  // auto +18% GST on the total row, on blur — mirrors your original behavior
+  document.addEventListener('blur', function (e) {
+    if (e.target && e.target.id === 'drugCommercialValue3') {
+      const raw = parseFloat(String(e.target.value || '').replace(/[^0-9.]/g, ''));
+      if (!isNaN(raw)) {
+        const withGst = raw * 1.18;
+        e.target.value = Number.isInteger(withGst) ? withGst.toFixed(0) : withGst.toFixed(2);
+      }
+    }
+  }, true);
+</script>
+
+</body>
+</html>

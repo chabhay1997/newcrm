@@ -54,4 +54,4 @@ tailwindcss.exe
 application-local.properties
 tailwindcss.exe.exe
 node_modules/
-.env
+__MACOSX/
