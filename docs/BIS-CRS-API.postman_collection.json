@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "EVTL CRM - BIS CRS API",
+    "description": "Authenticated, CSRF-protected verification flow for POST /api/operation/bis-crs. Run requests in order and set crm_username/crm_password to a user with Operation permission.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8081" },
+    { "key": "crm_username", "value": "" },
+    { "key": "crm_password", "value": "" },
+    { "key": "csrf_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Get pre-login CSRF token",
+      "request": { "method": "GET", "url": "{{base_url}}/login" },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Login page returned', () => pm.response.to.have.status(200));",
+          "const match = pm.response.text().match(/name=\"_csrf\"[^>]*value=\"([^\"]+)\"/);",
+          "pm.expect(match, 'CSRF input').to.not.equal(null);",
+          "pm.collectionVariables.set('csrf_token', match[1]);"
+        ]}
+      }]
+    },
+    {
+      "name": "2 - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": { "mode": "urlencoded", "urlencoded": [
+          { "key": "username", "value": "{{crm_username}}" },
+          { "key": "password", "value": "{{crm_password}}" },
+          { "key": "_csrf", "value": "{{csrf_token}}" }
+        ]},
+        "url": "{{base_url}}/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Authentication did not fail', () => pm.expect(pm.response.headers.get('Location') || '').not.to.include('error=true'));"
+        ]}
+      }]
+    },
+    {
+      "name": "3 - Get authenticated CSRF token",
+      "request": { "method": "GET", "url": "{{base_url}}/operation/bis-crs/create" },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Authenticated form returned', () => pm.response.to.have.status(200));",
+          "const match = pm.response.text().match(/name=\"_csrf\"[^>]*value=\"([^\"]+)\"/);",
+          "pm.expect(match, 'Authenticated CSRF input').to.not.equal(null);",
+          "pm.collectionVariables.set('csrf_token', match[1]);"
+        ]}
+      }]
+    },
+    {
+      "name": "4 - Create BIS CRS renewal",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"manufacturerName\": \"Postman BIS CRS Manufacturer {{$timestamp}}\",\n  \"productName\": \"Wireless Device\",\n  \"licenceNumber\": \"R-POSTMAN-{{$timestamp}}\",\n  \"isStandard\": \"IS 13252\",\n  \"licenceDate\": \"2026-09-24\",\n  \"expiryDate\": \"2028-09-23\",\n  \"notifyDate\": \"2026-10-01\",\n  \"brandName\": \"EVTL Test\",\n  \"airName\": \"Authorized Representative\",\n  \"airAddress\": \"New Delhi, India\",\n  \"airEmailId\": \"compliance@example.com\",\n  \"airContactNumber\": \"9876543210\",\n  \"currentStatus\": \"Registered\"\n}"
+        },
+        "url": "{{base_url}}/api/operation/bis-crs"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Created', () => pm.response.to.have.status(201));",
+          "pm.test('JSON response', () => pm.response.to.be.json);",
+          "pm.test('Location header present', () => pm.expect(pm.response.headers.get('Location')).to.match(/^\\/api\\/operation\\/bis-crs\\/\\d+$/));",
+          "pm.test('Database id returned', () => pm.expect(pm.response.json().id).to.be.a('number'));",
+          "pm.test('No-store response', () => pm.expect(pm.response.headers.get('Cache-Control')).to.include('no-store'));"
+        ]}
+      }]
+    }
+  ]
+}

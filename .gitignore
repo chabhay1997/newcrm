@@ -41,14 +41,17 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+.application.properties
 
 # Tailwind CLI binaries
 tailwindcss
 tailwindcss.exe
-tailwindcss.exe.exe
 
 *.log
 .DS_Store
 
 .env
 application-local.properties
+tailwindcss.exe.exe
+node_modules/
+.env

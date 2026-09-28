@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <title>CDSCO Dashboard | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <link rel="stylesheet" th:href="@{/css/cdsco.css}">
+  <link rel="stylesheet" th:href="@{/css/cdsco-excel.css}">
+  <link rel="stylesheet" th:href="@{/css/cdsco-excel-refine.css}">
+  <link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
+  <script defer th:src="@{/js/cdsco.js}"></script>
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="cdsco-page">
+    <div th:if="${success}" class="cdsco-alert success" role="status" th:text="${success}"></div>
+    <div th:if="${error}" class="cdsco-alert error" role="alert" th:text="${error}"></div>
+
+    <header class="cdsco-hero">
+      <div class="cdsco-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/><path d="M3 6h3M18 6h3M3 18h3M18 18h3"/></svg></div>
+      <div><h1>CDSCO Dashboard</h1><p>Manage and monitor CDSCO records</p></div>
+      <div class="cdsco-head-actions"><a class="cdsco-add" href="/operation/cdsco/create"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add CDSCO</a><a class="cdsco-clear" href="/operation/cdsco"><svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M5.5 15a7 7 0 0 0 11.7 2.4L20 14M4 10l2.8-3.4A7 7 0 0 1 18.5 9"/></svg>Clear Filters</a></div>
+    </header>
+
+    <section class="cdsco-stats" aria-label="CDSCO status filters">
+      <a th:href="@{/operation/cdsco(size=${size})}" th:classappend="${status.isBlank()} ? ' active' : ''"><i class="total"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg></i><span><b>Total</b><strong th:text="${totalRecords}">0</strong><small>All CDSCO records</small></span></a>
+      <a th:each="entry,loop : ${statusCounts}" th:if="${loop.index < 4}" th:href="@{/operation/cdsco(status=${entry.key},size=${size})}" th:classappend="${status.equalsIgnoreCase(entry.key)} ? ' active' : ''"><i th:class="|status tone-${loop.index % 4}|"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></i><span><b th:text="${entry.key}">Status</b><strong th:text="${entry.value}">0</strong><small>CDSCO applications</small></span></a>
+    </section>
+
+    <form class="cdsco-filters" method="get" th:action="@{/operation/cdsco}">
+      <label>Start Date<input type="date" name="startDate" th:value="${startDate}"></label>
+      <label>End Date<input type="date" name="endDate" th:value="${endDate}"></label>
+      <label>Status<select name="status"><option value="">All Statuses</option><option th:each="entry : ${statusCounts}" th:value="${entry.key}" th:text="${entry.key}" th:selected="${status.equalsIgnoreCase(entry.key)}"></option></select></label>
+      <label>Search<div class="cdsco-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input type="search" name="search" th:value="${search}" placeholder="Search name, email, contact or user ID"></div></label>
+      <div class="cdsco-filter-actions"><input id="cdsco-import-file" type="file" accept=".xlsx,.xls" hidden><label class="cdsco-excel-button import" for="cdsco-import-file"><svg viewBox="0 0 24 24"><path d="M12 20V4m0 0L6 10m6-6 6 6M5 20h14"/></svg>Import Excel</label><a class="cdsco-excel-button export" href="/operation/cdsco/export"><svg viewBox="0 0 24 24"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a><select name="size" aria-label="Rows per page"><option value="10" th:selected="${size == 10}">Show 10 rows</option><option value="25" th:selected="${size == 25}">Show 25 rows</option><option value="50" th:selected="${size == 50}">Show 50 rows</option><option value="100" th:selected="${size == 100}">Show 100 rows</option></select></div>
+    </form>
+
+    <section class="cdsco-table-card">
+      <div class="cdsco-table-wrap">
+        <table>
+          <thead><tr><th>S No</th><th>Name</th><th>Email / Contact</th><th>User ID</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody>
+          <tr th:each="record,row : ${records}">
+            <td class="serial" th:text="${page * size + row.index + 1}">1</td>
+            <td class="name"><a class="cdsco-name-link" th:href="@{/operation/cdsco/{id}/edit(id=${record.id})}" title="Edit CDSCO details"><span class="avatar" th:text="${#strings.substring(record.name,0,1)}">C</span><strong th:text="${record.name}">Name</strong></a></td>
+            <td class="contact"><span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><b th:text="${record.email}">email</b></span><span class="service-line"><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5"/></svg><b th:text="${record.service}">service</b></span><span><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1.5a15 15 0 0 0 5.5 5.5L15 14l5 2v3c0 1.1-.9 2-2 2C10.3 21 3 13.7 3 6c0-1.1.9-2 2-2Z"/></svg><b th:text="${record.contact}">contact</b></span></td>
+            <td class="credentials"><span class="user-id-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span class="user-id" th:text="${record.userId}">N/A</span></span><span class="password-line"><svg viewBox="0 0 24 24"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4M12 15v2"/></svg><b th:text="${record.password}">N/A</b></span></td>
+            <td><span class="status-badge" th:classappend="${record.status == 'N/A'} ? ' status-na' : (${record.status == 'Half'} ? ' status-half' : '')" th:text="${record.status}">Status</span></td>
+            <td class="date"><span class="date-badge" th:text="${record.date}">Date</span></td>
+            <td class="actions"><div class="cdsco-action-menu"><button type="button" class="cdsco-menu-trigger" aria-label="Open actions" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button><div class="cdsco-menu"><form method="post" th:action="@{/operation/cdsco/{id}/delete(id=${record.id})}"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="cdsco-delete">Delete</button></form></div></div></td>
+          </tr>
+          <tr th:if="${records.empty}"><td colspan="7" class="empty">No CDSCO records match the selected filters.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="cdsco-footer classic-pagination" th:attr="data-current=${page + 1},data-pages=${pages},data-total=${total},data-size=${size}"><span th:text="|Showing ${records.empty ? 0 : page * size + 1} to ${page * size + records.size()} of ${total} entries|">Showing entries</span><nav class="classic-pagination-controls" aria-label="CDSCO pages"></nav></footer>
+    </section>
+  </main>
+</div>
+</body>
+</html>

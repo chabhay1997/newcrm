@@ -63,6 +63,10 @@ public class QuotationCreationService {
                 equipment.setDescription(clean(item.description()));
                 String lineData = objectMapper.writeValueAsString(item);
                 equipment.setDesQtyPrice(lineData);
+<<<<<<< HEAD
+                equipment.setQuotationStatus(0);
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
                 equipment = testingEquipmentRepository.saveAndFlush(equipment);
 
                 QuotationTestingEquipment quotation = new QuotationTestingEquipment();

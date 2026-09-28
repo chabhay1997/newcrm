@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BIS CRS | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <link rel="stylesheet" th:href="@{/css/bis-crs.css}">
+  <link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
+  <script defer th:src="@{/js/bis-crs-pagination.js}"></script>
+  <script defer th:src="@{/js/bis-crs.js}"></script>
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="crs-page">
+    <div th:if="${success}" class="crs-alert success" role="status" th:text="${success}"></div>
+    <div th:if="${error}" class="crs-alert error" role="alert" th:text="${error}"></div>
+    <section class="crs-panel" aria-labelledby="crs-title">
+      <header class="crs-panel-head">
+        <div class="crs-title-wrap">
+          <span class="crs-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span>
+          <div><h1 id="crs-title">BIS CRS</h1><p th:text="|${records.totalElements} BIS CRS record${records.totalElements == 1 ? '' : 's'}|">BIS CRS records</p></div>
+        </div>
+        <a class="crs-add-button" th:href="@{/operation/bis-crs/create}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add BIS-CRS</a>
+      </header>
+
+      <div class="crs-toolbar">
+        <div class="crs-toolbar-left">
+          <form class="crs-size-form" method="get" th:action="@{/operation/bis-crs}">
+            <input type="hidden" name="search" th:value="${search}">
+            <label for="crs-size">Show</label>
+            <select id="crs-size" name="size">
+              <option value="10" th:selected="${size == 10}">10 rows</option>
+              <option value="25" th:selected="${size == 25}">25 rows</option>
+              <option value="50" th:selected="${size == 50}">50 rows</option>
+              <option value="100" th:selected="${size == 100}">100 rows</option>
+            </select>
+          </form>
+          <form class="crs-import-form" method="post" enctype="multipart/form-data" th:action="@{/operation/bis-crs/import}">
+            <input id="crs-import-file" name="file" type="file" accept=".xlsx,.xls" hidden onchange="this.form.submit()">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <label class="crs-excel-button import" for="crs-import-file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4m0 0L6 10m6-6 6 6M5 20h14"/></svg>Import Excel</label>
+          </form>
+          <a class="crs-excel-button export" th:href="@{/operation/bis-crs/export(search=${search})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a>
+        </div>
+        <form class="crs-search" method="get" th:action="@{/operation/bis-crs}" role="search">
+          <input type="hidden" name="size" th:value="${size}">
+          <label for="crs-search">Search</label>
+          <div class="crs-search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="crs-search" name="search" type="search" th:value="${search}" placeholder="License, name, product or status"><button type="submit">Search</button></div>
+        </form>
+      </div>
+
+      <div class="crs-table-wrap">
+        <table class="crs-table">
+          <thead>
+          <tr>
+            <th scope="col">Serial No.</th>
+            <th scope="col">License No.</th>
+            <th scope="col">Name</th>
+            <th scope="col">Date</th>
+            <th scope="col">Status</th>
+            <th scope="col">Created by</th>
+            <th scope="col">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="record,row : ${records.content}">
+            <td class="crs-serial"><span class="crs-serial-badge" th:text="${records.number * records.size + row.index + 1}">1</span></td>
+            <td class="crs-emphasis" th:text="${record.licenceNumber == null or record.licenceNumber.isBlank() ? '—' : record.licenceNumber}">R-41163422</td>
+            <td class="crs-details">
+              <div><strong>Manufacturer Name:</strong> <a class="crs-manufacturer" th:href="@{/operation/bis-crs/{id}/edit(id=${record.id})}" th:text="${record.manufacturerName == null or record.manufacturerName.isBlank() ? '—' : record.manufacturerName}">Manufacturer name</a></div>
+              <div><strong>Product Name:</strong> <span th:text="${record.productName == null or record.productName.isBlank() ? '—' : record.productName}">Product name</span></div>
+              <div><strong>Air Name:</strong> <span th:text="${record.airName == null or record.airName.isBlank() ? '—' : record.airName}">Air name</span></div>
+              <div><strong>Brand Name:</strong> <span th:text="${record.brandName == null or record.brandName.isBlank() ? '—' : record.brandName}">Brand name</span></div>
+            </td>
+            <td class="crs-date-cell">
+              <div><strong>DOL:</strong> <span th:text="${record.licenceDate == null ? 'N/A' : #temporals.format(record.licenceDate, 'yyyy-MM-dd')}">2023-08-17</span></div>
+              <div><strong>Expire DOL:</strong> <span th:text="${record.expiryDate == null ? 'N/A' : #temporals.format(record.expiryDate, 'yyyy-MM-dd')}">2025-10-08</span></div>
+            </td>
+            <td><span class="crs-status"
+                      th:classappend="${record.currentStatus != null and #strings.equalsIgnoreCase(record.currentStatus.trim(), 'Active')} ? ' active' : (${record.currentStatus != null and (#strings.equalsIgnoreCase(record.currentStatus.trim(), 'Differ') or #strings.equalsIgnoreCase(record.currentStatus.trim(), 'Differed'))} ? ' differed' : (${record.currentStatus != null and #strings.equalsIgnoreCase(record.currentStatus.trim(), 'Registered')} ? ' registered' : (${record.currentStatus != null and #strings.equalsIgnoreCase(record.currentStatus.trim(), 'Expired')} ? ' expired' : '')))"
+                      th:text="${record.currentStatus == null or record.currentStatus.isBlank() ? '—' : record.currentStatus}">Registered</span></td>
+            <td class="crs-emphasis" th:text="${record.createdBy == null ? '—' : (creatorNames.get(record.createdBy) ?: 'User #' + record.createdBy)}">Naveen</td>
+            <td class="crs-action-cell">
+              <form th:if="${operationAdmin}" method="post" th:action="@{/operation/bis-crs/{id}/delete(id=${record.id})}" onsubmit="return confirm('Delete this BIS CRS record? This action cannot be undone.');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="search" th:value="${search}">
+                <input type="hidden" name="size" th:value="${size}">
+                <input type="hidden" name="page" th:value="${records.number}">
+                <button class="crs-delete" type="submit" th:aria-label="|Delete BIS CRS record ${record.licenceNumber ?: record.id}|" title="Delete record">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                </button>
+              </form>
+              <span th:unless="${operationAdmin}" class="crs-no-action" title="Only administrators can delete records">—</span>
+            </td>
+          </tr>
+          <tr th:if="${records.empty}">
+            <td class="crs-empty" colspan="7"><strong>No BIS CRS records found</strong><span th:text="${search.isBlank() ? 'BIS CRS records will appear here once they are added.' : 'Try a different search term.'}">No records</span></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="crs-footer classic-pagination" th:attr="data-current=${records.number + 1},data-pages=${records.totalPages == 0 ? 1 : records.totalPages},data-total=${records.totalElements},data-size=${records.size}">
+        <span th:text="|Showing ${records.empty ? 0 : records.number * records.size + 1} to ${records.number * records.size + records.numberOfElements} of ${records.totalElements} entries|">Showing records</span>
+        <nav class="classic-pagination-controls" aria-label="BIS CRS pages">
+          <a th:if="${records.hasPrevious()}" th:href="@{/operation/bis-crs(page=${records.number - 1},size=${size},search=${search})}">Previous</a>
+          <span th:text="|Page ${records.number + 1} of ${records.totalPages == 0 ? 1 : records.totalPages}|">Page 1 of 1</span>
+          <a th:if="${records.hasNext()}" th:href="@{/operation/bis-crs(page=${records.number + 1},size=${size},search=${search})}">Next</a>
+        </nav>
+      </footer>
+    </section>
+
+    <dialog id="crs-create-modal" class="crs-modal" aria-labelledby="crs-create-title">
+      <form method="post" th:action="@{/operation/bis-crs}" class="crs-create-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <header class="crs-modal-head"><div><h2 id="crs-create-title">Add BIS-CRS</h2><p>Create a new BIS CRS record.</p></div><button id="close-crs-create" type="button" class="crs-modal-close" aria-label="Close">×</button></header>
+        <div class="crs-modal-body">
+          <div class="crs-form-grid">
+            <label>License No.<span>*</span><input name="licenceNumber" required maxlength="255" autocomplete="off"></label>
+            <label>Date<input name="licenceDate" type="date"></label>
+            <label class="crs-form-wide">Manufacturer Name<span>*</span><input name="manufacturerName" required maxlength="255" autocomplete="organization"></label>
+            <label class="crs-form-wide">Product Name<input name="productName" maxlength="255"></label>
+            <label>Air Name<input name="airName" maxlength="255"></label>
+            <label>Brand Name<input name="brandName" maxlength="255"></label>
+            <label class="crs-form-wide">Status<input name="currentStatus" maxlength="255" placeholder="e.g. Registered or Differed"></label>
+          </div>
+        </div>
+        <footer class="crs-modal-footer"><button id="cancel-crs-create" class="crs-cancel" type="button">Cancel</button><button class="crs-save" type="submit">Add BIS-CRS</button></footer>
+      </form>
+    </dialog>
+  </main>
+</div>
+</body>
+</html>

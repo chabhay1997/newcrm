@@ -17,6 +17,36 @@ repositories {
 }
 
 dependencies {
+    //To secure the APIs and applying rate limiting using the Bucket4j
+    implementation 'com.bucket4j:bucket4j_jdk17-core:8.19.0'
+
+    // Web APIs
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Database ORM (Laravel Eloquent ki tarah)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Auth Login Middleware
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // MySQL Database Connector
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+    // Self-contained local development database. Production can use the
+    // `mysql` Spring profile instead.
+    runtimeOnly 'com.h2database:h2'
+
+    // Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // HTML to PDF
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-svg-support:1.0.10'
+
+    // Excel exports
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
+
+    // Testing
     // Web APIs banane ke liye
     implementation 'org.springframework.boot:spring-boot-starter-web'
     
@@ -38,12 +68,16 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Development
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
-// Keep source resources on the runtime classpath so template edits are visible
-// without running a separate Gradle command after every change.
+// Keep source resources on the runtime classpath
+// so template edits are visible without running
+// a separate Gradle command after every change.
 bootRun {
     sourceResources sourceSets.main
 }

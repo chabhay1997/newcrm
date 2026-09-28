@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+package repository;
+
+import model.Lead;
+import org.springframework.data.jpa.repository.*;
+import java.util.List;
+
+public interface LeadRepository extends JpaRepository<Lead,Long> {
+    @Query("select l from Lead l where lower(l.status)='converted' and (l.deleted is null or l.deleted=0)")
+    List<Lead> findConvertedActive();
+}
+=======
 package repository;
 
 import model.Lead;
@@ -20,3 +32,4 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
     @Query("SELECT l.sourceId AS sourceKey, COUNT(l) AS cnt FROM Lead l GROUP BY l.sourceId")
     List<Object[]> countGroupedBySource();
 }
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4

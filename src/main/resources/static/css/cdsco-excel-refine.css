@@ -1,0 +1,59 @@
+.cdsco-filter-actions .cdsco-excel-button {
+  height: 34px;
+  min-width: 0;
+  padding: 0 11px;
+  gap: 7px;
+  border: 1px solid #cbd8e9;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: none;
+  font-size: 9.5px;
+  letter-spacing: 0;
+}
+.cdsco-filter-actions .cdsco-excel-button svg { width: 15px; height: 15px; }
+.cdsco-filter-actions .cdsco-excel-button.import { color: #315fae; border-color: #cbd8e9; background: #fff; box-shadow: none; }
+.cdsco-filter-actions .cdsco-excel-button.export { color: #177451; border-color: #94d2b4; background: #edf9f3; box-shadow: none; }
+.cdsco-filter-actions .cdsco-excel-button.import:hover { color: #315fae; border-color: #5686e2; background: #eef4ff; box-shadow: none; }
+.cdsco-filter-actions .cdsco-excel-button.export:hover { color: #177451; border-color: #35a874; background: #dff5e9; box-shadow: none; }
+.cdsco-filter-actions select { height: 34px; }
+.status-badge.status-na { color: #d7253d; background: #ffe4e8; }
+.status-badge.status-half { color: #a76a00; background: #fff1b8; }
+.date-badge { display: inline-block; padding: 4px 9px; border-radius: 12px; color: #315f9f; background: #eaf3ff; font-weight: 700; }
+.cdsco-head-actions { z-index: 1; margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.cdsco-head-actions .cdsco-clear { margin-left: 0; }
+.cdsco-add { height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 7px; border: 1px solid #dbe9ff; border-radius: 8px; color: #1764df; background: #fff; text-decoration: none; font-size: 12px; font-weight: 800; transition: transform .16s, box-shadow .16s, background .16s; }
+.cdsco-add svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.cdsco-add:hover { transform: translateY(-2px); background: #f5f9ff; box-shadow: 0 7px 18px rgba(6,52,116,.25); }
+@media(max-width:760px){.cdsco-head-actions .cdsco-clear{display:none}.cdsco-add{height:36px;padding:0 12px}}
+.cdsco-name-link { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.cdsco-name-link strong { transition: color .16s; }
+.cdsco-name-link:hover strong { color: #004dc4; text-decoration: underline; text-underline-offset: 2px; }
+.contact .service-line svg { stroke: #7a4de2; }
+.contact .service-line b { color: #263451; font-weight: 650; }
+.credentials { min-width: 135px; }
+.user-id-line { display: flex; align-items: center; gap: 6px; color: #263451; }
+.user-id-line svg { width: 14px; height: 14px; flex: none; fill: none; stroke: #356fe0; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.credentials .user-id { display: inline-block; overflow-wrap: anywhere; }
+.password-line { display: flex; align-items: center; gap: 6px; margin-top: 7px; color: #263451; }
+.password-line svg { width: 14px; height: 14px; flex: none; fill: none; stroke: #7a4de2; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.password-line b { overflow-wrap: anywhere; font-size: 10.5px; font-weight: 600; }
+.cdsco-hero { background: linear-gradient(135deg, #6092ec, #5686e2); }
+
+/* Match the BIS ISI table header and cell interaction. */
+.cdsco-table-card table thead th {
+  height: 58px;
+  border-color: rgba(255, 255, 255, .32);
+  background: linear-gradient(135deg, #6092ec, #5686e2);
+  color: #fff;
+  letter-spacing: .075em;
+}
+.cdsco-table-card table tbody td {
+  transition: background-color .16s ease, box-shadow .16s ease;
+}
+.cdsco-table-card table thead th:first-child { border-top-left-radius: 8px; }
+.cdsco-table-card table thead th:last-child { border-top-right-radius: 8px; }
+.cdsco-table-card table tbody tr:hover td { background: #fcfdff; }
+.cdsco-table-card table tbody td:hover {
+  background: #edf4ff !important;
+  box-shadow: inset 3px 0 #4e7df2;
+}

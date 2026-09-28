@@ -16,10 +16,13 @@ public class User {
     @Column(name = "role_id", nullable = false)
     private Integer roleId = 1;
 
+<<<<<<< HEAD
+=======
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", insertable = false, updatable = false)
     private Role role;
 
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     @Column(name = "type_id", nullable = false)
     private Long typeId;
 
@@ -81,9 +84,12 @@ public class User {
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
 
+<<<<<<< HEAD
+=======
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     public Long getTypeId() { return typeId; }
     public void setTypeId(Long typeId) { this.typeId = typeId; }
 

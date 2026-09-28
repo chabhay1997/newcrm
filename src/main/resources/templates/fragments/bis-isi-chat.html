@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="bis-isi-chat" th:if="${operationAdmin}" class="bis-chat" id="bisIsiChat">
+    <button
+        class="bis-chat-launcher"
+        id="bisChatLauncher"
+        type="button"
+        aria-controls="bisChatPanel"
+        aria-expanded="false"
+        aria-label="Open BIS-ISI Assistant">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.6 1.4 5 3.7 6.5L5 22l4.2-2.1c.9.2 1.8.3 2.8.3 5.5 0 10-3.8 10-8.7S17.5 3 12 3Z"/>
+            <path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/>
+        </svg>
+        <span>AI Assistant</span>
+    </button>
+
+    <div class="bis-chat-backdrop" id="bisChatBackdrop" hidden></div>
+
+    <section
+        class="bis-chat-panel"
+        id="bisChatPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bisChatTitle"
+        hidden>
+
+        <header class="bis-chat-header">
+            <div class="bis-chat-brand">
+                <span class="bis-chat-brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>
+                    </svg>
+                </span>
+                <div>
+                    <h2 id="bisChatTitle">BIS-ISI Assistant</h2>
+                    <span>Operations Assistant mode · Authorized BIS-ISI context</span>
+                </div>
+            </div>
+
+            <button
+                class="bis-chat-close"
+                id="bisChatClose"
+                type="button"
+                aria-label="Close assistant">
+                &times;
+            </button>
+        </header>
+
+        <div class="bis-chat-workspace">
+            <aside class="bis-chat-sidebar" aria-label="Assistant prompt history">
+                <button class="bis-chat-new" id="bisChatClear" type="button">
+                    <span aria-hidden="true">+</span>
+                    New chat
+                </button>
+
+                <div class="bis-chat-history-heading">Recent prompts</div>
+                <div class="bis-chat-prompt-history" id="bisChatPromptHistory">
+                    <p class="bis-chat-history-empty">Your last four prompts will appear here.</p>
+                </div>
+
+                <div class="bis-chat-sidebar-foot">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5M2 20h20M8 8h3M8 12h8M8 16h6"/>
+                    </svg>
+                    BIS-ISI Operations Help
+                </div>
+            </aside>
+
+            <main class="bis-chat-main">
+                <div class="bis-chat-filter-context" id="bisChatFilterContext">
+                    Current BIS-ISI filters
+                </div>
+
+                <div
+                    class="bis-chat-messages"
+                    id="bisChatMessages"
+                    aria-live="polite"
+                    aria-relevant="additions">
+
+                    <div class="bis-chat-message assistant">
+                        <div class="bis-chat-avatar">AI</div>
+                        <div class="bis-chat-bubble">
+                            Hi, I am your BIS-ISI Assistant. I can help with operation totals, processes, procedures, assignments, deadlines and company questions.
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="bis-chat-composer">
+                    <div
+                        class="bis-chat-status"
+                        id="bisChatStatus"
+                        role="status"
+                        hidden>
+                    </div>
+
+                    <form class="bis-chat-form" id="bisChatForm">
+                        <label class="sr-only" for="bisChatInput">
+                            Ask the BIS-ISI assistant
+                        </label>
+
+                        <textarea
+                            id="bisChatInput"
+                            rows="1"
+                            maxlength="2000"
+                            placeholder="Ask about BIS-ISI operations..."
+                            required></textarea>
+
+                        <button id="bisChatSend" type="submit" aria-label="Send question">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m4 4 17 8-17 8 3-8-3-8Z"/>
+                                <path d="M7 12h14"/>
+                            </svg>
+                        </button>
+                    </form>
+                </footer>
+            </main>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>

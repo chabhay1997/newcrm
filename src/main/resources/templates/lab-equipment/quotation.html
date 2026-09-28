@@ -3,6 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <title>Quotation | EVTL CRM</title>
+  <link rel="stylesheet" th:href="@{/css/output.css}">
+  <link rel="stylesheet" th:href="@{/css/classic-pagination.css}">
+  <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
+  <style>
+    .equipment-quotation-page { padding: 18px 14px 34px; }
+    .equipment-quotation-card { overflow: hidden; border: 1px solid rgba(255,255,255,.9); border-radius: 24px; background: linear-gradient(120deg, rgba(255,255,255,.97), rgba(244,248,255,.9)); box-shadow: 0 18px 45px -34px rgba(41, 74, 128, .55); }
+    .quotation-toolbar { padding: 20px 26px 14px; }
+    .quotation-title { color: #10245e; font-size: 19px; font-weight: 800; letter-spacing: -.035em; }
+    .quotation-subtitle { color: #6380ba; font-size: 11px; }
+    .quotation-primary-button, .quotation-secondary-button { display: inline-flex; height: 42px; align-items: center; gap: 9px; border-radius: 11px; padding: 0 17px; font-size: 11px; font-weight: 700; transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+    .quotation-primary-button { color: #fff; background: linear-gradient(115deg, #4238ed, #6049f6); box-shadow: 0 9px 18px rgba(73, 58, 235, .28); }
+    .quotation-primary-button:hover { background: linear-gradient(115deg, #362ddd, #533beb); transform: translateY(-1px); }
+    .quotation-secondary-button { border: 1px solid #263d79; color: #10245e; background: rgba(255,255,255,.72); }
+    .quotation-secondary-button:hover { background: #f6f8ff; }
+    .quotation-search-form { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
+    .quotation-search-wrap { position: relative; }
+    .quotation-search-wrap svg { position: absolute; top: 50%; left: 17px; width: 19px; height: 19px; color: #6380ba; transform: translateY(-50%); pointer-events: none; }
+    .quotation-search-input { box-sizing: border-box; width: 342px; height: 46px; border: 1px solid #dce5f5; border-radius: 13px; padding: 0 15px 0 49px; color: #16306c; background: rgba(255,255,255,.8); font: inherit; font-size: 12px; outline: none; box-shadow: 0 5px 16px rgba(54,87,148,.04); }
+    .quotation-search-input:focus { border-color: #8477ff; box-shadow: 0 0 0 4px rgba(96,73,246,.1); }
+    .quotation-search-button { height: 46px; border: 0; border-radius: 12px; padding: 0 22px; color: #10245e; background: #eef2ff; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; transition: background .16s ease; }
+    .quotation-search-button:hover { background: #e2e8ff; }
+    .quotation-summary-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(232px, 1.35fr); gap: 10px; margin: 2px 0 17px; }
+    .quotation-summary-card { display: flex; min-width: 0; height: 58px; align-items: center; gap: 12px; border: 1px solid #edf1f8; border-radius: 10px; padding: 0 14px; background: rgba(255,255,255,.9); box-shadow: 0 5px 15px rgba(33, 66, 119, .06); }
+    .quotation-summary-icon { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 9px; }
+    .quotation-summary-icon svg { width: 17px; height: 17px; }
+    .quotation-summary-card.total .quotation-summary-icon { color: #316aff; background: #edf4ff; }
+    .quotation-summary-card.pending .quotation-summary-icon { color: #ff9f42; background: #fff4e8; }
+    .quotation-summary-card.approved .quotation-summary-icon { color: #37b980; background: #e9fbf3; }
+    .quotation-summary-card.expired .quotation-summary-icon { color: #f45a66; background: #fff0f1; }
+    .quotation-summary-card.period .quotation-summary-icon { color: #5c58e9; background: #eff0ff; }
+    .quotation-summary-copy { min-width: 0; line-height: 1.12; }
+    .quotation-summary-value { color: #25385c; font-size: 13px; font-weight: 800; }
+    .quotation-summary-label { margin-top: 3px; color: #7b8eae; font-size: 9px; font-weight: 700; white-space: nowrap; }
+    .quotation-summary-card.period { position: relative; gap: 9px; padding: 0; }
+    .quotation-period-copy { min-width: 0; }
+    .quotation-period-name { color: #334866; font-size: 9px; font-weight: 800; }
+    .quotation-period-trigger { display: flex; width: 100%; height: 100%; align-items: center; gap: 9px; border: 0; border-radius: 10px; padding: 0 14px; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    .quotation-period-trigger:hover { background: #f6f7ff; }
+    .quotation-period-popover { position: absolute; z-index: 20; top: calc(100% + 9px); right: 0; width: 244px; border: 1px solid #d9e2f1; border-radius: 12px; padding: 13px; background: #fff; box-shadow: 0 16px 30px rgba(28, 52, 94, .18); }
+    .quotation-period-popover[hidden] { display: none; }
+    .quotation-period-popover label { display: block; margin-bottom: 8px; color: #344a70; font-size: 10px; font-weight: 800; }
+    .quotation-period-picker { box-sizing: border-box; width: 100%; height: 34px; border: 1px solid #cbd8ec; border-radius: 8px; padding: 0 8px; color: #18356a; background: #f9fbff; font: inherit; font-size: 11px; font-weight: 700; outline: none; }
+    .quotation-period-picker:focus { border-color: #6458ef; box-shadow: 0 0 0 3px rgba(100, 88, 239, .12); }
+    .quotation-period-apply { width: 100%; height: 32px; margin-top: 10px; border: 0; border-radius: 8px; color: #fff; background: #5548ee; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .quotation-period-apply:hover { background: #4638df; }
+    .quotation-period-clear { width: 100%; height: 32px; margin-top: 7px; border: 1px solid #cbd8ec; border-radius: 8px; color: #344a70; background: #fff; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .quotation-period-clear:hover { border-color: #9fb2d1; background: #f6f8fc; }
+    .quotation-period-range { margin-top: 4px; color: #8698b6; font-size: 8px; font-weight: 700; white-space: nowrap; }
+    .quotation-period-chevron { width: 15px; height: 15px; margin-left: auto; color: #7b8eae; }
+    .quotation-table-scroll { padding: 0 10px 18px; overflow-x: auto; }
+    .quotation-records-table { width: 100%; min-width: 1220px; border: 1px solid #aebfd8; border-collapse: collapse; text-align: left; }
+    .quotation-records-table th { padding: 15px 14px; color: #fff; background: linear-gradient(135deg,#6092ec,#5686e2); border: 1px solid rgba(255,255,255,.32); font-size: 11px; font-weight: 800; letter-spacing: .055em; text-align: center; text-transform: uppercase; white-space: nowrap; }
+    .quotation-records-table th:first-child { padding-left: 22px; }
+    .quotation-records-table td { height: 82px; box-sizing: border-box; padding: 11px 14px; color: #10245e; background: rgba(255,255,255,.9); border: 1px solid #bdcbe0; vertical-align: middle; box-shadow: none; }
+    .quotation-records-table td:first-child { padding-left: 22px; }
+    .quotation-records-table td:last-child { padding-right: 20px; }
+    .quotation-records-table tbody tr { transition: background .16s ease; }
+    .quotation-records-table tbody tr:hover td { background: #fcfdff; }
+    .quotation-records-table tbody td { transition: background .16s ease, box-shadow .16s ease; }
+    .quotation-records-table tbody td:hover { background: #edf4ff !important; box-shadow: inset 3px 0 #4e7df2; }
+    .quotation-number { display: grid; width: 47px; height: 47px; place-items: center; border-radius: 13px; color: #1455e8; background: linear-gradient(135deg, #edf8ff, #e8eeff); font-size: 17px; font-weight: 800; }
+    .quotation-records-table tbody tr:nth-child(3n + 2) .quotation-number { color: #6134ee; background: linear-gradient(135deg, #f0edff, #f8f4ff); }
+    .quotation-records-table tbody tr:nth-child(3n) .quotation-number { color: #ef4b56; background: linear-gradient(135deg, #fff0f1, #ffe8e9); }
+    .quotation-creator { min-width: 145px; }
+    .quotation-creator-name { max-width: 145px; overflow: hidden; color: #10245e; font-size: 11px; font-weight: 700; line-height: 1.25; text-overflow: ellipsis; }
+    .quotation-creator-date { margin-top: 6px; color: #10245e; font-size: 11px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+    .quotation-divider { border-left: 1px solid #dde7f5; }
+    .quotation-detail-icon { display: grid; width: 46px; height: 46px; flex: 0 0 auto; place-items: center; border-radius: 13px; color: #1761fa; background: linear-gradient(135deg, #eef9ff, #eaf0ff); }
+    .quotation-detail-icon svg { width: 22px; height: 22px; }
+    .quotation-detail-label { margin-bottom: 3px; color: #6380ba; font-size: 8.5px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+    .quotation-invoice { display: flex; min-width: 245px; align-items: center; gap: 12px; }
+    .quotation-invoice-copy { min-width: 0; }
+    .quotation-invoice-value { max-width: 205px; overflow: hidden; color: #10245e; font-size: 11px; font-weight: 700; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+    .quotation-invoice-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; margin-left: auto; }
+    .quotation-invoice-action { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border: 0; border-radius: 8px; color: #3157dc; background: #eef2ff; cursor: pointer; text-decoration: none; transition: background .16s ease, color .16s ease, transform .16s ease; }
+    .quotation-invoice-action:hover, .quotation-invoice-action:focus-visible { color: #fff; background: #5145e8; outline: none; transform: translateY(-1px); }
+    .quotation-invoice-action.download { color: #0878c9; background: #e9f7ff; }
+    .quotation-invoice-action.download:hover, .quotation-invoice-action.download:focus-visible { color: #fff; background: #0878c9; }
+    .quotation-invoice-action svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .quotation-chip { display: flex; min-width: 92px; align-items: center; gap: 10px; border-radius: 13px; padding: 11px 14px; color: #1261df; background: linear-gradient(105deg, #eaf7ff, #edf2ff); font-size: 11px; font-weight: 700; }
+    .quotation-contact { display:flex; min-width:210px; align-items:center; gap:11px; border-radius:13px; padding:10px 13px; color:#4430ed; background:linear-gradient(105deg,#f2efff,#f7f5ff); }.quotation-contact-icon { display:grid; width:31px; height:31px; flex:0 0 auto; place-items:center; border-radius:9px; color:#4430ed; background:#fff; }.quotation-contact-icon svg { width:19px; height:19px; }.quotation-contact-copy { min-width:0; }.quotation-contact-row + .quotation-contact-row { margin-top:5px; }.quotation-contact-value { max-width:155px; overflow:hidden; color:#26366e; font-size:10.5px; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }
+    .quotation-chip.code { min-width: 108px; color: #1d7ef6; background: linear-gradient(105deg, #effaff, #eef7ff); }
+    .quotation-chip.company { min-width: 160px; color: #e9424e; background: linear-gradient(105deg, #fff0f1, #fff4f4); }
+    .quotation-chip svg { width: 22px; height: 22px; flex: 0 0 auto; }
+    .quotation-chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .quotation-action-cell { min-width: 88px; position: relative; overflow: visible; z-index: 2; }
+    .quotation-history-box { width:min(470px,calc(100vw - 28px)); overflow:hidden; padding:0 !important; border:1px solid #dbe3f0; background:#fff !important; }.quotation-history-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:17px 19px; border-bottom:1px solid #e6ebf3; background:linear-gradient(120deg,#f5f4ff,#f2f8ff); }.quotation-history-title { margin:0; color:#172b59; font-size:16px; font-weight:850; }.quotation-history-subtitle { margin:4px 0 0; color:#71819c; font-size:10.5px; }.quotation-history-close { display:grid; width:32px; height:32px; place-items:center; border:0; border-radius:9px; color:#75839a; background:#fff; cursor:pointer; }.quotation-history-close:hover { color:#d43c4c; background:#fff0f2; }.quotation-history-entries { display:flex; max-height:350px; flex-direction:column; gap:9px; overflow-y:auto; padding:14px; }.quotation-history-item { position:relative; padding:12px 13px 12px 39px; border:1px solid #e2e7f0; border-radius:11px; background:#fafbfe; }.quotation-history-item::before { position:absolute; top:14px; left:14px; width:12px; height:12px; border:3px solid #dcd9ff; border-radius:50%; background:#5548ee; content:""; }.quotation-history-editor { color:#1d3156; font-size:11.5px; font-weight:850; }.quotation-history-time { margin-top:4px; color:#72829b; font-size:10.5px; }.quotation-history-empty { padding:28px 12px; color:#73809b; font-size:11px; text-align:center; }
+    .quotation-preview-overlay { position: fixed; z-index: 1400; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(14, 25, 54, .58); backdrop-filter: blur(5px); }
+    .quotation-preview-overlay.open { display: flex; }
+    .quotation-preview-dialog { display: flex; width: min(1080px, calc(100vw - 36px)); height: min(820px, calc(100vh - 36px)); flex-direction: column; overflow: hidden; border: 1px solid #d6dff0; border-radius: 18px; background: #eef2f8; box-shadow: 0 28px 80px rgba(8, 18, 54, .36); }
+    .quotation-preview-toolbar { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 20px; border-bottom: 1px solid #dbe3ef; color: #10245e; background: #fff; }
+    .quotation-preview-title { font-size: 15px; font-weight: 850; }
+    .quotation-preview-subtitle { margin-top: 3px; color: #526887; font-size: 10px; font-weight: 700; }
+    .quotation-preview-toolbar-actions { display: flex; align-items: center; gap: 8px; }
+    .quotation-preview-tool { display: inline-flex; height: 36px; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border: 1px solid #d2dced; border-radius: 9px; color: #29446f; background: #fff; font-size: 10px; font-weight: 850; text-decoration: none; cursor: pointer; }
+    .quotation-preview-tool:hover { background: #f2f5fb; }.quotation-preview-tool.primary { border-color: #4e46e5; color: #fff; background: #4e46e5; }.quotation-preview-tool.primary:hover { background: #3f36d4; }
+    .quotation-preview-tool svg, .quotation-preview-close svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .quotation-preview-close { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 0; border-radius: 9px; color: #7b879d; background: transparent; cursor: pointer; }.quotation-preview-close:hover { color: #dc3f50; background: #fff0f2; }
+    .quotation-preview-stage { min-height: 0; flex: 1; overflow-y: auto; padding: 20px; background: linear-gradient(145deg,#f2f6fc,#e8eef8); scrollbar-color:#829ed0 #dfe7f3; scrollbar-width:thin; }
+    .quotation-preview-loading,.quotation-preview-error { display:grid; min-height:300px; place-items:center; color:#637795; font-size:12px; font-weight:700; }.quotation-preview-error { color:#c43d4b; }
+    .quotation-document { overflow:hidden; border:1px solid #d6deeb; border-radius:15px; background:#fff; color:#1d2d4d; box-shadow:0 15px 36px rgba(25,48,91,.10); }.quotation-document-accent { height:8px; background:linear-gradient(90deg,#5145e8 0 66%,#16a8bd 66% 84%,#ff9f43 84%); }
+    .quotation-document-head { display:grid; grid-template-columns:1fr auto; align-items:center; gap:24px; padding:24px 28px; }.quotation-document-brand { display:flex; align-items:center; gap:18px; }.quotation-document-logo { width:172px; height:auto; object-fit:contain; }.quotation-document-company { padding-left:18px; border-left:1px solid #dde4ef; color:#657691; font-size:9.5px; line-height:1.6; }.quotation-document-heading { text-align:right; }.quotation-document-heading strong { display:block; color:#312d8e; font-size:23px; font-weight:900; letter-spacing:.055em; }.quotation-document-number { display:inline-block; margin-top:8px; padding:6px 10px; border-radius:8px; color:#4438d0; background:#efedff; font-size:10px; font-weight:850; }
+    .quotation-document-meta { display:grid; grid-template-columns:repeat(4,1fr); border-block:1px solid #dce4ef; background:#f4f6ff; }.quotation-document-meta > div { padding:14px 18px; border-right:1px solid #dce4ef; }.quotation-document-meta > div:last-child { border-right:0; }.quotation-document-label { display:block; margin-bottom:5px; color:#7584a0; font-size:8.5px; font-weight:850; letter-spacing:.055em; text-transform:uppercase; }.quotation-document-value { color:#213d6b; font-size:11px; font-weight:800; overflow-wrap:anywhere; }
+    .quotation-preview-input { display:none; box-sizing:border-box; width:100%; min-height:34px; border:1px solid #aebee0; border-radius:8px; padding:7px 9px; color:#1d3764; background:#fff; font:inherit; font-size:10.5px; font-weight:750; outline:none; }.quotation-preview-input:focus { border-color:#5145e8; box-shadow:0 0 0 3px rgba(81,69,232,.12); }.quotation-document.editing [data-quote-display] { display:none; }.quotation-document.editing .quotation-preview-input { display:block; }.quotation-preview-tool.cancel { display:none; color:#b33c4b; border-color:#efc4ca; background:#fff7f8; }.quotation-preview-tool.cancel:hover { background:#ffedf0; }.quotation-preview-toolbar.editing .quotation-preview-tool.cancel { display:inline-flex; }.quotation-preview-toolbar.editing #quotationPreviewEdit { color:#fff; border-color:#168866; background:#168866; }.quotation-preview-toolbar.editing #quotationPreviewEdit:hover { background:#107356; }
+    .quotation-document-client { display:grid; grid-template-columns:1.35fr .65fr; border-bottom:1px solid #dde4ef; }.quotation-client-block { padding:19px 24px; }.quotation-client-block + .quotation-client-block { border-left:1px solid #dde4ef; background:#fbfcff; }.quotation-client-title { display:flex; align-items:center; gap:8px; margin:0 0 10px; color:#3730a3; font-size:9px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }.quotation-client-title::before { width:4px; height:16px; border-radius:4px; background:#16a8bd; content:""; }.quotation-client-name { color:#182f54; font-size:15px; font-weight:900; }.quotation-client-detail { margin-top:6px; color:#687a96; font-size:10.5px; line-height:1.5; }
+    .quotation-items { padding:21px 24px; }.quotation-items-title { margin:0 0 10px; color:#233d69; font-size:10px; font-weight:900; text-transform:uppercase; }.quotation-document-table { width:100%; border-collapse:collapse; table-layout:fixed; }.quotation-document-table th { padding:10px 9px; border:1px solid #373396; color:#fff; background:#312d82; font-size:8.5px; font-weight:850; text-align:left; text-transform:uppercase; }.quotation-document-table td { padding:11px 9px; border:1px solid #dbe2ed; color:#2d405e; font-size:10px; font-weight:650; vertical-align:top; overflow-wrap:anywhere; }.quotation-document-table th:nth-child(1){width:6%}.quotation-document-table th:nth-child(2){width:36%}.quotation-document-table th:nth-child(3){width:15%}.quotation-document-table th:nth-child(4){width:10%}.quotation-document-table th:nth-child(5),.quotation-document-table th:nth-child(6){width:16.5%}.quotation-line-detail{display:block;margin-top:4px;color:#7a879b;font-size:9px;font-weight:500;white-space:pre-wrap}
+    .quotation-document-bottom { display:flex; justify-content:flex-end; padding:0 24px 22px; }.quotation-total-card { width:290px; overflow:hidden; border:1px solid #d8dfec; border-radius:11px; }.quotation-total-row { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; color:#61728d; font-size:10px; }.quotation-total-row.grand { color:#fff; background:linear-gradient(115deg,#3730a3,#6056e8); font-weight:850; }.quotation-total-row strong { color:inherit; font-size:14px; }.quotation-document-footer { display:flex; justify-content:space-between; padding:13px 24px; border-top:1px solid #dce4ef; color:#7c8ba3; background:#f8faff; font-size:8.5px; }.quotation-document-footer strong { color:#384d70; }
+    @media (max-width: 700px) { .quotation-preview-overlay { padding:8px }.quotation-preview-dialog{width:calc(100vw - 16px);height:calc(100vh - 16px);border-radius:13px}.quotation-preview-toolbar{align-items:flex-start;padding:11px}.quotation-preview-tool span{display:none}.quotation-preview-stage{padding:8px}.quotation-document-head,.quotation-document-brand{align-items:flex-start;grid-template-columns:1fr;flex-direction:column}.quotation-document-heading{text-align:left}.quotation-document-company{padding-left:0;border-left:0}.quotation-document-meta,.quotation-document-client{grid-template-columns:1fr}.quotation-document-meta>div,.quotation-client-block+.quotation-client-block{border-right:0;border-left:0;border-bottom:1px solid #dde4ef}.quotation-items{overflow-x:auto}.quotation-document-table{min-width:700px} }
+    .quotation-records-table tr:has(.quotation-actions[open]) { position: relative; z-index: 50; }
+    .quotation-records-table tr:has(.quotation-actions[open]) .quotation-action-cell { z-index: 51; }
+    .quotation-actions { position: relative; display: inline-block; }
+    .quotation-actions-toggle { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border: 0; border-radius: 11px; color: #354ec7; background: linear-gradient(135deg, #edf4ff, #edf0ff); cursor: pointer; list-style: none; transition: transform .16s ease, background .16s ease, box-shadow .16s ease; }
+    .quotation-actions-toggle::-webkit-details-marker { display: none; }
+    .quotation-actions-toggle:hover { background: #e2eaff; box-shadow: 0 4px 12px rgba(56, 74, 200, .18); transform: translateY(-1px); }
+    .quotation-actions-toggle svg { width: 20px; height: 20px; }
+    .quotation-actions-menu { position: fixed; z-index: 1600; width: 142px; overflow: hidden; border: 1px solid #dbe3f0; border-radius: 10px; padding: 4px 0; background: #fff; box-shadow: 0 12px 26px rgba(23, 49, 84, .18); }
+    .quotation-actions-menu button { display: block; width: 100%; border: 0; padding: 8px 12px; color: #263d60; background: transparent; font: inherit; font-size: 10px; font-weight: 700; text-align: left; cursor: pointer; }
+    .quotation-actions-menu button:hover { background: #f2f6ff; color: #2848c6; }
+    .quotation-actions-menu button.delete { color: #dc3545; }
+    .quotation-actions-menu button.delete:hover { background: #fff1f2; color: #c92335; }
+    .quotation-footer { border-top: 0; padding: 0 26px 21px; font-size: 10px; }
+    @media (max-width: 1100px) { .quotation-summary-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 700px) { .equipment-quotation-page { padding: 12px; } .quotation-toolbar { padding: 18px; } .quotation-primary-button, .quotation-secondary-button { width: 100%; justify-content: center; } .quotation-search-form { align-items: stretch; flex-direction: column; } .quotation-search-input { width: 100%; } .quotation-search-button { width: 100%; } .quotation-summary-cards { grid-template-columns: 1fr; } }
+=======
   <title>Quotation | EVTL CRM</title>
   <link rel="stylesheet" th:href="@{/css/output.css}">
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
@@ -17,6 +145,7 @@
     .quotation-action-button.download:hover { background: #E0E7FF; }
     .quotation-action-button.delete { color: #DC2626; background: #FEF2F2; }
     .quotation-action-button.delete:hover { background: #FEE2E2; }
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
   </style>
 </head>
 <body>
@@ -25,6 +154,25 @@
   <div class="min-h-screen flex flex-col pl-[6.5rem]">
     <div th:replace="~{fragments/topbar :: topbar}"></div>
 
+<<<<<<< HEAD
+    <main class="equipment-quotation-page flex-1 space-y-5">
+      <section class="equipment-quotation-card">
+        <div class="quotation-toolbar">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h1 class="quotation-title">Equipment Quotation</h1>
+              <p class="quotation-subtitle mt-1">Review lab equipment quotations.</p>
+            </div>
+            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <a href="/lab-equipment/quotation/create"
+                class="quotation-primary-button focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Add Equipment Quotation
+              </a>
+              <button type="button"
+                class="quotation-secondary-button focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+=======
     <main class="flex-1 px-8 pb-8 space-y-5">
       <section class="rounded-2xl bg-white border border-[#E5EAF1] shadow-[0_12px_32px_-24px_rgba(23,50,79,.42)] overflow-hidden">
         <div class="px-5 py-4 border-b border-[#EEF1F5]">
@@ -40,10 +188,66 @@
               </a>
               <button type="button"
                 class="inline-flex h-9 items-center rounded-lg border border-[#D9E2EC] bg-white px-3 text-[11px] font-bold text-[#3A4B63] transition hover:bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-indigo-100">
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
                 Terms and Conditions
               </button>
             </div>
           </div>
+<<<<<<< HEAD
+          <form id="quotationSearchForm" class="quotation-search-form" role="search">
+            <div class="quotation-search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="quotationSearch" name="q" type="search" maxlength="100" placeholder="Search quotations"
+              aria-label="Search quotations" class="quotation-search-input">
+            </div>
+            <button type="submit" class="quotation-search-button">Search</button>
+          </form>
+        </div>
+
+        <div class="quotation-summary-cards" aria-label="Quotation summary">
+          <article class="quotation-summary-card total">
+            <span class="quotation-summary-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+            <div class="quotation-summary-copy"><div id="quotationTotalCount" class="quotation-summary-value">0</div><div class="quotation-summary-label">Total Quotations</div></div>
+          </article>
+          <article class="quotation-summary-card pending">
+            <span class="quotation-summary-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>
+            <div class="quotation-summary-copy"><div class="quotation-summary-value">0</div><div class="quotation-summary-label">Pending Review</div></div>
+          </article>
+          <article class="quotation-summary-card approved">
+            <span class="quotation-summary-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span>
+            <div class="quotation-summary-copy"><div class="quotation-summary-value">0</div><div class="quotation-summary-label">Approved</div></div>
+          </article>
+          <article class="quotation-summary-card expired">
+            <span class="quotation-summary-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m9 9 6 6m0-6-6 6"/></svg></span>
+            <div class="quotation-summary-copy"><div class="quotation-summary-value">0</div><div class="quotation-summary-label">Expired</div></div>
+          </article>
+          <article class="quotation-summary-card period">
+            <button id="quotationPeriodTrigger" class="quotation-period-trigger" type="button" aria-expanded="false" aria-controls="quotationPeriodPopover">
+              <span class="quotation-summary-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <span class="quotation-period-copy"><span id="quotationPeriodName" class="quotation-period-name">This Month</span><span id="quotationPeriodRange" class="quotation-period-range"></span></span>
+              <svg class="quotation-period-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </button>
+            <div id="quotationPeriodPopover" class="quotation-period-popover" hidden>
+              <label for="quotationMonthFilter">Choose year and month</label>
+              <input id="quotationMonthFilter" class="quotation-period-picker" type="month">
+              <button id="quotationPeriodApply" class="quotation-period-apply" type="button">Apply filter</button>
+              <button id="quotationPeriodClear" class="quotation-period-clear" type="button">Clear filter</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="quotation-table-scroll">
+          <table class="quotation-records-table" aria-label="Lab equipment quotations">
+            <thead>
+              <tr>
+                <th scope="col">S No.</th>
+                <th scope="col">Created By</th>
+                <th scope="col">Invoice No.</th>
+                <th scope="col">Attention / Client Name</th>
+                <th scope="col">IS Code</th>
+                <th scope="col">Company Name</th>
+                <th scope="col" class="text-right">Action</th>
+=======
           <form id="quotationSearchForm" class="mt-3 flex items-center gap-2 sm:justify-end" role="search">
             <input id="quotationSearch" name="q" type="search" maxlength="100" placeholder="Search quotations"
               aria-label="Search quotations" class="h-9 w-52 rounded-lg border border-[#E1E7EF] px-3 text-[11.5px] outline-none focus:ring-2 focus:ring-indigo-100">
@@ -64,23 +268,68 @@
                 <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">IS Code</th>
                 <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Company Name</th>
                 <th scope="col" class="border-b border-[#DDE4EC] px-5 py-3 text-right font-extrabold">Action</th>
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
               </tr>
             </thead>
             <tbody id="quotationRows">
               <tr>
+<<<<<<< HEAD
+                <td colspan="7" class="px-5 py-12 text-center text-[12px] text-[#6B87A8]">Loading quotations...</td>
+=======
                 <td colspan="9" class="px-5 py-12 text-center text-[12px] text-[#6B87A8]">Loading quotations...</td>
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
               </tr>
             </tbody>
           </table>
         </div>
+<<<<<<< HEAD
+        <div class="quotation-footer classic-pagination">
+          <p id="quotationSummary" class="text-[11px] text-[#6B87A8]">Loading quotations...</p>
+          <nav id="quotationPagination" class="classic-pagination-controls" aria-label="Quotation pagination"></nav>
+=======
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF1F5] px-5 py-3.5">
           <p id="quotationSummary" class="text-[11px] text-[#6B87A8]">Loading quotations...</p>
           <nav id="quotationPagination" class="flex items-center gap-1.5" aria-label="Quotation pagination"></nav>
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         </div>
       </section>
     </main>
   </div>
 
+<<<<<<< HEAD
+  <div id="quotationHistoryModal" class="modal-overlay" aria-hidden="true">
+    <section class="quotation-history-box modal-box rounded-2xl" role="dialog" aria-modal="true" aria-labelledby="quotationHistoryTitle">
+      <header class="quotation-history-head"><div><h2 id="quotationHistoryTitle" class="quotation-history-title">Quotation Edit History</h2><p id="quotationHistorySubtitle" class="quotation-history-subtitle">Loading updates...</p></div><button id="quotationHistoryClose" class="quotation-history-close" type="button" aria-label="Close edit history"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></header>
+      <div id="quotationHistoryEntries" class="quotation-history-entries"></div>
+    </section>
+  </div>
+
+  <div id="quotationPreviewModal" class="quotation-preview-overlay" aria-hidden="true">
+    <section class="quotation-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="quotationPreviewTitle">
+      <header class="quotation-preview-toolbar">
+        <div>
+          <div id="quotationPreviewTitle" class="quotation-preview-title">Equipment Quotation Preview</div>
+          <div id="quotationPreviewSubtitle" class="quotation-preview-subtitle">Loading quotation...</div>
+        </div>
+        <div class="quotation-preview-toolbar-actions">
+          <button id="quotationPreviewEdit" class="quotation-preview-tool" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span id="quotationPreviewEditLabel">Edit</span>
+          </button>
+          <button id="quotationPreviewCancel" class="quotation-preview-tool cancel" type="button"><span>Cancel</span></button>
+          <a id="quotationPreviewDownload" class="quotation-preview-tool primary" href="#">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Download PDF</span>
+          </a>
+          <button id="quotationPreviewClose" class="quotation-preview-close" type="button" aria-label="Close quotation preview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </header>
+      <div id="quotationPreviewContent" class="quotation-preview-stage"><div class="quotation-preview-loading">Loading quotation...</div></div>
+    </section>
+  </div>
+
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
   <script>
     (() => {
       const rows = document.getElementById('quotationRows');
@@ -88,9 +337,57 @@
       const pagination = document.getElementById('quotationPagination');
       const form = document.getElementById('quotationSearchForm');
       const search = document.getElementById('quotationSearch');
+<<<<<<< HEAD
+      const totalCount = document.getElementById('quotationTotalCount');
+      const periodRange = document.getElementById('quotationPeriodRange');
+      const periodName = document.getElementById('quotationPeriodName');
+      const monthFilter = document.getElementById('quotationMonthFilter');
+      const periodTrigger = document.getElementById('quotationPeriodTrigger');
+      const periodPopover = document.getElementById('quotationPeriodPopover');
+      const periodApply = document.getElementById('quotationPeriodApply');
+      const periodClear = document.getElementById('quotationPeriodClear');
+      const historyModal = document.getElementById('quotationHistoryModal');
+      const historySubtitle = document.getElementById('quotationHistorySubtitle');
+      const historyEntries = document.getElementById('quotationHistoryEntries');
+      const historyClose = document.getElementById('quotationHistoryClose');
+      const previewModal = document.getElementById('quotationPreviewModal');
+      const previewSubtitle = document.getElementById('quotationPreviewSubtitle');
+      const previewContent = document.getElementById('quotationPreviewContent');
+      const previewDownload = document.getElementById('quotationPreviewDownload');
+      const previewEdit = document.getElementById('quotationPreviewEdit');
+      const previewEditLabel = document.getElementById('quotationPreviewEditLabel');
+      const previewCancel = document.getElementById('quotationPreviewCancel');
+      const previewToolbar = document.querySelector('.quotation-preview-toolbar');
+      const previewClose = document.getElementById('quotationPreviewClose');
+      let previewRequestId = 0;
+      let previewRecord = null;
+      let previewData = null;
+      const pendingCount = document.querySelector('.quotation-summary-card.pending .quotation-summary-value');
+      const approvedCount = document.querySelector('.quotation-summary-card.approved .quotation-summary-value');
+      const expiredCount = document.querySelector('.quotation-summary-card.expired .quotation-summary-value');
       const params = new URLSearchParams(window.location.search);
       let currentPage = Math.max(Number.parseInt(params.get('page') || '1', 10) || 1, 1);
       search.value = (params.get('q') || '').slice(0, 100);
+      monthFilter.value = /^\d{4}-\d{2}$/.test(params.get('month') || '') ? params.get('month') : '';
+
+      function setMonthRange(value) {
+        if (!value) {
+          periodName.textContent = 'All Quotations';
+          periodRange.textContent = 'Showing all entries';
+          return;
+        }
+        const [year, month] = value.split('-').map(Number);
+        const first = new Date(year, month - 1, 1);
+        const last = new Date(year, month, 0);
+        const format = date => new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+        periodName.textContent = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(first);
+        periodRange.textContent = `${format(first)} - ${format(last)}`;
+      }
+=======
+      const params = new URLSearchParams(window.location.search);
+      let currentPage = Math.max(Number.parseInt(params.get('page') || '1', 10) || 1, 1);
+      search.value = (params.get('q') || '').slice(0, 100);
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
       function cell(value, className) {
         const td = document.createElement('td');
@@ -103,7 +400,11 @@
         rows.replaceChildren();
         const tr = document.createElement('tr');
         const td = cell(message, `px-5 py-12 text-center text-[12px] ${isError ? 'text-rose-600' : 'text-[#6B87A8]'}`);
+<<<<<<< HEAD
+        td.colSpan = 7;
+=======
         td.colSpan = 9;
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         tr.appendChild(td);
         rows.appendChild(tr);
       }
@@ -114,6 +415,23 @@
           .format(new Date(`${value}T00:00:00Z`));
       }
 
+<<<<<<< HEAD
+      const icons = {
+        document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>',
+        person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+        code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6M9 8h2"/></svg>',
+        building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5l8-3v19M4 9h8M8 13h.01M8 17h.01M16 9h4v12h-8"/><path d="M16 13h.01M16 17h.01"/></svg>'
+      };
+
+      function valueOrDash(value) { return value === null || value === undefined || value === '' ? '—' : String(value); }
+      function numberCell(number) { const td = document.createElement('td'); const badge = document.createElement('span'); badge.className = 'quotation-number'; badge.textContent = number; td.appendChild(badge); return td; }
+      function creatorCell(createdBy, date) { const td = document.createElement('td'); td.className = 'quotation-divider'; const wrap = document.createElement('div'); wrap.className = 'quotation-creator'; const nameLabel = document.createElement('div'); nameLabel.className = 'quotation-detail-label'; nameLabel.textContent = 'Created By'; const name = document.createElement('div'); name.className = 'quotation-creator-name'; name.textContent = valueOrDash(createdBy); const dateLabel = document.createElement('div'); dateLabel.className = 'quotation-detail-label'; dateLabel.style.marginTop = '6px'; dateLabel.textContent = 'Date'; const dateValue = document.createElement('div'); dateValue.className = 'quotation-creator-date'; dateValue.textContent = formatDate(date); wrap.append(nameLabel, name, dateLabel, dateValue); td.appendChild(wrap); return td; }
+      function invoiceCell(record) { const td = document.createElement('td'); const wrap = document.createElement('div'); wrap.className = 'quotation-invoice'; const icon = document.createElement('span'); icon.className = 'quotation-detail-icon'; icon.innerHTML = icons.document; const copy = document.createElement('div'); copy.className = 'quotation-invoice-copy'; const label = document.createElement('div'); label.className = 'quotation-detail-label'; label.textContent = 'Invoice No.'; const value = document.createElement('div'); value.className = 'quotation-invoice-value'; value.textContent = valueOrDash(record.invoiceNo); const actions = document.createElement('div'); actions.className = 'quotation-invoice-actions'; const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'quotation-invoice-action'; preview.title = 'Preview quotation'; preview.setAttribute('aria-label', `Preview quotation ${record.invoiceNo || record.id}`); preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>'; preview.addEventListener('click', () => openQuotationPreview(record)); const download = document.createElement('a'); download.className = 'quotation-invoice-action download'; download.href = `/api/lab-equipment/quotations/${encodeURIComponent(record.id)}/download`; download.title = 'Download quotation PDF'; download.setAttribute('aria-label', `Download quotation ${record.invoiceNo || record.id}`); download.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>'; copy.append(label, value); actions.append(preview, download); wrap.append(icon, copy, actions); td.appendChild(wrap); return td; }
+      function chipCell(value, type, iconName) { const td = document.createElement('td'); const chip = document.createElement('div'); chip.className = `quotation-chip ${type || ''}`; chip.innerHTML = icons[iconName]; const text = document.createElement('span'); text.className = 'quotation-chip-text'; text.textContent = valueOrDash(value); chip.appendChild(text); td.appendChild(chip); return td; }
+      function attentionClientCell(attention, clientName) { const td = document.createElement('td'); const wrap = document.createElement('div'); wrap.className = 'quotation-contact'; const icon = document.createElement('span'); icon.className = 'quotation-contact-icon'; icon.innerHTML = icons.person; const copy = document.createElement('div'); copy.className = 'quotation-contact-copy'; const attentionRow = document.createElement('div'); attentionRow.className = 'quotation-contact-row'; const attentionLabel = document.createElement('div'); attentionLabel.className = 'quotation-detail-label'; attentionLabel.textContent = 'Attention'; const attentionValue = document.createElement('div'); attentionValue.className = 'quotation-contact-value'; attentionValue.textContent = valueOrDash(attention); attentionRow.append(attentionLabel, attentionValue); const clientRow = document.createElement('div'); clientRow.className = 'quotation-contact-row'; const clientLabel = document.createElement('div'); clientLabel.className = 'quotation-detail-label'; clientLabel.textContent = 'Client Name'; const clientValue = document.createElement('div'); clientValue.className = 'quotation-contact-value'; clientValue.textContent = valueOrDash(clientName); clientRow.append(clientLabel, clientValue); copy.append(attentionRow, clientRow); wrap.append(icon, copy); td.appendChild(wrap); return td; }
+
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
       function renderRows(records, page, pageSize) {
         rows.replaceChildren();
         if (!records.length) {
@@ -122,6 +440,11 @@
         }
         records.forEach((record, index) => {
           const tr = document.createElement('tr');
+<<<<<<< HEAD
+          tr.append(
+            numberCell(String(((page - 1) * pageSize) + index + 1)), creatorCell(record.createdBy, record.date), invoiceCell(record),
+            attentionClientCell(record.attention, record.clientName), chipCell(record.isCode, 'code', 'code'), chipCell(record.companyName, 'company', 'building'),
+=======
           tr.className = 'border-b border-[#EEF1F5] last:border-b-0';
           tr.append(
             cell(String(((page - 1) * pageSize) + index + 1), 'px-5 py-3 text-[12px] font-semibold text-[#17324F]'),
@@ -132,12 +455,200 @@
             cell(record.clientName, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
             cell(record.isCode, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
             cell(record.companyName, 'px-4 py-3 text-[12px] text-[#3A4B63]'),
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
             actionCell(record)
           );
           rows.appendChild(tr);
         });
       }
 
+<<<<<<< HEAD
+      function csrfHeaders() { const token = document.querySelector('meta[name="_csrf"]')?.content; const header = document.querySelector('meta[name="_csrf_header"]')?.content; return token && header ? { [header]: token } : {}; }
+      function editQuotation(record) { window.location.assign(`/lab-equipment/quotation/${encodeURIComponent(record.id)}/edit`); }
+      function downloadQuotation(record) { window.location.assign(`/api/lab-equipment/quotations/${record.id}/download`); }
+      function closeQuotationHistory() { historyModal.classList.remove('open'); historyModal.setAttribute('aria-hidden', 'true'); }
+      async function openQuotationHistory(record) {
+        historySubtitle.textContent = record.invoiceNo || 'Quotation updates';
+        historyEntries.innerHTML = '<div class="quotation-history-empty">Loading edit history...</div>';
+        historyModal.classList.add('open'); historyModal.setAttribute('aria-hidden', 'false');
+        try {
+          const response = await fetch(`/api/lab-equipment/quotations/${encodeURIComponent(record.id)}/history`, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to load edit history.');
+          const entries = await response.json(); historyEntries.replaceChildren();
+          historySubtitle.textContent = entries.length ? `${entries.length} recorded update${entries.length === 1 ? '' : 's'}` : 'No recorded updates';
+          if (!entries.length) { const empty = document.createElement('div'); empty.className = 'quotation-history-empty'; empty.textContent = 'No edits have been recorded for this quotation yet.'; historyEntries.appendChild(empty); return; }
+          entries.forEach(entry => { const item = document.createElement('article'); item.className = 'quotation-history-item'; const editor = document.createElement('div'); editor.className = 'quotation-history-editor'; editor.textContent = entry.editor || 'Unknown user'; const time = document.createElement('div'); time.className = 'quotation-history-time'; time.textContent = `Updated on ${String(entry.editedAt || '').replace('T', ' ')}`; item.append(editor, time); historyEntries.appendChild(item); });
+        } catch (error) { historyEntries.innerHTML = '<div class="quotation-history-empty">Unable to load quotation edit history.</div>'; }
+      }
+      async function openQuotationPreview(record) {
+        const id = encodeURIComponent(record.id);
+        const requestId = ++previewRequestId;
+        previewRecord = record;
+        previewToolbar.classList.remove('editing');
+        previewEditLabel.textContent = 'Edit';
+        previewSubtitle.textContent = record.invoiceNo || 'Quotation details';
+        previewDownload.href = `/api/lab-equipment/quotations/${id}/download`;
+        previewContent.innerHTML = '<div class="quotation-preview-loading">Loading quotation...</div>';
+        previewModal.classList.add('open');
+        previewModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        previewClose.focus();
+        try {
+          const response = await fetch(`/api/lab-equipment/quotations/${id}/preview`, {
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' }
+          });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error(`Preview request failed with status ${response.status}`);
+          const data = await response.json();
+          if (requestId !== previewRequestId || !previewModal.classList.contains('open')) return;
+          renderQuotationPreview(data);
+        } catch (error) {
+          if (requestId !== previewRequestId) return;
+          previewContent.innerHTML = '<div class="quotation-preview-error">Unable to load the quotation preview. Please try again.</div>';
+        }
+      }
+      function renderQuotationPreview(data) {
+        previewData = data;
+        previewContent.innerHTML = `
+          <article class="quotation-document">
+            <div class="quotation-document-accent"></div>
+            <header class="quotation-document-head">
+              <div class="quotation-document-brand"><img class="quotation-document-logo" src="/images/invoice/evtl-watermark.png" alt="EVTL India"><div class="quotation-document-company">EMPHATIC VANS &amp; TESTING LABS PRIVATE LIMITED<br>F-88-89 B, S/F, Street No-08, Mangal Bazar<br>Laxmi Nagar, East Delhi - 110092<br>GSTIN: 07AAFCE4483M1Z7</div></div>
+              <div class="quotation-document-heading"><strong>QUOTATION</strong><span class="quotation-document-number" data-quote="invoice"></span></div>
+            </header>
+            <section class="quotation-document-meta"><div><span class="quotation-document-label">Quotation Date</span><span class="quotation-document-value" data-quote="date" data-quote-display></span><input class="quotation-preview-input" data-quote-edit="date" type="date"></div><div><span class="quotation-document-label">Attention</span><span class="quotation-document-value" data-quote="attention" data-quote-display></span><input class="quotation-preview-input" data-quote-edit="attention" type="text" maxlength="255"></div><div><span class="quotation-document-label">IS Code</span><span class="quotation-document-value" data-quote="code" data-quote-display></span><input class="quotation-preview-input" data-quote-edit="isCode" type="text" maxlength="255"></div><div><span class="quotation-document-label">Valid For</span><span class="quotation-document-value">30 Days</span></div></section>
+            <section class="quotation-document-client"><div class="quotation-client-block"><h3 class="quotation-client-title">Quotation For</h3><div class="quotation-client-name" data-quote="client" data-quote-display></div><input class="quotation-preview-input" data-quote-edit="clientName" type="text" maxlength="255"><div class="quotation-client-detail" data-quote="company" data-quote-display></div><input class="quotation-preview-input" data-quote-edit="companyName" type="text" maxlength="255"></div><div class="quotation-client-block"><h3 class="quotation-client-title">Reference</h3><div class="quotation-client-name" data-quote="reference"></div><div class="quotation-client-detail">Testing equipment quotation</div></div></section>
+            <section class="quotation-items"><h3 class="quotation-items-title">Equipment &amp; Pricing Details</h3><table class="quotation-document-table"><thead><tr><th>S No.</th><th>Equipment / Description</th><th>HSN Code</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody id="quotationPreviewItems"></tbody></table></section>
+            <section class="quotation-document-bottom"><div class="quotation-total-card"><div class="quotation-total-row"><span>Subtotal</span><strong data-quote="subtotal"></strong></div><div class="quotation-total-row grand"><span>Quotation Total</span><strong data-quote="total"></strong></div></div></section>
+            <footer class="quotation-document-footer"><span>This is a system-generated equipment quotation preview.</span><span>For <strong>EVTL India Pvt. Ltd.</strong></span></footer>
+          </article>`;
+        const show = value => value === null || value === undefined || value === '' ? '\u2014' : String(value);
+        const money = value => `\u20b9 ${show(value)}`;
+        const put = (key, value) => { const target = previewContent.querySelector(`[data-quote="${key}"]`); if (target) target.textContent = show(value); };
+        put('invoice', data.invoiceNo); put('date', formatDate(data.date)); put('attention', data.attention); put('code', data.isCode);
+        put('client', data.clientName); put('company', data.companyName); put('reference', data.invoiceNo); put('subtotal', money(data.subtotal)); put('total', money(data.subtotal));
+        previewContent.querySelector('[data-quote-edit="date"]').value = data.date || '';
+        previewContent.querySelector('[data-quote-edit="attention"]').value = data.attention || '';
+        previewContent.querySelector('[data-quote-edit="isCode"]').value = data.isCode || '';
+        previewContent.querySelector('[data-quote-edit="clientName"]').value = data.clientName || '';
+        previewContent.querySelector('[data-quote-edit="companyName"]').value = data.companyName || '';
+        const body = previewContent.querySelector('#quotationPreviewItems');
+        (data.items || []).forEach(item => {
+          const row = document.createElement('tr');
+          const serial = document.createElement('td'); serial.textContent = show(item.serial);
+          const description = document.createElement('td'); description.textContent = show(item.description); if (item.detail) { const detail = document.createElement('span'); detail.className = 'quotation-line-detail'; detail.textContent = item.detail; description.appendChild(detail); }
+          const hsn = document.createElement('td'); hsn.textContent = show(item.hsnCode);
+          const quantity = document.createElement('td'); quantity.textContent = show(item.quantity);
+          const price = document.createElement('td'); price.textContent = money(item.price);
+          const total = document.createElement('td'); total.textContent = money(item.total);
+          row.append(serial, description, hsn, quantity, price, total); body.appendChild(row);
+        });
+        if (!body.children.length) { const row = document.createElement('tr'); const empty = document.createElement('td'); empty.colSpan = 6; empty.textContent = 'No equipment lines available.'; empty.style.textAlign = 'center'; row.appendChild(empty); body.appendChild(row); }
+      }
+      function setPreviewEditMode(editing) {
+        previewContent.querySelector('.quotation-document')?.classList.toggle('editing', editing);
+        previewToolbar.classList.toggle('editing', editing);
+        previewEditLabel.textContent = editing ? 'Save Changes' : 'Edit';
+        previewEdit.setAttribute('aria-label', editing ? 'Save quotation changes' : 'Edit quotation');
+        if (editing) previewContent.querySelector('[data-quote-edit="date"]')?.focus();
+      }
+      async function savePreviewChanges() {
+        if (!previewRecord) return;
+        const read = name => previewContent.querySelector(`[data-quote-edit="${name}"]`)?.value.trim() || '';
+        const payload = { date: read('date'), attention: read('attention'), clientName: read('clientName'), companyName: read('companyName'), isCode: read('isCode') };
+        if (!payload.date) { previewSubtitle.textContent = 'Quotation date is required.'; previewContent.querySelector('[data-quote-edit="date"]')?.focus(); return; }
+        previewEdit.disabled = true;
+        previewEditLabel.textContent = 'Saving...';
+        try {
+          const response = await fetch(`/api/lab-equipment/quotations/${encodeURIComponent(previewRecord.id)}`, {
+            method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...csrfHeaders() }, body: JSON.stringify(payload)
+          });
+          if (response.status === 401) { window.location.assign('/login'); return; }
+          if (!response.ok) throw new Error('Unable to save quotation changes.');
+          const saved = await response.json();
+          previewRecord = { ...previewRecord, ...saved };
+          await openQuotationPreview(previewRecord);
+          await loadPage(currentPage);
+        } catch (error) {
+          previewSubtitle.textContent = error.message || 'Unable to save quotation changes.';
+          previewEditLabel.textContent = 'Save Changes';
+        } finally {
+          previewEdit.disabled = false;
+        }
+      }
+      function closeQuotationPreview() {
+        previewRequestId++;
+        previewModal.classList.remove('open');
+        previewModal.setAttribute('aria-hidden', 'true');
+        previewRecord = null;
+        previewData = null;
+        previewToolbar.classList.remove('editing');
+        previewEditLabel.textContent = 'Edit';
+        previewContent.innerHTML = '<div class="quotation-preview-loading">Loading quotation...</div>';
+        previewDownload.href = '#';
+        document.body.style.overflow = '';
+      }
+      async function deleteQuotation(record) { if (!window.confirm(`Delete quotation ${record.invoiceNo || record.id}?`)) return; const response = await fetch(`/api/lab-equipment/quotations/${record.id}`, { method: 'DELETE', credentials: 'same-origin', headers: csrfHeaders() }); if (!response.ok) throw new Error('Unable to delete quotation.'); await loadPage(currentPage); }
+
+      function actionCell(record) {
+        const td = document.createElement('td');
+        td.className = 'quotation-action-cell text-right';
+        const actions = document.createElement('details');
+        actions.className = 'quotation-actions';
+        const toggle = document.createElement('summary');
+        toggle.className = 'quotation-actions-toggle';
+        toggle.setAttribute('aria-label', `Actions for quotation ${record.invoiceNo || record.id}`);
+        toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>';
+        toggle.addEventListener('click', () => {
+          document.querySelectorAll('.quotation-actions[open]').forEach(openMenu => {
+            if (openMenu !== actions) openMenu.open = false;
+          });
+          window.requestAnimationFrame(() => {
+            if (!actions.open) return;
+            const anchor = toggle.getBoundingClientRect();
+            const width = menu.offsetWidth || 142;
+            const height = menu.offsetHeight || 150;
+            const gap = 7;
+            const left = Math.max(8, Math.min(anchor.right - width, window.innerWidth - width - 8));
+            const top = window.innerHeight - anchor.bottom >= height + gap + 8
+              ? anchor.bottom + gap
+              : Math.max(8, anchor.top - height - gap);
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+          });
+        });
+        const menu = document.createElement('div');
+        menu.className = 'quotation-actions-menu';
+        let hoverCloseTimer = null;
+        const cancelHoverClose = () => {
+          if (hoverCloseTimer !== null) window.clearTimeout(hoverCloseTimer);
+          hoverCloseTimer = null;
+        };
+        const scheduleHoverClose = () => {
+          cancelHoverClose();
+          hoverCloseTimer = window.setTimeout(() => {
+            actions.open = false;
+            hoverCloseTimer = null;
+          }, 160);
+        };
+        actions.addEventListener('pointerenter', cancelHoverClose);
+        actions.addEventListener('pointerleave', scheduleHoverClose);
+        menu.addEventListener('pointerenter', cancelHoverClose);
+        menu.addEventListener('pointerleave', scheduleHoverClose);
+        const handlers = { 'Edit': editQuotation, 'Edit History': openQuotationHistory, 'Download': downloadQuotation, 'Delete': deleteQuotation };
+        ['Edit', 'Edit History', 'Download', 'Delete'].forEach(label => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.textContent = label;
+          if (label === 'Delete') item.className = 'delete';
+          item.setAttribute('aria-label', `${label} quotation ${record.invoiceNo || record.id}`);
+          item.addEventListener('click', async () => { actions.open = false; try { await handlers[label](record); } catch (error) { window.alert(error.message || 'Unable to complete this action.'); } });
+          menu.appendChild(item);
+        });
+        actions.append(toggle, menu);
+=======
       function actionCell(record) {
         const td = document.createElement('td');
         td.className = 'px-5 py-3 text-right';
@@ -158,6 +669,7 @@
         remove.setAttribute('aria-label', `Delete quotation ${record.invoiceNo || record.id}`);
         remove.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
         actions.append(download, remove);
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         td.appendChild(actions);
         return td;
       }
@@ -178,8 +690,20 @@
 
       function renderPagination(data) {
         pagination.replaceChildren();
+<<<<<<< HEAD
+        if (data.totalPages < 1) return;
+        const goInput = document.createElement('input');
+        goInput.type = 'number'; goInput.min = '1'; goInput.max = String(data.totalPages); goInput.placeholder = 'Go to...'; goInput.setAttribute('aria-label','Go to page');
+        const goButton = document.createElement('button');
+        goButton.type = 'button'; goButton.textContent = 'Go'; goButton.className = 'go-button';
+        const go = () => { const target = Number.parseInt(goInput.value,10); if(target >= 1 && target <= data.totalPages) loadPage(target); };
+        goButton.addEventListener('click',go); goInput.addEventListener('keydown',event=>{if(event.key==='Enter')go();});
+        pagination.append(goInput,goButton);
+        pagination.appendChild(pageButton('Previous', data.currentPage - 1, !data.hasPrevious, false, 'Previous page'));
+=======
         if (data.totalPages < 2) return;
         pagination.appendChild(pageButton('‹', data.currentPage - 1, !data.hasPrevious, false, 'Previous page'));
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         const pages = data.totalPages <= 7
           ? Array.from({ length: data.totalPages }, (_, index) => index + 1)
           : [1, ...(data.currentPage > 3 ? ['…'] : []), ...[data.currentPage - 1, data.currentPage, data.currentPage + 1]
@@ -195,12 +719,20 @@
             pagination.appendChild(pageButton(String(page), page, false, page === data.currentPage, `Page ${page}`));
           }
         });
+<<<<<<< HEAD
+        pagination.appendChild(pageButton('Next', data.currentPage + 1, !data.hasNext, false, 'Next page'));
+=======
         pagination.appendChild(pageButton('›', data.currentPage + 1, !data.hasNext, false, 'Next page'));
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
       }
 
       async function loadPage(page) {
         const query = search.value.trim();
         const request = new URLSearchParams({ page: String(page) });
+<<<<<<< HEAD
+        if (monthFilter.value) request.set('month', monthFilter.value);
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         if (query) request.set('q', query);
         const url = `${window.location.pathname}?${request}`;
         window.history.replaceState({}, '', url);
@@ -211,10 +743,21 @@
           if (!response.ok) throw new Error('Unable to load quotations.');
           const data = await response.json();
           currentPage = data.currentPage;
+<<<<<<< HEAD
+          totalCount.textContent = data.summary.total;
+          pendingCount.textContent = data.summary.pendingReview;
+          approvedCount.textContent = data.summary.approved;
+          expiredCount.textContent = data.summary.expired;
+          renderRows(data.records, data.currentPage, data.pageSize);
+          summary.textContent = data.totalRecords
+            ? `Showing ${((data.currentPage - 1) * data.pageSize) + 1} to ${Math.min(data.currentPage * data.pageSize, data.totalRecords)} of ${data.totalRecords} entries`
+            : 'Showing 0 entries';
+=======
           renderRows(data.records, data.currentPage, data.pageSize);
           summary.textContent = data.totalRecords
             ? `Showing ${((data.currentPage - 1) * data.pageSize) + 1} to ${Math.min(data.currentPage * data.pageSize, data.totalRecords)} of ${data.totalRecords} quotations`
             : 'Showing 0 quotations';
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
           renderPagination(data);
         } catch (error) {
           status('Unable to load quotations. Please try again.', true);
@@ -227,6 +770,63 @@
         event.preventDefault();
         loadPage(1);
       });
+<<<<<<< HEAD
+      periodTrigger.addEventListener('click', () => {
+        const opening = periodPopover.hidden;
+        periodPopover.hidden = !opening;
+        periodTrigger.setAttribute('aria-expanded', String(opening));
+        if (opening) monthFilter.focus();
+      });
+      periodApply.addEventListener('click', () => {
+        if (monthFilter.value) {
+          setMonthRange(monthFilter.value);
+          periodPopover.hidden = true;
+          periodTrigger.setAttribute('aria-expanded', 'false');
+          loadPage(1);
+        }
+      });
+      periodClear.addEventListener('click', () => {
+        monthFilter.value = '';
+        setMonthRange('');
+        periodPopover.hidden = true;
+        periodTrigger.setAttribute('aria-expanded', 'false');
+        loadPage(1);
+      });
+      previewClose.addEventListener('click', closeQuotationPreview);
+      historyClose.addEventListener('click', closeQuotationHistory);
+      historyModal.addEventListener('click', event => { if (event.target === historyModal) closeQuotationHistory(); });
+      previewEdit.addEventListener('click', () => {
+        if (!previewRecord) return;
+        if (previewToolbar.classList.contains('editing')) savePreviewChanges();
+        else setPreviewEditMode(true);
+      });
+      previewCancel.addEventListener('click', () => { if (previewData) renderQuotationPreview(previewData); setPreviewEditMode(false); previewSubtitle.textContent = previewRecord?.invoiceNo || 'Quotation details'; });
+      previewModal.addEventListener('click', event => { if (event.target === previewModal) closeQuotationPreview(); });
+      document.querySelector('.quotation-table-scroll')?.addEventListener('scroll', () => {
+        document.querySelectorAll('.quotation-actions[open]').forEach(menu => { menu.open = false; });
+      }, { passive: true });
+      window.addEventListener('resize', () => {
+        document.querySelectorAll('.quotation-actions[open]').forEach(menu => { menu.open = false; });
+      }, { passive: true });
+      document.addEventListener('click', event => {
+        if (!periodPopover.hidden && !periodPopover.contains(event.target) && !periodTrigger.contains(event.target)) {
+          periodPopover.hidden = true;
+          periodTrigger.setAttribute('aria-expanded', 'false');
+        }
+        if (!event.target.closest('.quotation-actions')) {
+          document.querySelectorAll('.quotation-actions[open]').forEach(menu => { menu.open = false; });
+        }
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          document.querySelectorAll('.quotation-actions[open]').forEach(menu => { menu.open = false; });
+          if (previewModal.classList.contains('open')) closeQuotationPreview();
+          if (historyModal.classList.contains('open')) closeQuotationHistory();
+        }
+      });
+      setMonthRange(monthFilter.value);
+=======
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
       loadPage(currentPage);
     })();
   </script>

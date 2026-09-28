@@ -91,6 +91,51 @@
             <span class="sidebar-label">Vendor</span>
           </a>
 
+<<<<<<< HEAD
+          <details class="sidebar-accounts sidebar-operation" th:if="${canAccessOperation}"
+            th:attr="open=${activePage != null and #strings.startsWith(activePage, 'operation')}">
+            <summary
+              class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition"
+              th:classappend="${activePage != null and #strings.startsWith(activePage, 'operation')} ? ' active' : ''">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z" />
+              </svg>
+              <span class="sidebar-label">Operation</span>
+              <svg class="sidebar-label accounts-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+            </summary>
+            <div class="accounts-submenu sidebar-label">
+              <a href="/operation/bis-isi" th:classappend="${activePage == 'operation-bis-isi'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>BIS-ISI</span></a>
+              <a href="/operation/bis-isi-amc" th:classappend="${activePage == 'operation-bis-isi-amc'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>BIS ISI-AMC</span></a>
+              <a href="/operation/draft-report" th:classappend="${activePage == 'operation-draft-report'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Operation Draft Report</span></a>
+              <a href="/operation/bis-crs" th:classappend="${activePage == 'operation-bis-crs'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>BIS CRS</span></a>
+              <a href="/operation/trademark" th:classappend="${activePage == 'operation-trademark'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Trademark</span></a>
+              <a href="/operation/cdsco" th:classappend="${activePage == 'operation-cdsco'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>CDSCO</span></a>
+              <a href="/operation/rdso" th:classappend="${activePage == 'operation-rdso'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>RDSO Operation</span></a>
+              <a href="/operation/fmcs-1" th:classappend="${activePage == 'operation-fmcs-1'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>FMCS-1</span></a>
+              <a href="/operation/epr-registration" th:classappend="${activePage == 'operation-epr-registration'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>EPR-registration</span></a>
+              <a href="/operation/epr-post-registration" th:classappend="${activePage == 'operation-epr-post-registration'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>EPR-POST Registration</span></a>
+              <a href="/operation/nsws" th:classappend="${activePage == 'operation-nsws'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>NSWS</span></a>
+              <a href="/operation/iso" th:classappend="${activePage == 'operation-iso'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>ISO</span></a>
+              <a href="/operation/iso-certification" th:classappend="${activePage == 'operation-iso-certification'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>ISO Certification</span></a>
+              <a href="/operation/gem" th:classappend="${activePage == 'operation-gem'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>GeM</span></a>
+              <a href="/operation/bee" th:classappend="${activePage == 'operation-bee'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Bee</span></a>
+              <a href="/operation/tec" th:classappend="${activePage == 'operation-tec'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Tec</span></a>
+              <a href="/operation/wmi" th:classappend="${activePage == 'operation-wmi'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Wmi</span></a>
+              <a href="/operation/waste-collection" th:classappend="${activePage == 'operation-waste-collection'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Waste Collection</span></a>
+              <a href="/operation/testing-status" th:classappend="${activePage == 'operation-testing-status'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Testing Status</span></a>
+              <a href="/operation/lab-payment" th:classappend="${activePage == 'operation-lab-payment'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Lab Payment</span></a>
+              <a href="/operation/saral-sanchar" th:classappend="${activePage == 'operation-saral-sanchar'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Saral Sanchar</span></a>
+              <a href="/operation/foreign-inspection-visit" th:classappend="${activePage == 'operation-foreign-inspection-visit'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Foreign Inspection Visit</span></a>
+              <a href="/operation/technical-sit" th:classappend="${activePage == 'operation-technical-sit'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Technical SIT</span></a>
+              <a href="/operation/renewal-license" th:classappend="${activePage == 'operation-renewal-license'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Renewal License</span></a>
+              <a href="/operation/scheme-x-otr-domestic" th:classappend="${activePage == 'operation-scheme-x-otr-domestic'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Scheme-X OTR (Domestic)</span></a>
+              <a href="/operation/scheme-x-fmcs" th:classappend="${activePage == 'operation-scheme-x-fmcs'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>Scheme-X FMCS</span></a>
+              <a href="/operation/noc" th:classappend="${activePage == 'operation-noc'} ? ' active' : ''"><span class="submenu-chevron">&#8250;</span><span>NOC</span></a>
+            </div>
+          </details>
+=======
           <a href="/operation"
             class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition"
             th:classappend="${activePage == 'operation'} ? ' active' : ''">
@@ -102,6 +147,7 @@
             </svg>
             <span class="sidebar-label">Operation</span>
           </a>
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
           <a href="/challan"
             class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition"
@@ -207,6 +253,8 @@
 </body>
 
 </html>
+<<<<<<< HEAD
+=======
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
@@ -282,3 +330,4 @@
 
 </body>
 </html>
+>>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4

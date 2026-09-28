@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    @page { size: A4; margin: 0; }
+    body { margin: 0; padding: 0; font-family: sans-serif; font-size: 13px; color: #000; }
+    .page { position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .background { position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; z-index: 0; }
+    .company-header { position: absolute; top: 4mm; left: 106mm; z-index: 4; box-sizing: border-box; width: 102mm; height: 32mm; overflow: hidden; padding: 3mm 2mm 2mm; background: #fff; color: #333; font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.18; }
+    .company-header-name { margin-bottom: 1px; color: #0e5d81; font-size: 13.2pt; font-weight: bold; line-height: 1.12; }
+    .company-header-cin { margin-top: 1px; color: #0e5d81; font-size: 10pt; font-weight: bold; line-height: 1.12; }
+    .watermark { position: absolute; top: 35%; left: 5%; width: 90%; z-index: 1; }
+    .content { position: relative; padding: 145px 40px 150px; z-index: 2; }
+    .info { margin-bottom: 15px; } .info td { border: 0; font-size: 15px; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; font-size: 13px; }
+    th { background: #115D88; color: white; } .center { text-align: center; } .right { text-align: right; }
+    .terms-title { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin: 20px 0 30px; }
+    .footer { position: absolute; bottom: 90px; left: 0; width: 100%; text-align: center; font-size: 11px; z-index: 3; }
+    .footer p { width: 80%; margin: 5px auto; }
+    .closing { position: relative; height: 165px; margin-top: 20px; }
+    .signature { position: relative; width: 80%; font-size: 14px; line-height: 1.45; z-index: 3; }
+    .stamp { position: absolute; left: 0; top: 0; width: 250px; z-index: 2; }
+    .note { white-space: pre-line; } .term-label { width: 30%; } .term-value { width: 70%; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <img class="background" th:src="${background}" alt=""/>
+    <div class="company-header"><div class="company-header-name">Emphatic Vans &amp; Testing Labs (P) Ltd.</div><div>H-20, 3rd Floor, Block-H, Sector-63, Noida,</div><div>Uttar Pradesh, 201301, | Mob.: +91-9560935898</div><div>E-mail: contact@evtlindia.com, accounts@evtlindia.com</div><div class="company-header-cin">CIN : U73100DL2019PTC348569</div></div>
+    <img class="watermark" th:src="${watermark}" alt=""/>
+    <div class="content">
+      <table class="info"><tr><td><b>Invoice No:</b> <span th:text="${quotation.invoiceNo}"></span><br/><b>Date:</b> <span th:text="${date}"></span><br/><b>Is Code:</b> <span th:text="${quotation.isCode}"></span></td><td class="right"><b>Kind Attention:</b> <span th:text="${quotation.clientName}"></span><br/><b>Company Name:</b> <span th:text="${quotation.companyName}"></span>/Confidential</td></tr></table>
+      <table><thead><tr><th>Sr No</th><th>Description</th><th>HSN Code</th><th>Qty</th><th>Price</th></tr></thead><tbody><tr th:each="item : ${items}"><td class="center" th:text="${item.serial}"></td><td><b th:text="${item.description}"></b><div th:if="${!item.detail.isBlank()}" th:text="${item.detail}" style="margin-top:5px"></div></td><td class="center" th:text="${item.hsnCode}"></td><td class="center" th:text="${item.quantity}"></td><td class="right" th:text="${item.price}"></td></tr></tbody></table>
+      <p class="right"><b>Total Amount:</b> <span th:text="${total}"></span>/-</p><p class="right">Note: 18% GST Extra (Where applicable)</p>
+    </div>
+  </section>
+  <section class="page">
+    <img class="background" th:src="${termsBackground}" alt=""/>
+    <div class="company-header"><div class="company-header-name">Emphatic Vans &amp; Testing Labs (P) Ltd.</div><div>H-20, 3rd Floor, Block-H, Sector-63, Noida,</div><div>Uttar Pradesh, 201301, | Mob.: +91-9560935898</div><div>E-mail: contact@evtlindia.com, accounts@evtlindia.com</div><div class="company-header-cin">CIN : U73100DL2019PTC348569</div></div>
+    <img class="watermark" th:src="${watermark}" alt=""/>
+    <div class="content">
+      <div class="terms-title">Terms &amp; Conditions</div>
+      <table><tbody><tr><td class="term-label"><b>Unit Price</b></td><td class="term-value" th:text="${terms?.unitPrice ?: '-'}"></td></tr><tr><td><b>DELIVERY</b></td><td th:text="${terms?.delivery ?: '-'}"></td></tr><tr><td><b>Payment</b></td><td th:text="${terms?.payment ?: '-'}"></td></tr><tr><td><b>Freight</b></td><td th:text="${terms?.freight ?: '-'}"></td></tr><tr><td><b>Warranty</b></td><td th:text="${terms?.warranty ?: '-'}"></td></tr><tr><td><b>Inspection</b></td><td th:text="${terms?.inspection ?: '-'}"></td></tr><tr><td><b>Installation &amp; Commissioning (One Time/site)</b></td><td th:text="${terms?.installationCommissioning ?: '-'}"></td></tr><tr><td><b>Training</b></td><td th:text="${terms?.training ?: '-'}"></td></tr><tr><td><b>Note:</b></td><td class="note" th:text="${terms?.note ?: '-'}"></td></tr></tbody></table>
+      <div class="closing"><img class="stamp" th:src="${stamp}" alt=""/><div class="signature"><b>Thanking You,</b><br/><br/><b>Yours Sincerely,</b><br/><br/><b>For Emphatic Vans Testing &amp; Labs Pvt. Ltd.</b><br/><br/><b>(Authorized Signatory)</b></div></div>
+    </div>
+    <div class="footer"><hr/><p>This document is generated by EVTL INDIA encrypted system software; &#169; <span th:text="${year}"></span>. EVTL INDIA, All Rights Reserved.</p></div>
+  </section>
+</body>
+</html>

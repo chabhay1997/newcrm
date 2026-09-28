@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>AMC SIT Proposal</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    body { margin: 0; color: #111; font-family: "Times New Roman", Times, serif; font-size: 9.5pt; }
+    .page { position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .page-border { position: absolute; top: 10.5mm; left: 9mm; width: 192mm; height: 279mm; border: .25mm solid #d1d1d1; z-index: 1; }
+    .letterhead { position: absolute; top: 10mm; left: 9mm; width: 192mm; height: 280mm; z-index: 0; }
+    .header-address { position: absolute; top: 17mm; left: 108mm; width: 91mm; height: 27mm; padding: 0 1mm; background: #fff; font-family: Arial, sans-serif; font-size: 8.5pt; line-height: 1.14; z-index: 2; }
+    .header-address strong { color: #15577a; font-size: 10.3pt; }
+    .watermark { position: absolute; top: 43%; left: 17%; width: 76%; opacity: .06; z-index: 1; }
+    .content { position: relative; z-index: 3; padding: 55mm 15mm 16mm; }
+    .page-two .content { padding-top: 58mm; }
+    .meta { width: 100%; border-collapse: collapse; margin: 0 0 2mm; font-size: 9.5pt; }
+    .meta td { width: 50%; padding: 0; vertical-align: top; }
+    .meta .right { text-align: right; }
+    .title { margin: 7mm 0 4mm; text-align: center; text-decoration: underline; text-transform: uppercase; font-size: 11.5pt; font-weight: bold; }
+    .intro { margin: 3mm 0 4mm; font-size: 9.5pt; line-height: 1.2; }
+    .section-title { margin: 4mm 0 1.5mm; text-decoration: underline; font-size: 10pt; font-weight: bold; }
+    ol { margin: 1mm 0 3mm; padding-left: 8mm; font-size: 9.5pt; line-height: 1.12; }
+    li { margin-bottom: .5mm; }
+    .details-table { width: 100%; margin-top: 13mm; border-collapse: collapse; border: 1px solid #555; }
+    .details-table td { border: 1px solid #555; padding: 1.5mm 3mm; font-size: 9pt; }
+    .details-table .label { width: 58mm; background: #f4f6fb; font-weight: bold; }
+    .fee-title { margin: 0 0 4mm; font-size: 10pt; font-weight: bold; }
+    .fee-table { width: 100%; border-collapse: collapse; }
+    .fee-table th { padding: 1.7mm 3mm; border: 1px solid #4472c4; color: #fff; background: #4472c4; font-size: 9pt; text-align: center; }
+    .fee-table td { padding: 2.1mm 3mm; border: 1px solid #b0c4d8; background: #fff; font-size: 9pt; vertical-align: top; }
+    .fee-table .highlight td { background: #dce6f5; font-weight: bold; }
+    .gst-note { margin: 3mm 0 4mm; font-size: 9.5pt; }
+    .importance { margin-top: 4mm; }
+    .payment-title { margin: 4mm 0 2mm; font-size: 9.5pt; font-weight: bold; }
+    .payment-copy { margin: 0 0 4mm; font-size: 9.5pt; }
+    .closing { position: relative; margin-top: 4mm; font-size: 9.5pt; line-height: 1.4; }
+    .closing a { color: #174b8f; }
+    .signoff { margin-top: 4mm; font-weight: bold; }
+    .stamp { width: 44mm; margin-top: -22mm; margin-left: 10mm; opacity: .65; }
+  </style>
+</head>
+<body>
+  <section class="page page-one">
+    <img class="letterhead" th:src="${letterhead}" alt=""/>
+    <div class="page-border"></div>
+    <div class="header-address"><strong>Emphatic Vans &amp; Testing Labs (P) Ltd.</strong><br/>H-20, 3rd Floor, Block-H, Sector-63, Noida,<br/>Uttar Pradesh, 201301, | Mob.: +91-9560935898<br/>E-mail: contact@evtlindia.com, accounts@evtlindia.com<br/><strong>CIN : U73100DL2019PTC348569</strong></div>
+    <img class="watermark" th:src="${watermark}" alt=""/>
+    <div class="content">
+      <table class="meta"><tr><td><strong>Quotation ID:</strong> <span th:text="${quotationId}">1</span></td><td class="right"><strong>Kind Atten:</strong> - <span th:text="${kindAttention}">---</span> / Confidential</td></tr></table>
+      <table class="meta"><tr><td><strong>Ref. No.</strong> <span th:text="${referenceNumber}">EVTL/2026-27/SIT/AMC/001/R1</span></td><td class="right"><strong>Date:</strong> <span th:text="${date}">01-01-2026</span></td></tr></table>
+      <h1 class="title">Proposal Letter for BIS-ISI AMC and SIT</h1>
+      <p class="intro">We are pleased to offer you our AMC and SIT consulting services under the following terms and conditions.</p>
+      <h2 class="section-title">BIS SOP of AMC and SIT</h2>
+      <ol>
+        <li><strong>In-process Quality Control</strong> &#8211; Monitoring product quality during manufacturing.</li>
+        <li><strong>Routine Product Testing</strong> &#8211; Regular testing of products as per Indian Standards (IS).</li>
+        <li><strong>Testing Frequency Compliance</strong> &#8211; Performing tests at defined intervals (lot-wise/daily/monthly).</li>
+        <li><strong>Equipment Calibration</strong> &#8211; Periodic calibration of testing equipment.</li>
+        <li><strong>Product Marking &amp; Labelling Control</strong> &#8211; Using ISI mark only on approved products.</li>
+        <li><strong>Production &amp; Consignee Records</strong> &#8211; Maintaining production and Consignee details.</li>
+      </ol>
+      <h2 class="section-title">EVTL- Scope of Work</h2>
+      <ol>
+        <li><strong>Documentation Support</strong> &#8211; Preparation of technical files and guidance on manuals and related documentation.</li>
+        <li><strong>Product Testing</strong> &#8211; Verification of in-house laboratory reports and coordination of product testing as per the prescribed testing frequency.</li>
+        <li><strong>SIT Guidance</strong> &#8211; Provide support and guidance during third-party inspections conducted by SGS and TUV.</li>
+        <li><strong>SIT Report &amp; Corrective Actions</strong> &#8211; Review SIT reports and recommend corrective actions, wherever required.</li>
+        <li><strong>License Renewal Support</strong> &#8211; Preparation and submission of applications for BIS license renewal.</li>
+        <li><strong>Monthly/Quarterly Production &amp; Consignee Data</strong> &#8211; Maintenance of production records, consignee details, and batch-wise production data.</li>
+        <li><strong>Training &amp; updates</strong> &#8211; Training employees on BIS compliance and provide updates on latest BIS regulations.</li>
+      </ol>
+      <table class="details-table">
+        <tr><td class="label">IS Standard</td><td th:text="${isStandard}">---</td></tr>
+        <tr><td class="label">Product</td><td th:text="${product}">---</td></tr>
+        <tr><td class="label">CML No.</td><td th:text="${cmlNumber}">---</td></tr>
+        <tr><td class="label">Licence Validity Date</td><td th:text="${licenceValidity}">---</td></tr>
+        <tr><td class="label">Operation ID</td><td th:text="${operationId}">1</td></tr>
+      </table>
+    </div>
+  </section>
+  <section class="page page-two">
+    <img class="letterhead" th:src="${letterhead}" alt=""/>
+    <div class="page-border"></div>
+    <div class="header-address"><strong>Emphatic Vans &amp; Testing Labs (P) Ltd.</strong><br/>H-20, 3rd Floor, Block-H, Sector-63, Noida,<br/>Uttar Pradesh, 201301, | Mob.: +91-9560935898<br/>E-mail: contact@evtlindia.com, accounts@evtlindia.com<br/><strong>CIN : U73100DL2019PTC348569</strong></div>
+    <img class="watermark" th:src="${watermark}" alt=""/>
+    <div class="content">
+      <h2 class="fee-title">BIS Fee structure of SIT/AMC:</h2>
+      <table class="fee-table">
+        <thead><tr><th style="width:17mm">Sl. No.</th><th>Expense</th><th style="width:48mm">Value</th></tr></thead>
+        <tbody>
+          <tr><td>1.</td><td>Actual Marking Fee (Medium/Small/Micro Scale)<br/>Unit Rate:-</td><td th:text="${markingFee}">As per actual</td></tr>
+          <tr class="highlight"><td colspan="3">SIT/AMC Fee Structure</td></tr>
+          <tr><td>2.</td><td>Sample Testing fee as per standard frequency (Required and sub-contracting) Testing in a Six Months</td><td th:text="${sampleFee}">As per actual</td></tr>
+          <tr><td>3.</td><td>Engineer Visit charge (If required otherwise online)</td><td th:text="${engineerFee}">As per actual</td></tr>
+          <tr><td>4.</td><td>Consultancy / Services Fee</td><td th:text="${consultancyFee}">--- INR/-</td></tr>
+          <tr class="highlight"><td></td><td>Consultancy Charges for 1 year</td><td th:text="${consultancyYearly}">--- INR/-</td></tr>
+        </tbody>
+      </table>
+      <p class="gst-note">Note: 18% GST Extra (Where applicable)</p>
+      <h2 class="section-title importance">Importance of AMC and SIT (Scheme of Inspection and Testing)</h2>
+      <ol>
+        <li>Ensures the product consistently meets <strong>BIS quality standards</strong>.</li>
+        <li>Maintains the validity and continuity of the <strong>BIS ISI license</strong>.</li>
+        <li>Builds <strong>customer trust</strong> and strengthens brand reputation.</li>
+        <li>Identifies and corrects <strong>non-compliance or deviations</strong> in time.</li>
+        <li>Helps ensure <strong>smooth business operations</strong> without regulatory interruptions.</li>
+        <li>Improves <strong>overall product performance and reliability</strong>.</li>
+      </ol>
+      <p class="payment-title">Payment milestone: -</p>
+      <p class="payment-copy">All Payments to be made in the name of "EMPHATIC VANS AND TESTING LABS PRIVATE LIMITED" New Delhi, India.</p>
+      <div class="closing">
+        Please visit for more details. <a href="https://evtlindia.com">www.evtlindia.com</a><br/>
+        <div class="signoff">Thanking You,<br/><br/>Yours Sincerely,<br/><br/>For Emphatic Vans Testing &amp; Labs Pvt. Ltd.<br/><br/>(Authorized Signatory)</div>
+        <img class="stamp" th:src="${stamp}" alt=""/>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
