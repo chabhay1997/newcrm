@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="plasticepr-panel-script" th:inline="none">
+	let plasticEprEditingRevisionId = null;
+
+	function plasticEprSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function plasticEprRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('plasticEprRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openPlasticEprEditPanel(leadId, 'Plastic EPR', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function plasticEprPopulate(quotation, lead) {
+		const q = quotation || {};
+		plasticEprSetInput('plasticEprReferenceNoInput', q.referenceNo || '');
+		plasticEprSetInput('plasticEprQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		plasticEprSetInput('plasticEprClientNameInput', q.clientName || lead.isName || '');
+		plasticEprSetInput('plasticEprTypeInput', q.type || '');
+		plasticEprSetInput('plasticEprGovtFeeInput', q.govtFee || '');
+		plasticEprSetInput('plasticEprRecycleAgreementInput', q.recycleAgreement || '');
+		plasticEprSetInput('plasticEprServiceFeesInput', q.serviceFees || '');
+	}
+
+	function openPlasticEprEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('plasticEprQuotationForm').reset();
+		document.getElementById('plasticEprLeadIdInput').value = leadId;
+		plasticEprSetInput('plasticEprReferenceNoInput', 'REF-' + leadId);
+		plasticEprSetInput('plasticEprQuotationDateInput', new Date().toISOString().slice(0, 10));
+		openModal('plasticEprEditModal');
+		fetch('/leads/' + leadId + '/plasticepr-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				plasticEprRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					plasticEprPopulate(quotation, lead);
+				} else {
+					plasticEprSetInput('plasticEprClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { plasticEprSetInput('plasticEprClientNameInput', companyName || ''); });
+	}
+
+	function plasticEprPayload() {
+		return {
+			id: plasticEprEditingRevisionId,
+			leadId: document.getElementById('plasticEprLeadIdInput').value,
+			referenceNo: document.getElementById('plasticEprReferenceNoInput').value,
+			quotationDate: document.getElementById('plasticEprQuotationDateInput').value || null,
+			clientName: document.getElementById('plasticEprClientNameInput').value,
+			type: document.getElementById('plasticEprTypeInput').value,
+			govtFee: document.getElementById('plasticEprGovtFeeInput').value,
+			recycleAgreement: document.getElementById('plasticEprRecycleAgreementInput').value,
+			serviceFees: document.getElementById('plasticEprServiceFeesInput').value
+		};
+	}
+
+	function savePlasticEprQuotation() {
+		const leadId = document.getElementById('plasticEprLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/plasticepr-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(plasticEprPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save Plastic EPR quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('Plastic EPR quotation saved successfully');
+				closeModal('plasticEprEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the Plastic EPR quotation.'); });
+	}
+
+	function downloadPlasticEprQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

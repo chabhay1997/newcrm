@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- RDSO EDIT PANEL -->
+<div th:fragment="rdso-panel" id="rdsoEditModal" class="modal-overlay" onclick="closeModal('rdsoEditModal')">
+  <div class="modal-box glass rdso-modal-box" onclick="event.stopPropagation()" style="backdrop-filter:blur(20px);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 32px rgba(31,38,135,.15);">
+
+    <!-- Scoped styles: keeps this panel independent of the compiled Tailwind output.css -->
+    <style th:inline="none">
+      #rdsoEditModal .rdso-modal-box { width:980px; max-width:96vw; max-height:90vh; overflow-y:auto; padding:24px; border-radius:16px; color:#171923; }
+      #rdsoEditModal .rdso-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+      #rdsoEditModal .rdso-title { font-size:16px; font-weight:700; color:#171923; margin:0; }
+      #rdsoEditModal .rdso-close { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#8C8FA3; }
+      #rdsoEditModal .rdso-close:hover { background:rgba(0,0,0,.05); }
+
+      #rdsoEditModal .rdso-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:16px; }
+      #rdsoEditModal .rdso-span-2 { grid-column:span 2; }
+      #rdsoEditModal .rdso-label { display:block; font-size:11.5px; font-weight:700; color:#3A4B63; margin-bottom:6px; }
+      #rdsoEditModal .rdso-field { display:block; width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid rgba(0,0,0,.1); border-radius:12px; font-size:13px; color:#171923; background:rgba(255,255,255,.7); outline:none; }
+      #rdsoEditModal .rdso-field[readonly] { background:#F3F5F8; }
+      #rdsoEditModal .rdso-field:focus, #rdsoEditModal .rdso-input:focus { border-color:#8A5CF6; box-shadow:0 0 0 3px rgba(138,92,246,.12); }
+
+      #rdsoEditModal .rdso-section { font-size:13px; font-weight:800; color:#171923; margin:8px 0 10px; padding-top:12px; border-top:1px solid rgba(0,0,0,.08); }
+      #rdsoEditModal .rdso-table-wrap { overflow-x:auto; border:1px solid rgba(0,0,0,.08); border-radius:12px; margin-bottom:8px; }
+      #rdsoEditModal .rdso-table { width:100%; min-width:640px; table-layout:fixed; border-collapse:collapse; font-size:12px; color:#3A4B63; }
+      #rdsoEditModal .rdso-table th { background:#5B8DEF; color:#fff; text-align:left; font-size:11px; font-weight:800; padding:10px 8px; border-right:1px solid rgba(255,255,255,.22); vertical-align:middle; }
+      #rdsoEditModal .rdso-table td { padding:6px 8px; border-top:1px solid rgba(0,0,0,.06); vertical-align:middle; }
+      #rdsoEditModal .rdso-table tbody tr:nth-child(even) { background:#FAFBFE; }
+      #rdsoEditModal .rdso-input { display:block; width:100%; box-sizing:border-box; padding:6px 8px; border:1px solid #C9D0DC; border-radius:6px; font-size:12px; color:#171923; background:#fff; outline:none; }
+      #rdsoEditModal .rdso-input[readonly] { background:#F3F5F8; }
+      #rdsoEditModal .rdso-total-row td { background:#fff; font-weight:800; color:#111; font-size:12.5px; }
+
+      #rdsoEditModal .rdso-actions { display:flex; gap:8px; margin-top:12px; }
+      #rdsoEditModal .rdso-btn { flex:1; padding:10px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; }
+      #rdsoEditModal .rdso-btn-cancel { background:#fff; color:#171923; border:1px solid rgba(0,0,0,.1); }
+      #rdsoEditModal .rdso-btn-save { color:#fff; border:none; background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF); box-shadow:0 4px 12px rgba(138,92,246,.25); }
+
+      @media (max-width: 760px) {
+        #rdsoEditModal .rdso-modal-box { padding:18px; max-width:94vw; }
+        #rdsoEditModal .rdso-grid { grid-template-columns:1fr; }
+        #rdsoEditModal .rdso-span-2 { grid-column:span 1; }
+      }
+    </style>
+
+    <div class="rdso-head">
+      <p class="rdso-title">RDSO &mdash; Quotation Details</p>
+      <button type="button" onclick="closeModal('rdsoEditModal')" class="spin-close rdso-close">&#10005;</button>
+    </div>
+
+    <form id="rdsoQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="rdsoLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="rdsoRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="rdso-grid">
+        <div><label class="rdso-label">Reference No</label><input id="rdsoReferenceNoInput" type="text" readonly class="rdso-field"></div>
+        <div><label class="rdso-label">Certificate Type</label><input type="text" value="RDSO" readonly class="rdso-field"></div>
+        <div><label class="rdso-label">Quotation Date</label><input id="rdsoQuotationDateInput" type="date" class="rdso-field"></div>
+        <div><label class="rdso-label">Client Name</label><input id="rdsoClientNameInput" type="text" placeholder="Enter Client Name" class="rdso-field"></div>
+
+        <div class="rdso-span-2"><label class="rdso-label">Product Name</label><input id="rdsoProductNameInput" type="text" placeholder="Enter Product Name" class="rdso-field"></div>
+        <div class="rdso-span-2"><label class="rdso-label">GST Fee</label><input id="rdsoGstFeeInput" type="text" placeholder="Enter GST Fee" class="rdso-field"></div>
+      </div>
+
+      <p class="rdso-section">Part 2 Commercial Scope RDSO Fee structure</p>
+      <div class="rdso-table-wrap">
+        <table class="rdso-table">
+          <colgroup><col style="width:12%"><col style="width:38%"><col style="width:25%"><col style="width:25%"></colgroup>
+          <thead>
+            <tr><th>S. No.</th><th>Expense</th><th>Extra Alias</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" class="rdso-input" value="1" readonly></td>
+              <td><input type="text" class="rdso-input" value="RDSO Application Fee (Gov. Fee)" readonly></td>
+              <td><input type="text" id="rdsoFeeAlias1" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoFeeValue1" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr>
+              <td><input type="text" class="rdso-input" value="2" readonly></td>
+              <td><input type="text" class="rdso-input" value="Sample testing charges (Pre-testing : Per Batch/Type)" readonly></td>
+              <td><input type="text" id="rdsoFeeAlias2" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoFeeValue2" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr>
+              <td><input type="text" class="rdso-input" value="3" readonly></td>
+              <td><input type="text" class="rdso-input" value="Factory Audit / Visit Administrative Fee (RDSO Officer Visit)" readonly></td>
+              <td><input type="text" id="rdsoFeeAlias3" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoFeeValue3" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr class="rdso-total-row">
+              <td><input type="text" class="rdso-input" value="" readonly></td>
+              <td><input type="text" class="rdso-input" value="Total Fees + GST" readonly></td>
+              <td><input type="text" id="rdsoFeeAliasTotal" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoFeeValueTotal" class="rdso-input" placeholder="Enter Total"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="rdso-section">Consultancy Fee structure</p>
+      <div class="rdso-table-wrap">
+        <table class="rdso-table">
+          <colgroup><col style="width:12%"><col style="width:38%"><col style="width:25%"><col style="width:25%"></colgroup>
+          <thead>
+            <tr><th>S. No.</th><th>Expense</th><th>Extra Alias</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" class="rdso-input" value="1" readonly></td>
+              <td><input type="text" class="rdso-input" value="Consultancy charge for entire contract (1 Product / Category)" readonly></td>
+              <td><input type="text" id="rdsoConsultancyAlias1" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoConsultancyValue1" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr>
+              <td><input type="text" class="rdso-input" value="2" readonly></td>
+              <td><input type="text" class="rdso-input" value="EVTL Engineer visit travel, lodging & food (Pre-Audit & Live Audit Visit)" readonly></td>
+              <td><input type="text" id="rdsoConsultancyAlias2" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoConsultancyValue2" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr>
+              <td><input type="text" class="rdso-input" value="3" readonly></td>
+              <td><input type="text" class="rdso-input" value="Other expenses RDSO officer" readonly></td>
+              <td><input type="text" id="rdsoConsultancyAlias3" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoConsultancyValue3" class="rdso-input" placeholder="Enter Value"></td>
+            </tr>
+            <tr class="rdso-total-row">
+              <td><input type="text" class="rdso-input" value="" readonly></td>
+              <td><input type="text" class="rdso-input" value="Total Fees" readonly></td>
+              <td><input type="text" id="rdsoConsultancyAliasTotal" class="rdso-input" placeholder="Extra Alias"></td>
+              <td><input type="text" id="rdsoConsultancyValueTotal" class="rdso-input" placeholder="Enter Total"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="rdso-actions">
+        <button type="button" onclick="closeModal('rdsoEditModal')" class="rdso-btn rdso-btn-cancel">Cancel</button>
+        <button id="rdsoSaveRevisionButton" type="button" onclick="saveRdsoQuotation()" class="rdso-btn rdso-btn-save">Save as New Revision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

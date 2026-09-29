@@ -9,9 +9,26 @@
   <link rel="stylesheet" th:href="@{/css/output.css}">
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
   <style>
+    .challan-shell { display:flex; min-height:100vh; flex-direction:column; padding-left:6.5rem; color:#17324f; }
+    .challan-main { display:flex; min-width:0; flex:1; flex-direction:column; gap:1.25rem; padding:.75rem 1.5rem 2rem; }
+    .challan-page-header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; }
+    .challan-action-group { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
     .challan-page-title { display:flex; align-items:center; gap:14px; }
-    .challan-list-heading { flex:none; white-space:nowrap; }.challan-list-heading h2 { font-size:16px; }
-    .challan-list-toolbar { padding-left:20px; padding-right:4px; }
+    .challan-page-title h1 { margin:0; color:#132c50; font-size:27px; font-weight:800; line-height:1; letter-spacing:-.03em; }
+    .challan-page-title p { margin:6px 0 0; color:#617391; font-size:13px; }
+    .challan-list-heading { flex:none; white-space:nowrap; }.challan-list-heading h2 { margin:0; color:#17324f; font-size:16px; font-weight:800; }
+    .challan-list-card { overflow:hidden; border:1px solid #e5eaf1; border-radius:16px; background:#fff; box-shadow:0 12px 32px -24px rgba(23,50,79,.42); }
+    .challan-list-toolbar { display:flex; flex-direction:column; gap:12px; padding:16px 20px; border-bottom:1px solid #dfe7f1; }
+    .challan-header-controls { display:flex; width:100%; flex-direction:column; gap:12px; }
+    .challan-search-form { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:flex-end; gap:8px; }
+    .challan-search-form label { display:flex; flex-direction:column; gap:4px; color:#526783; font-size:11px; font-weight:700; }
+    .challan-search-form input { height:36px; border:1px solid #e1e7ef; border-radius:8px; background:#fff; padding:0 10px; color:#263d60; font-size:12px; outline:none; }
+    .challan-search-form input:focus { border-color:#7587f4; box-shadow:0 0 0 2px rgba(100,117,242,.12); }
+    .challan-search-form input[type=search] { width:208px; }
+    .challan-search-form button { height:36px; padding:0 12px; border:0; border-radius:8px; background:#f3f6fb; color:#3a4b63; font-size:11px; font-weight:700; cursor:pointer; }
+    .challan-toolbar-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    @media(min-width:1024px) { .challan-list-toolbar { flex-direction:row; align-items:center; justify-content:space-between; }.challan-header-controls { width:auto; flex:1; flex-direction:row; align-items:flex-end; justify-content:flex-end; }.challan-list-heading { flex:none; } }
+    @media(max-width:760px) { .challan-shell { padding-left:5.5rem; }.challan-main { padding:.75rem .75rem 1.5rem; }.challan-search-form { justify-content:flex-start; }.challan-search-form input[type=search] { width:min(208px,55vw); } }
     .challan-page-icon { display:flex; width:54px; height:54px; align-items:center; justify-content:center; border-radius:16px; background:linear-gradient(145deg,#e6eaff,#f5f6ff); color:#4d43ef; box-shadow:0 8px 22px rgba(81,72,244,.10); }
     .challan-page-icon svg { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .challan-add-button { min-width:190px; height:40px; padding:0 18px; background:#2563eb !important; color:#fff !important; font-size:13px !important; box-shadow:0 8px 20px rgba(37,99,235,.28); }.challan-add-button svg { width:18px; height:18px; }.challan-add-button:hover { background:#1d4ed8 !important; }
@@ -62,21 +79,21 @@
 </head>
 <body>
   <div th:replace="~{fragments/sidebar :: sidebar}"></div>
-  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div class="challan-shell">
     <div th:replace="~{fragments/topbar :: topbar}"></div>
-    <main class="flex-1 px-6 pt-3 pb-8 space-y-5">
+    <main class="challan-main">
       <div th:if="${successMessage}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[12px] font-semibold text-emerald-700" th:text="${successMessage}"></div>
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div class="challan-page-header">
         <div class="challan-page-title"><div class="challan-page-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div><div><h1 class="text-[27px] leading-none font-extrabold tracking-[-.03em] text-[#132c50]">Delivery Challan</h1><p class="mt-1.5 text-[13px] text-[#617391]">Review and manage delivery challans.</p></div></div>
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="challan-action-group">
           <a href="/challan/analytics" class="challan-analytics-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V2"/></svg><span>Challan Analytics</span></a>
           <a href="/challan/create" class="challan-add-button inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-5 text-[12px] font-bold transition focus:outline-none focus:ring-2 focus:ring-indigo-200"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add Challan</span></a>
         </div>
       </div>
-      <section class="rounded-2xl bg-white border border-[#E5EAF1] shadow-[0_12px_32px_-24px_rgba(23,50,79,.42)] overflow-hidden">
-        <div class="challan-list-toolbar py-4 border-b border-[#dfe7f1] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <section class="challan-list-card">
+        <div class="challan-list-toolbar">
           <div class="challan-list-heading"><h2 class="font-extrabold text-[#17324F]">Challan List (<span id="challanRecordCount">…</span>)</h2></div>
-          <div class="challan-header-controls flex w-full flex-col gap-3 lg:flex-1 xl:flex-row xl:items-end xl:justify-end">
+          <div class="challan-header-controls">
             <div id="challanExcelImportWrap" class="shrink-0">
               <input id="challanExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
               <label id="challanExcelImport" for="challanExcelFile" class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-[#d8deea] bg-white px-3 text-[11px] font-bold text-[#344159] transition hover:border-[#7182ef] hover:bg-[#f4f6ff] focus-within:ring-2 focus-within:ring-indigo-100" title="Import Challans from an Excel sheet">
@@ -88,7 +105,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m8 13 4-4 4 4"/><path d="M5 4h14"/></svg>
               <span>Export Excel</span>
             </a>
-            <form id="challanSearchForm" class="flex flex-wrap items-end justify-end gap-2">
+            <form id="challanSearchForm" class="challan-search-form">
               <label class="flex flex-col gap-1 text-[10.5px] font-bold text-[#526783]">
                 <span>Starting Date</span>
                 <input id="challanStartDate" name="startDate" type="date" class="h-9 rounded-lg border border-[#E1E7EF] bg-white px-2.5 text-[11.5px] text-[#263d60] outline-none focus:ring-2 focus:ring-indigo-100">
@@ -97,7 +114,7 @@
                 <span>Ending Date</span>
                 <input id="challanEndDate" name="endDate" type="date" class="h-9 rounded-lg border border-[#E1E7EF] bg-white px-2.5 text-[11.5px] text-[#263d60] outline-none focus:ring-2 focus:ring-indigo-100">
               </label>
-              <div class="flex items-center gap-2">
+              <div class="challan-toolbar-actions">
                 <input id="challanSearch" name="q" maxlength="100" type="search" placeholder="Search challans" aria-label="Search challans" class="w-52 h-9 rounded-lg border border-[#E1E7EF] px-3 text-[11.5px] outline-none focus:ring-2 focus:ring-indigo-100">
                 <button type="submit" class="h-9 px-3 rounded-lg bg-[#F3F6FB] text-[#3A4B63] text-[11px] font-bold">Search</button>
               </div>

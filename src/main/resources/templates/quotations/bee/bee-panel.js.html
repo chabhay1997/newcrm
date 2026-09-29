@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="bee-panel-script" th:inline="none">
+	let beeEditingRevisionId = null;
+
+	function beeSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function beeParseAmount(value) {
+		if (!value) return 0;
+		const cleaned = String(value).replace(/₹|\$|,/g, '').replace(/[^0-9.\-]/g, '');
+		const n = Number(cleaned);
+		return Number.isFinite(n) ? n : 0;
+	}
+
+	function beeUpdateCalculatedTotal() {
+		let total = 0;
+		document.querySelectorAll('#beeStepsContainer .bee-fee-amount').forEach(function (input) {
+			total += beeParseAmount(input.value);
+		});
+		const el = document.getElementById('beeCalculatedTotal');
+		if (el) el.textContent = '₹' + total.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+	}
+
+	function beeAddFeeRow(triggerEl, feeType, amount, remarks) {
+		const stepBlock = triggerEl.closest('.bee-step-block');
+		const rowsContainer = stepBlock.querySelector('.bee-fee-rows');
+		const template = document.getElementById('beeFeeRowTemplate');
+		const row = template.content.firstElementChild.cloneNode(true);
+		row.querySelector('.bee-fee-type').value = feeType || '';
+		row.querySelector('.bee-fee-amount').value = amount || '';
+		row.querySelector('.bee-fee-remarks').value = remarks || '';
+		row.querySelector('.bee-fee-amount').addEventListener('input', beeUpdateCalculatedTotal);
+		rowsContainer.appendChild(row);
+		beeUpdateCalculatedTotal();
+	}
+
+	function beeRemoveFeeRow(button) {
+		button.closest('.bee-fee-row').remove();
+		beeUpdateCalculatedTotal();
+	}
+
+	function beeAddStep(stepLabel, showRemoveButton) {
+		const container = document.getElementById('beeStepsContainer');
+		const template = document.getElementById('beeStepTemplate');
+		const block = template.content.firstElementChild.cloneNode(true);
+		block.querySelector('.bee-step-label-input').value = stepLabel || '';
+		if (showRemoveButton === false) block.querySelector('.bee-remove-step').style.display = 'none';
+		container.appendChild(block);
+		return block;
+	}
+
+	function beeRemoveStep(button) {
+		button.closest('.bee-step-block').remove();
+		beeUpdateCalculatedTotal();
+	}
+
+	function beeRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('beeRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openBeeEditPanel(leadId, 'BEE Certification', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function beeDefaultSteps() {
+		document.getElementById('beeStepsContainer').innerHTML = '';
+		const step1 = beeAddStep('Step 1: Brand Registration', false);
+		beeAddFeeRow(step1.querySelector('.add-fee-anchor') || step1.querySelector('button'), 'Brand Registration Govt Fee', '55000/- INR', 'Payable to BEE (Refundable)');
+		beeAddFeeRow(step1.querySelector('button'), 'Brand Consultancy Charges', '15,000/- INR', 'Payable to EVTL');
+		const step2 = beeAddStep('Step 2: Model Registration', false);
+		beeAddFeeRow(step2.querySelector('button'), 'Model registration fee per model', '5,000 INR/- (5,000×1 Model)', 'Payable to BEE (Non-refundable)');
+		beeAddFeeRow(step2.querySelector('button'), 'Sample Testing Fee (One model)', '30,000/- INR (30,000×1 Report)', 'Payable to Testing Laboratory');
+		beeAddFeeRow(step2.querySelector('button'), 'Consultancy Charges per model', '15,000 INR/-', 'Payable to EVTL');
+	}
+
+	function beePopulate(quotation, fees, lead) {
+		const q = quotation || {};
+		beeSetInput('beeReferenceNoInput', q.referenceNo || '');
+		beeSetInput('beeQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		beeSetInput('beeClientNameInput', q.clientName || lead.isName || '');
+		beeSetInput('beeProductNameInput', q.productName || '');
+		beeSetInput('beeProductCategoryClassInput', q.productCategoryClass || '');
+		beeSetInput('beeCertificateNameInput', q.certificateName || '');
+		beeSetInput('beeManufacturingLocationInput', q.manufacturingLocation || '');
+		beeSetInput('beeProductModelsInput', q.productModels || '');
+
+		document.getElementById('beeStepsContainer').innerHTML = '';
+		const stepOrder = [];
+		const stepBlocks = {};
+		(fees || []).forEach(function (fee) {
+			const label = fee.stepLabel || 'Step 1';
+			if (!stepBlocks[label]) {
+				stepOrder.push(label);
+				stepBlocks[label] = beeAddStep(label);
+			}
+			beeAddFeeRow(stepBlocks[label].querySelector('button'), fee.typeOfFee, fee.amount, fee.remarks);
+		});
+		if (!stepOrder.length) beeDefaultSteps();
+		beeUpdateCalculatedTotal();
+	}
+
+	function openBeeEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('beeQuotationForm').reset();
+		document.getElementById('beeLeadIdInput').value = leadId;
+		document.getElementById('beeStepsContainer').innerHTML = '';
+		beeSetInput('beeReferenceNoInput', 'REF-' + leadId);
+		beeSetInput('beeQuotationDateInput', new Date().toISOString().slice(0, 10));
+		beeDefaultSteps();
+		openModal('beeEditModal');
+		fetch('/leads/' + leadId + '/bee-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				beeRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					beePopulate(quotation, data.fees, lead);
+				} else {
+					beeSetInput('beeClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { beeSetInput('beeClientNameInput', companyName || ''); });
+	}
+
+	function beeCollectFees() {
+		const fees = [];
+		document.querySelectorAll('#beeStepsContainer .bee-step-block').forEach(function (block) {
+			const stepLabel = block.querySelector('.bee-step-label-input').value.trim();
+			block.querySelectorAll('.bee-fee-row').forEach(function (row) {
+				const typeOfFee = row.querySelector('.bee-fee-type').value.trim();
+				const amount = row.querySelector('.bee-fee-amount').value.trim();
+				const remarks = row.querySelector('.bee-fee-remarks').value.trim();
+				if (!typeOfFee && !amount && !remarks) return;
+				fees.push({ stepLabel: stepLabel, typeOfFee: typeOfFee, amount: amount, remarks: remarks });
+			});
+		});
+		return fees;
+	}
+
+	function beePayload() {
+		return {
+			quotation: {
+				id: beeEditingRevisionId,
+				leadId: document.getElementById('beeLeadIdInput').value,
+				referenceNo: document.getElementById('beeReferenceNoInput').value,
+				quotationDate: document.getElementById('beeQuotationDateInput').value || null,
+				clientName: document.getElementById('beeClientNameInput').value,
+				productName: document.getElementById('beeProductNameInput').value,
+				productCategoryClass: document.getElementById('beeProductCategoryClassInput').value,
+				certificateName: document.getElementById('beeCertificateNameInput').value,
+				manufacturingLocation: document.getElementById('beeManufacturingLocationInput').value,
+				productModels: document.getElementById('beeProductModelsInput').value
+			},
+			fees: beeCollectFees()
+		};
+	}
+
+	function saveBeeQuotation() {
+		const leadId = document.getElementById('beeLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/bee-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(beePayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save BEE quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('BEE quotation saved successfully');
+				closeModal('beeEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the BEE quotation.'); });
+	}
+
+	function downloadBeeQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="electronicepr-panel-script" th:inline="none">
+	let electronicEprEditingRevisionId = null;
+
+	function electronicEprSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function electronicEprRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('electronicEprRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openElectronicEprEditPanel(leadId, 'Electronic EPR', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function electronicEprPopulate(quotation, lead) {
+		const q = quotation || {};
+		electronicEprSetInput('electronicEprReferenceNoInput', q.referenceNo || '');
+		electronicEprSetInput('electronicEprQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		electronicEprSetInput('electronicEprClientNameInput', q.clientName || lead.isName || '');
+		electronicEprSetInput('electronicEprProductNameInput', q.productName || '');
+		electronicEprSetInput('electronicEprServiceChargesInput', q.eprServiceCharges || '');
+		electronicEprSetInput('electronicEprGovtFeeInput', q.govtFee || '');
+		electronicEprSetInput('electronicEprServiceFeesInput', q.serviceFees || '');
+		electronicEprSetInput('electronicEprLicenseValidityInput', q.licenseValidity || '');
+	}
+
+	function openElectronicEprEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('electronicEprQuotationForm').reset();
+		document.getElementById('electronicEprLeadIdInput').value = leadId;
+		electronicEprSetInput('electronicEprReferenceNoInput', 'REF-' + leadId);
+		electronicEprSetInput('electronicEprQuotationDateInput', new Date().toISOString().slice(0, 10));
+		openModal('electronicEprEditModal');
+		fetch('/leads/' + leadId + '/electronicepr-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				electronicEprRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					electronicEprPopulate(quotation, lead);
+				} else {
+					electronicEprSetInput('electronicEprClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { electronicEprSetInput('electronicEprClientNameInput', companyName || ''); });
+	}
+
+	function electronicEprPayload() {
+		return {
+			id: electronicEprEditingRevisionId,
+			leadId: document.getElementById('electronicEprLeadIdInput').value,
+			referenceNo: document.getElementById('electronicEprReferenceNoInput').value,
+			quotationDate: document.getElementById('electronicEprQuotationDateInput').value || null,
+			clientName: document.getElementById('electronicEprClientNameInput').value,
+			productName: document.getElementById('electronicEprProductNameInput').value,
+			eprServiceCharges: document.getElementById('electronicEprServiceChargesInput').value,
+			govtFee: document.getElementById('electronicEprGovtFeeInput').value,
+			serviceFees: document.getElementById('electronicEprServiceFeesInput').value,
+			licenseValidity: document.getElementById('electronicEprLicenseValidityInput').value
+		};
+	}
+
+	function saveElectronicEprQuotation() {
+		const leadId = document.getElementById('electronicEprLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/electronicepr-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(electronicEprPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save Electronic EPR quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('Electronic EPR quotation saved successfully');
+				closeModal('electronicEprEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the Electronic EPR quotation.'); });
+	}
+
+	function downloadElectronicEprQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

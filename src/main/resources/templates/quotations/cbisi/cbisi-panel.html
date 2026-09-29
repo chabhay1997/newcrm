@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- CB-ISI CERTIFICATION EDIT PANEL -->
+<div th:fragment="cbisi-panel" id="cbisiEditModal" class="modal-overlay" onclick="closeModal('cbisiEditModal')">
+  <div class="modal-box glass rounded-2xl w-[1100px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+       style="width:min(1200px,96vw); max-width:96vw; backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <!-- Scoped styles: keeps this panel independent of the compiled Tailwind output.css -->
+    <style th:inline="none">
+      #cbisiEditModal .cbisi-add-btn { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:#8A5CF6; padding:6px 12px; border-radius:999px; border:1px solid rgba(138,92,246,.30); background:rgba(138,92,246,.05); cursor:pointer; transition:background .15s; }
+      #cbisiEditModal .cbisi-add-btn:hover { background:rgba(138,92,246,.10); }
+
+      #cbisiEditModal .cbisi-rows { display:flex; flex-direction:column; gap:12px; margin-bottom:12px; }
+      #cbisiEditModal .cbisi-rows:empty::before { content:'No certification standards added yet. Use "Add Certification Standard" above.'; padding:18px; text-align:center; font-size:12px; color:#8C8FA3; border:1px dashed rgba(0,0,0,.15); border-radius:12px; background:#F8FAFF; }
+
+      #cbisiEditModal .cbisi-row { border:1px solid rgba(91,141,239,.22); border-radius:14px; background:#F8FAFF; padding:14px; }
+      #cbisiEditModal .cbisi-row-head { display:grid; grid-template-columns:34px 170px minmax(0,1fr) 34px; gap:12px; align-items:end; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid rgba(91,141,239,.15); }
+      #cbisiEditModal .cbisi-badge { width:34px; height:34px; border-radius:50%; background:#5B8DEF; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+
+      #cbisiEditModal .cbisi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+      #cbisiEditModal .cbisi-span-2 { grid-column:span 2; }
+
+      #cbisiEditModal .cbisi-field label { display:block; font-size:10.5px; font-weight:600; color:#3A4B63; margin-bottom:4px; }
+      #cbisiEditModal .cbisi-field input,
+      #cbisiEditModal .cbisi-field select { width:100%; padding:8px 10px; border-radius:10px; border:1px solid rgba(0,0,0,.10); background:#fff; font-size:12.5px; color:#171923; }
+      #cbisiEditModal .cbisi-field input:focus,
+      #cbisiEditModal .cbisi-field select:focus { outline:none; border-color:#8A5CF6; box-shadow:0 0 0 3px rgba(138,92,246,.18); }
+      #cbisiEditModal .cbisi-field input.cbisi-marking-net { background:#FFF8DD; border-color:#E6D48A; font-weight:700; }
+
+      #cbisiEditModal .cbisi-total { display:flex; align-items:center; justify-content:flex-end; min-height:35px; padding:0 14px; border-radius:10px; background:#EAF1FF; border:1px solid rgba(91,141,239,.35); font-size:14px; font-weight:800; color:#2F5FC4; }
+
+      #cbisiEditModal .cbisi-remove { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#C0304A; background:#FCE9EC; border:none; cursor:pointer; transition:background .15s; }
+      #cbisiEditModal .cbisi-remove:hover { background:#F8D2D8; }
+
+      #cbisiEditModal .cbisi-grand { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; margin-bottom:20px; border-radius:12px; background:linear-gradient(135deg,#EAF1FF,#F3F0FF); border:1px solid rgba(91,141,239,.25); font-size:13px; font-weight:700; color:#171923; }
+      #cbisiEditModal .cbisi-grand em { font-style:normal; font-weight:600; font-size:11.5px; color:#8C8FA3; margin-left:6px; }
+      #cbisiEditModal .cbisi-grand strong { font-size:18px; font-weight:800; color:#2F5FC4; }
+
+      @media (max-width: 900px) {
+        #cbisiEditModal .cbisi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        #cbisiEditModal .cbisi-row-head { grid-template-columns:34px minmax(0,1fr) 34px; }
+        #cbisiEditModal .cbisi-row-head .cbisi-field.cbisi-product-wrap { grid-column:2 / span 2; }
+      }
+    </style>
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">CB-ISI Certification &mdash; Quotation Details</p>
+      <button onclick="closeModal('cbisiEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="cbisiQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="cbisiLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="cbisiRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="cbisiReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="CB-ISI Certification" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="cbisiQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Company Name <span class="text-red-500">*</span></label>
+          <input id="cbisiCompanyNameInput" type="text" placeholder="Enter Company Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Name</label>
+          <input id="cbisiCertificateNameInput" type="text" placeholder="Enter Certificate Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name <span class="text-red-500">*</span></label>
+          <input id="cbisiClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Custom Heading (Optional)</label>
+        <input id="cbisiCustomHeadingInput" type="text" placeholder="Proposal for BIS-ISI Certification" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+      </div>
+
+      <!-- COMMERCIAL BIS FEE STRUCTURE -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-[13px] font-bold text-[#171923]">Commercial BIS Fee Structure</p>
+        <button type="button" onclick="cbisiAddNewRow()" class="cbisi-add-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Certification Standard
+        </button>
+      </div>
+      <div id="cbisiScopeContainer" class="cbisi-rows" oninput="cbisiOnInput(event)" onchange="cbisiOnInput(event)"></div>
+
+      <div class="cbisi-grand">
+        <span>Total Fee (All Standards)<em id="cbisiGrandCount"></em></span>
+        <strong id="cbisiGrandTotal">&#8377;0</strong>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('cbisiEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadCbisiQuotationPdf()" class="quotation-download-action flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="cbisiSaveRevisionButton" type="button" onclick="saveCbisiQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+
+      <template id="cbisiScopeRowTemplate">
+        <div class="cbisi-row">
+          <div class="cbisi-row-head">
+            <span class="cbisi-badge">1</span>
+            <div class="cbisi-field">
+              <label>Standard Code</label>
+              <input type="text" class="cbisi-code" placeholder="IS xxxxx">
+            </div>
+            <div class="cbisi-field cbisi-product-wrap">
+              <label>Product Name</label>
+              <input type="text" class="cbisi-product" placeholder="Product name">
+            </div>
+            <button type="button" class="cbisi-remove" title="Remove standard" onclick="cbisiRemoveRow(this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="cbisi-grid">
+            <div class="cbisi-field">
+              <label>Application Fee</label>
+              <input type="number" min="0" step="0.01" class="cbisi-app-fee">
+            </div>
+            <div class="cbisi-field">
+              <label>BIS Officer Visit Charges</label>
+              <input type="number" min="0" step="0.01" class="cbisi-visit">
+            </div>
+            <div class="cbisi-field">
+              <label>Min. Marking Fee (Full / Yr)</label>
+              <input type="number" min="0" step="0.01" class="cbisi-marking-full">
+            </div>
+            <div class="cbisi-field">
+              <label>Concession %</label>
+              <select class="cbisi-concession">
+                <option value="80">80% &ndash; Micro</option>
+                <option value="50">50% &ndash; Small</option>
+                <option value="20">20% &ndash; Medium</option>
+                <option value="0">0% &ndash; Large</option>
+              </select>
+            </div>
+
+            <div class="cbisi-field">
+              <label>Marking Fee After Concession</label>
+              <input type="number" min="0" step="0.01" class="cbisi-marking-net" title="Calculated from the full fee and concession; you can override it">
+            </div>
+            <div class="cbisi-field">
+              <label>License Fee</label>
+              <input type="number" min="0" step="0.01" class="cbisi-license">
+            </div>
+            <div class="cbisi-field">
+              <label>Sample Testing Charges</label>
+              <input type="number" min="0" step="0.01" class="cbisi-sample">
+            </div>
+            <div class="cbisi-field">
+              <label>Services Fee</label>
+              <input type="number" min="0" step="0.01" class="cbisi-services">
+            </div>
+
+            <div class="cbisi-field">
+              <label>Other Expenses (BIS Officer)</label>
+              <input type="text" class="cbisi-other" placeholder="As Per Actual">
+            </div>
+            <div class="cbisi-field">
+              <label>Engineer Visit, Travel &amp; Food</label>
+              <input type="text" class="cbisi-engineer" placeholder="Manufacture Site">
+            </div>
+            <div class="cbisi-field cbisi-span-2">
+              <label>Total Fee</label>
+              <div class="cbisi-total">&#8377;0</div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

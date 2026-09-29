@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="_csrf" th:content="${_csrf.token}">
   <meta name="_csrf_header" th:content="${_csrf.headerName}">
-<<<<<<< HEAD
   <title th:text="${editQuotationId != null ? 'Edit Equipment Quotation | EVTL CRM' : 'Add Equipment Quotation | EVTL CRM'}">Equipment Quotation | EVTL CRM</title>
-=======
-  <title>Add Equipment Quotation | EVTL CRM</title>
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
   <link rel="stylesheet" th:href="@{/css/output.css}">
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
   <style>
@@ -64,17 +60,10 @@
             </svg>
             <span>Equipment Quotation List Table</span>
           </div>
-<<<<<<< HEAD
           <h1 class="text-[17px] font-extrabold" th:text="${editQuotationId != null ? 'Edit Equipment Quotation' : 'Add Equipment Quotation'}">Equipment Quotation</h1>
         </header>
 
         <form id="quotationCreateForm" class="quotation-create-form" th:attr="data-edit-id=${editQuotationId}">
-=======
-          <h1 class="text-[17px] font-extrabold">Add Equipment Quotation</h1>
-        </header>
-
-        <form id="quotationCreateForm" class="quotation-create-form">
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
           <div class="quotation-fields">
             <label class="quotation-field">
               <span class="quotation-field-label">Invoice No</span>
@@ -131,11 +120,7 @@
             </button>
           </div>
 
-<<<<<<< HEAD
           <button id="quotationSubmit" type="submit" class="quotation-submit" th:text="${editQuotationId != null ? 'Update Quotation' : 'Submit'}">
-=======
-          <button id="quotationSubmit" type="submit" class="quotation-submit">
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
             Submit
           </button>
           <p id="quotationFormMessage" class="quotation-form-message" role="status" aria-live="polite"></p>
@@ -150,10 +135,7 @@
       const form = document.getElementById('quotationCreateForm');
       const submit = document.getElementById('quotationSubmit');
       const message = document.getElementById('quotationFormMessage');
-<<<<<<< HEAD
       const editId = form.dataset.editId || '';
-=======
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
       function updateRowNumbers() {
         rows.querySelectorAll('tr').forEach((row, index) => {
@@ -161,11 +143,7 @@
         });
       }
 
-<<<<<<< HEAD
       function appendRow(item = {}) {
-=======
-      addRow.addEventListener('click', () => {
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
         const tr = document.createElement('tr');
         tr.className = 'border-b border-[#EEF1F5]';
         tr.innerHTML = `
@@ -181,7 +159,6 @@
           updateRowNumbers();
         });
         rows.appendChild(tr);
-<<<<<<< HEAD
         const inputs = tr.querySelectorAll('input');
         inputs[0].value = item.description || '';
         inputs[1].value = item.hsnCode || '';
@@ -212,10 +189,6 @@
           message.textContent = '';
         } catch (error) { message.textContent = error.message; message.classList.add('error'); submit.disabled = true; }
       }
-=======
-        updateRowNumbers();
-      });
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 
       form.addEventListener('submit', async event => {
         event.preventDefault();
@@ -247,36 +220,21 @@
         submit.disabled = true;
         submit.textContent = 'Saving…';
         try {
-<<<<<<< HEAD
           const response = await fetch(editId ? `/api/lab-equipment/quotations/${encodeURIComponent(editId)}` : '/api/lab-equipment/quotations', {
             method: editId ? 'PUT' : 'POST', headers, credentials: 'same-origin', body: JSON.stringify(payload)
           });
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.detail || data.message || 'Unable to save quotation.');
           message.textContent = editId ? 'Equipment quotation updated successfully.' : `${data.message} (${data.invoiceNo})`;
-=======
-          const response = await fetch('/api/lab-equipment/quotations', {
-            method: 'POST', headers, credentials: 'same-origin', body: JSON.stringify(payload)
-          });
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(data.detail || data.message || 'Unable to save quotation.');
-          message.textContent = `${data.message} (${data.invoiceNo})`;
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
           window.setTimeout(() => window.location.assign('/lab-equipment/quotation'), 800);
         } catch (error) {
           message.textContent = error.message;
           message.classList.add('error');
           submit.disabled = false;
-<<<<<<< HEAD
           submit.textContent = editId ? 'Update Quotation' : 'Submit';
         }
       });
       loadQuotationForEdit();
-=======
-          submit.textContent = 'Submit';
-        }
-      });
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
     })();
   </script>
 </body>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="rdso-panel-script" th:inline="none">
+  let rdsoEditingRevisionId = null;
+
+  // Fixed row labels, in save order: rows 0-3 = fee section, rows 4-7 = consultancy section
+  const RDSO_FEE_LABELS = [
+    'RDSO Application Fee (Gov. Fee)',
+    'Sample testing charges (Pre-testing : Per Batch/Type)',
+    'Factory Audit / Visit Administrative Fee (RDSO Officer Visit)',
+    'Total Fees + GST'
+  ];
+  const RDSO_CONSULTANCY_LABELS = [
+    'Consultancy charge for entire contract (1 Product / Category)',
+    'EVTL Engineer visit travel, lodging & food (Pre-Audit & Live Audit Visit)',
+    'Other expenses RDSO officer',
+    'Total Fees'
+  ];
+
+  const RDSO_FEE_IDS = [
+    ['rdsoFeeAlias1', 'rdsoFeeValue1'],
+    ['rdsoFeeAlias2', 'rdsoFeeValue2'],
+    ['rdsoFeeAlias3', 'rdsoFeeValue3'],
+    ['rdsoFeeAliasTotal', 'rdsoFeeValueTotal']
+  ];
+  const RDSO_CONSULTANCY_IDS = [
+    ['rdsoConsultancyAlias1', 'rdsoConsultancyValue1'],
+    ['rdsoConsultancyAlias2', 'rdsoConsultancyValue2'],
+    ['rdsoConsultancyAlias3', 'rdsoConsultancyValue3'],
+    ['rdsoConsultancyAliasTotal', 'rdsoConsultancyValueTotal']
+  ];
+
+  function rdsoEl(id) { return document.getElementById(id); }
+  function rdsoSet(id, value) { const el = rdsoEl(id); if (el) el.value = value == null ? '' : value; }
+
+  // ---------- Revisions ----------
+  function rdsoRenderRevisions(quotations, leadId, activeId) {
+    const box = rdsoEl('rdsoRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      b.textContent = 'R' + (index + 1);
+      b.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openRdsoEditPanel(leadId, 'RDSO Quotation', '', item.id);
+      };
+      box.appendChild(b);
+    });
+  }
+
+  // ---------- Rows ----------
+  function rdsoClearRows() {
+    RDSO_FEE_IDS.concat(RDSO_CONSULTANCY_IDS).forEach(function (pair) {
+      rdsoSet(pair[0], '');
+      rdsoSet(pair[1], '');
+    });
+  }
+
+  // details = the 8 saved RdsoDetail rows, in order (0-3 fee, 4-7 consultancy)
+  function rdsoRenderRows(details) {
+    rdsoClearRows();
+    const rows = details || [];
+    rows.slice(0, 4).forEach(function (d, i) {
+      if (!RDSO_FEE_IDS[i]) return;
+      rdsoSet(RDSO_FEE_IDS[i][0], d.extraAlias);
+      rdsoSet(RDSO_FEE_IDS[i][1], d.charges);
+    });
+    rows.slice(4, 8).forEach(function (d, i) {
+      if (!RDSO_CONSULTANCY_IDS[i]) return;
+      rdsoSet(RDSO_CONSULTANCY_IDS[i][0], d.extraAlias);
+      rdsoSet(RDSO_CONSULTANCY_IDS[i][1], d.charges);
+    });
+  }
+
+  function rdsoCollectDetails() {
+    const details = [];
+    RDSO_FEE_IDS.forEach(function (pair, i) {
+      details.push({
+        sNo: i < 3 ? (i + 1) : null,
+        description: RDSO_FEE_LABELS[i],
+        extraAlias: rdsoEl(pair[0]).value,
+        charges: rdsoEl(pair[1]).value
+      });
+    });
+    RDSO_CONSULTANCY_IDS.forEach(function (pair, i) {
+      details.push({
+        sNo: i < 3 ? (i + 1) : null,
+        description: RDSO_CONSULTANCY_LABELS[i],
+        extraAlias: rdsoEl(pair[0]).value,
+        charges: rdsoEl(pair[1]).value
+      });
+    });
+    return details;
+  }
+
+  // ---------- Open / load ----------
+  function openRdsoEditPanel(leadId, quotationType, companyName, revisionId) {
+    const type = (quotationType || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (type !== 'rdsoquotation') return;
+
+    rdsoEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('rdsoSaveRevisionButton', revisionId);
+    rdsoEl('rdsoQuotationForm').reset();
+    rdsoEl('rdsoLeadIdInput').value = leadId;
+    rdsoSet('rdsoReferenceNoInput', 'REF-' + leadId);
+    rdsoSet('rdsoQuotationDateInput', new Date().toISOString().slice(0, 10));
+    rdsoClearRows();
+    openModal('rdsoEditModal');
+
+    fetch('/leads/' + leadId + '/rdso-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) return;
+        const q = data.quotation || {}, lead = data.lead || {};
+        rdsoRenderRevisions(data.quotations, leadId, revisionId ? q.id : null);
+
+        if (!revisionId) {
+          rdsoSet('rdsoClientNameInput', lead.isName || '');
+          rdsoSet('rdsoProductNameInput', lead.productName || '');
+          rdsoRenderRows(data.details);
+          return;
+        }
+
+        rdsoSet('rdsoReferenceNoInput', q.referenceNo || ('REF-' + leadId));
+        if (q.quotationDate) rdsoSet('rdsoQuotationDateInput', q.quotationDate);
+        rdsoSet('rdsoClientNameInput', q.clientName || lead.isName || '');
+        rdsoSet('rdsoProductNameInput', q.productName || '');
+        rdsoSet('rdsoGstFeeInput', q.gstFee || '');
+        rdsoRenderRows(data.details);
+      })
+      .catch(function () { /* keep the blank rows */ });
+  }
+
+  // ---------- Save ----------
+  function rdsoPayload() {
+    return {
+      quotation: {
+        id: rdsoEditingRevisionId,
+        leadId: rdsoEl('rdsoLeadIdInput').value,
+        referenceNo: rdsoEl('rdsoReferenceNoInput').value,
+        quotationDate: rdsoEl('rdsoQuotationDateInput').value || null,
+        clientName: rdsoEl('rdsoClientNameInput').value,
+        productName: rdsoEl('rdsoProductNameInput').value,
+        gstFee: rdsoEl('rdsoGstFeeInput').value
+      },
+      details: rdsoCollectDetails()
+    };
+  }
+
+  function saveRdsoQuotation() {
+    const id = rdsoEl('rdsoLeadIdInput').value;
+    if (!id) return;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content,
+          csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    fetch('/leads/' + id + '/rdso-quotation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+      body: JSON.stringify(rdsoPayload())
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data.success) { alert('Failed to save RDSO quotation: ' + (data.message || 'Unknown error')); return; }
+      showLeadToast('RDSO quotation saved successfully');
+      closeModal('rdsoEditModal');
+    }).catch(function () {
+      alert('Something went wrong while saving the RDSO quotation.');
+    });
+  }
+</script>
+</body>
+</html>

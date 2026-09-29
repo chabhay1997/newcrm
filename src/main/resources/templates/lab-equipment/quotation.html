@@ -7,54 +7,82 @@
   <link rel="stylesheet" th:href="@{/css/output.css}">
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
   <style>
-    .quotation-records-table { border: 1px solid #64748B; }
-    .quotation-records-table th { border-bottom: 2px solid #64748B; }
-    .quotation-records-table td { border-bottom: 1px solid #94A3B8; }
-    .quotation-records-table th:not(:last-child), .quotation-records-table td:not(:last-child) { border-right: 1px solid #64748B; }
+    .equipment-quotation-shell { display:flex; min-height:100vh; flex-direction:column; padding-left:6.5rem; color:#17324f; }
+    .equipment-quotation-main { min-width:0; flex:1; padding:0 2rem 2rem; }
+    .equipment-quotation-card { overflow:hidden; border:1px solid #e5eaf1; border-radius:16px; background:#fff; box-shadow:0 12px 32px -24px rgba(23,50,79,.42); }
+    .equipment-quotation-toolbar { padding:16px 20px; border-bottom:1px solid #eef1f5; }
+    .equipment-quotation-toolbar-head { display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+    .equipment-quotation-heading { margin:0; color:#17324f; font-size:16px; font-weight:800; }
+    .equipment-quotation-subtitle { margin:2px 0 0; color:#6b87a8; font-size:12px; }
+    .equipment-quotation-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .equipment-quotation-primary-button,.equipment-quotation-secondary-button { display:inline-flex; min-height:36px; align-items:center; justify-content:center; border-radius:9px; padding:0 12px; font-size:11px; font-weight:750; text-decoration:none; cursor:pointer; }
+    .equipment-quotation-primary-button { border:0; background:#5b4cf5; color:#fff; box-shadow:0 5px 12px rgba(91,76,245,.18); }
+    .equipment-quotation-primary-button:hover { background:#4f46e5; }
+    .equipment-quotation-secondary-button { border:1px solid #d9e2ec; background:#fff; color:#3a4b63; }
+    .equipment-quotation-secondary-button:hover { background:#f8fafc; }
+    .equipment-quotation-search { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:8px; margin-top:12px; }
+    .equipment-quotation-search input { box-sizing:border-box; width:min(208px,100%); height:36px; border:1px solid #e1e7ef; border-radius:9px; padding:0 12px; color:#263d60; font-size:12px; outline:none; }
+    .equipment-quotation-search input:focus { border-color:#7587f4; box-shadow:0 0 0 2px rgba(100,117,242,.12); }
+    .equipment-quotation-search button { height:36px; border:0; border-radius:9px; background:#f3f6fb; padding:0 12px; color:#3a4b63; font-size:11px; font-weight:750; cursor:pointer; }
+    .quotation-table-scroll { width:100%; overflow-x:auto; }
+    .quotation-records-table { width:100%; min-width:1200px; border:1px solid #e1e7ef; border-collapse:collapse; text-align:left; }
+    .quotation-records-table thead { background:#f8fafc; }
+    .quotation-records-table th { height:42px; padding:0 16px; border-bottom:1px solid #dde4ec; color:#6b87a8; font-size:10px; font-weight:800; letter-spacing:.08em; text-align:left; text-transform:uppercase; white-space:nowrap; }
+    .quotation-records-table td { padding:12px 16px; border-bottom:1px solid #eef1f5; color:#3a4b63; font-size:12px; vertical-align:middle; }
+    .quotation-records-table tbody tr:hover { background:#f8faff; }
     .quotation-records-table tbody tr:last-child td { border-bottom: 0; }
+    .equipment-quotation-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid #eef1f5; padding:14px 20px; }
+    .equipment-quotation-summary { margin:0; color:#6b87a8; font-size:11px; }
+    #quotationPagination { display:flex; align-items:center; gap:6px; }
+    #quotationPagination button { display:inline-flex; min-width:32px; height:32px; align-items:center; justify-content:center; border:1px solid #e1e7ef; border-radius:8px; background:#fff; padding:0 8px; color:#3a4b63; font-size:11px; font-weight:700; cursor:pointer; }
+    #quotationPagination button[aria-current="page"] { border-color:#5b4cf5; background:#5b4cf5; color:#fff; }
+    #quotationPagination button:disabled { color:#b4bdca; cursor:not-allowed; }
+    #quotationPagination span { padding:0 4px; color:#6b87a8; font-size:11px; }
     .quotation-action-button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border: 0; border-radius: 7px; cursor: pointer; transition: background .16s ease; }
     .quotation-action-button.download { color: #4F46E5; background: #EEF2FF; }
     .quotation-action-button.download:hover { background: #E0E7FF; }
     .quotation-action-button.delete { color: #DC2626; background: #FEF2F2; }
     .quotation-action-button.delete:hover { background: #FEE2E2; }
+    @media(min-width:640px) { .equipment-quotation-toolbar-head { flex-direction:row; align-items:center; }.equipment-quotation-actions { margin-left:auto; justify-content:flex-end; }.equipment-quotation-search { justify-content:flex-end; } }
+    @media(max-width:760px) { .equipment-quotation-shell { padding-left:5.5rem; }.equipment-quotation-main { padding:0 .75rem 1.5rem; }.equipment-quotation-toolbar,.equipment-quotation-footer { padding-right:12px; padding-left:12px; } }
   </style>
 </head>
 <body>
   <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-  <div class="min-h-screen flex flex-col pl-[6.5rem]">
+  <div class="equipment-quotation-shell">
     <div th:replace="~{fragments/topbar :: topbar}"></div>
 
-    <main class="flex-1 px-8 pb-8 space-y-5">
-      <section class="rounded-2xl bg-white border border-[#E5EAF1] shadow-[0_12px_32px_-24px_rgba(23,50,79,.42)] overflow-hidden">
-        <div class="px-5 py-4 border-b border-[#EEF1F5]">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <main class="equipment-quotation-main">
+      <section class="equipment-quotation-card">
+        <div class="equipment-quotation-toolbar">
+          <div class="equipment-quotation-toolbar-head">
             <div>
-              <h1 class="text-[14px] font-extrabold text-[#17324F]">Equipment Quotation</h1>
-              <p class="mt-0.5 text-[11px] text-[#6B87A8]">Review lab equipment quotations.</p>
+              <h1 class="equipment-quotation-heading">Equipment Quotation</h1>
+              <p class="equipment-quotation-subtitle">Review lab equipment quotations.</p>
             </div>
-            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+            <div class="equipment-quotation-actions">
               <a href="/lab-equipment/quotation/create"
-                class="inline-flex h-9 items-center rounded-lg bg-[#5B4CF5] px-3 text-[11px] font-bold text-white shadow-md shadow-indigo-500/20 transition hover:bg-[#4F46E5] focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                class="equipment-quotation-primary-button">
                 Add Equipment Quotation
               </a>
               <button type="button"
-                class="inline-flex h-9 items-center rounded-lg border border-[#D9E2EC] bg-white px-3 text-[11px] font-bold text-[#3A4B63] transition hover:bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                class="equipment-quotation-secondary-button">
                 Terms and Conditions
               </button>
             </div>
           </div>
-          <form id="quotationSearchForm" class="mt-3 flex items-center gap-2 sm:justify-end" role="search">
+          <form id="quotationSearchForm" class="equipment-quotation-search" role="search">
             <input id="quotationSearch" name="q" type="search" maxlength="100" placeholder="Search quotations"
-              aria-label="Search quotations" class="h-9 w-52 rounded-lg border border-[#E1E7EF] px-3 text-[11.5px] outline-none focus:ring-2 focus:ring-indigo-100">
-            <button type="submit" class="h-9 rounded-lg bg-[#F3F6FB] px-3 text-[11px] font-bold text-[#3A4B63]">Search</button>
+              aria-label="Search quotations">
+            <button type="submit">Search</button>
           </form>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="quotation-records-table w-full min-w-[1200px] border-collapse text-left" aria-label="Lab equipment quotations">
-            <thead class="bg-[#F8FAFC]">
-              <tr class="text-[10px] uppercase tracking-[.08em] text-[#6B87A8]">
+        <div class="quotation-table-scroll">
+          <table class="quotation-records-table" aria-label="Lab equipment quotations">
+            <thead>
+              <tr>
                 <th scope="col" class="border-b border-[#DDE4EC] px-5 py-3 font-extrabold">S No.</th>
                 <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Created By</th>
                 <th scope="col" class="border-b border-[#DDE4EC] px-4 py-3 font-extrabold">Invoice No.</th>
@@ -73,8 +101,8 @@
             </tbody>
           </table>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF1F5] px-5 py-3.5">
-          <p id="quotationSummary" class="text-[11px] text-[#6B87A8]">Loading quotations...</p>
+        <div class="equipment-quotation-footer">
+          <p id="quotationSummary" class="equipment-quotation-summary">Loading quotations...</p>
           <nav id="quotationPagination" class="flex items-center gap-1.5" aria-label="Quotation pagination"></nav>
         </div>
       </section>

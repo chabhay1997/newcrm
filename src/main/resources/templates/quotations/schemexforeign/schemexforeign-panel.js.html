@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="schemexforeign-panel-script" th:inline="none">
+	let schemexforeignEditingRevisionId = null;
+
+	function schemexforeignSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function schemexforeignRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('schemexforeignRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openSchemeXForeignEditPanel(leadId, 'Scheme-X Foreign', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function schemexforeignPopulate(quotation, lead) {
+		const q = quotation || {};
+		schemexforeignSetInput('schemexforeignReferenceNoInput', q.referenceNo || '');
+		schemexforeignSetInput('schemexforeignQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		schemexforeignSetInput('schemexforeignClientNameInput', q.clientName || lead.isName || '');
+		schemexforeignSetInput('schemexforeignProductNameInput', q.productName || '');
+		schemexforeignSetInput('schemexforeignHsnNoInput', q.hsnNo || '');
+		schemexforeignSetInput('schemexforeignLeadTimeInput', q.leadTime || '');
+		schemexforeignSetInput('schemexforeignConsulChargeInput', q.consulCharge || '');
+		schemexforeignSetInput('schemexforeignAirTicketsInput', q.airTickets || '');
+		schemexforeignSetInput('schemexforeignAdvanceInput', q.advance || '');
+		schemexforeignSetInput('schemexforeignCompletionInput', q.completion || '');
+		schemexforeignSetInput('schemexforeignOffVisitInput', q.offVisit || '');
+		schemexforeignSetInput('schemexforeignDuringGrantInput', q.duringGrant || '');
+	}
+
+	function openSchemeXForeignEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('schemexforeignQuotationForm').reset();
+		document.getElementById('schemexforeignLeadIdInput').value = leadId;
+		schemexforeignSetInput('schemexforeignReferenceNoInput', 'REF-' + leadId);
+		schemexforeignSetInput('schemexforeignQuotationDateInput', new Date().toISOString().slice(0, 10));
+		openModal('schemexforeignEditModal');
+		fetch('/leads/' + leadId + '/schemexforeign-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				schemexforeignRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					schemexforeignPopulate(quotation, lead);
+				} else {
+					schemexforeignSetInput('schemexforeignClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { schemexforeignSetInput('schemexforeignClientNameInput', companyName || ''); });
+	}
+
+	function schemexforeignPayload() {
+		return {
+			id: schemexforeignEditingRevisionId,
+			leadId: document.getElementById('schemexforeignLeadIdInput').value,
+			referenceNo: document.getElementById('schemexforeignReferenceNoInput').value,
+			quotationDate: document.getElementById('schemexforeignQuotationDateInput').value || null,
+			clientName: document.getElementById('schemexforeignClientNameInput').value,
+			productName: document.getElementById('schemexforeignProductNameInput').value,
+			hsnNo: document.getElementById('schemexforeignHsnNoInput').value,
+			leadTime: document.getElementById('schemexforeignLeadTimeInput').value,
+			consulCharge: document.getElementById('schemexforeignConsulChargeInput').value,
+			airTickets: document.getElementById('schemexforeignAirTicketsInput').value,
+			advance: document.getElementById('schemexforeignAdvanceInput').value,
+			completion: document.getElementById('schemexforeignCompletionInput').value,
+			offVisit: document.getElementById('schemexforeignOffVisitInput').value,
+			duringGrant: document.getElementById('schemexforeignDuringGrantInput').value
+		};
+	}
+
+	function saveSchemeXForeignQuotation() {
+		const leadId = document.getElementById('schemexforeignLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/schemexforeign-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(schemexforeignPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save Scheme-X Foreign quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('Scheme-X Foreign quotation saved successfully');
+				closeModal('schemexforeignEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the Scheme-X Foreign quotation.'); });
+	}
+
+	function downloadSchemeXForeignQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

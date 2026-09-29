@@ -7,7 +7,8 @@
   <link rel="stylesheet" th:href="@{/css/output.css}">
   <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
   <style>
-    body { background:#f3f6fb; }.analytics-shell { min-height:100vh; color:#17213f; background:radial-gradient(circle at 90% 5%,rgba(99,102,241,.10),transparent 25%),linear-gradient(180deg,#f8faff 0,#f3f6fb 42%,#eef3f9 100%); }
+    body { background:#f3f6fb; }.analytics-shell { display:flex; min-height:100vh; flex-direction:column; padding-left:6.5rem; color:#17213f; background:radial-gradient(circle at 90% 5%,rgba(99,102,241,.10),transparent 25%),linear-gradient(180deg,#f8faff 0,#f3f6fb 42%,#eef3f9 100%); }
+    .analytics-main { display:flex; min-width:0; flex:1; flex-direction:column; gap:1.25rem; padding: .75rem 1.5rem 2rem; }
     .analytics-header { position:relative; display:flex; min-height:126px; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; overflow:hidden; padding:25px 28px; border-radius:22px; background:linear-gradient(120deg,#102f57 0%,#224f88 53%,#5369f2 100%); box-shadow:0 18px 40px rgba(22,54,105,.20); }
     .analytics-header::before { position:absolute; top:-80px; right:16%; width:210px; height:210px; border:42px solid rgba(255,255,255,.07); border-radius:50%; content:""; }.analytics-header::after { position:absolute; right:-45px; bottom:-90px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.07); content:""; }
     .analytics-header > * { position:relative; z-index:1; }.analytics-title { margin:0; color:#fff; font-size:30px; line-height:1.05; font-weight:850; letter-spacing:-.035em; }.analytics-header p { color:#d9e8ff !important; }
@@ -37,14 +38,14 @@
     .analytics-lower { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }.empty-chart { display:flex; min-height:180px; align-items:center; justify-content:center; color:#7b879b; font-size:12px; }
     .analytics-error { padding:14px; border:1px solid #fecaca; border-radius:12px; background:#fff1f2; color:#be123c; font-size:12px; font-weight:700; }
     @media(max-width:1200px) { .metric-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }.analytics-grid { grid-template-columns:1fr; } }
-    @media(max-width:760px) { .metric-grid,.analytics-lower { grid-template-columns:1fr; }.analytics-filter input { width:145px; }.analytics-range { width:100%; margin-left:0; }.analytics-shell { padding-left:0; } }
+    @media(max-width:760px) { .metric-grid,.analytics-lower { grid-template-columns:1fr; }.analytics-filter input { width:145px; }.analytics-range { width:100%; margin-left:0; }.analytics-shell { padding-left:5.5rem; }.analytics-main { padding: .75rem .75rem 1.5rem; } }
   </style>
 </head>
 <body>
   <div th:replace="~{fragments/sidebar :: sidebar}"></div>
-  <div class="analytics-shell min-h-screen flex flex-col pl-[6.5rem]">
+  <div class="analytics-shell">
     <div th:replace="~{fragments/topbar :: topbar}"></div>
-    <main class="flex-1 px-6 pt-3 pb-8 space-y-5">
+    <main class="analytics-main">
       <div class="analytics-header">
         <div><h1 class="analytics-title">Challan Analytics</h1><p class="mt-1.5 text-[13px] text-[#617391]">Operational volume, value and distribution insights.</p></div>
         <a href="/challan" class="analytics-back"><span aria-hidden="true">←</span> Back to Challan List</a>

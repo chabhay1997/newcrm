@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- SIT CERTIFICATION EDIT PANEL -->
+<div th:fragment="sit-panel" id="sitEditModal" class="modal-overlay" onclick="closeModal('sitEditModal')">
+  <div class="modal-box glass rounded-2xl w-[820px] max-w-[96vw] p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"
+       style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(31,38,135,0.15);">
+
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-[16px] font-bold text-[#171923]">SIT &mdash; Quotation Details</p>
+      <button onclick="closeModal('sitEditModal')" class="spin-close w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="sitQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="sitLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="sitRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Reference No</label>
+          <input id="sitReferenceNoInput" type="text" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Certificate Type</label>
+          <input type="text" value="SIT" readonly class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-[#F3F5F8]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Date</label>
+          <input id="sitQuotationDateInput" type="date" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Client Name</label>
+          <input id="sitClientNameInput" type="text" placeholder="Enter Client Name" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Duration</label>
+          <input id="sitDurationInput" type="text" placeholder="Total Year" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">No of Certificate</label>
+          <input id="sitNoOfCertificateInput" type="text" maxlength="2" placeholder="Enter certification count" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+        </div>
+      </div>
+
+      <!-- CERTIFICATION / PRODUCT NAMES (max 3) -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-[13px] font-bold text-[#171923]">Certification / Product Name</p>
+        <button type="button" onclick="sitAddCertRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#8A5CF6] px-3 py-1.5 rounded-full border border-[#8A5CF6]/30 bg-[#8A5CF6]/5 hover:bg-[#8A5CF6]/10 transition">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add More
+        </button>
+      </div>
+      <div id="sitCertContainer" class="flex flex-col gap-2 mb-6"></div>
+
+      <!-- FEES -->
+      <div class="flex flex-col gap-2 mb-6">
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Actual Marking Fee (Medium/Small/Micro Scale) Unit Rate</label>
+          <input id="sitActualFeeInput" type="text" placeholder="Enter Actual Marking Fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-3 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Renewal Application Fee</label>
+          <input id="sitRenewalFeeCountInput" type="text" placeholder="How many applications?" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+          <input id="sitRenewalFeeInput" type="text" placeholder="Enter Renewal Fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-3 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Annual License Fee</label>
+          <input id="sitAnnualLicCountInput" type="text" placeholder="How many applications?" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+          <input id="sitAnnualFeeInput" type="text" placeholder="Enter Annual Fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">BIS officer Liaisoning fee</label>
+          <input id="sitBisOfficerLiaisoningFeeInput" type="text" placeholder="Enter BIS officer Liaisoning fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Sample Testing fee (per type)</label>
+          <input id="sitSampleTestingFeeInput" type="text" placeholder="Enter Sample Testing fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Engineer Visit charge for SIT</label>
+          <input id="sitEngVisitFeeInput" type="text" placeholder="Enter Engineer Visit charge" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <label class="text-[12px] font-semibold text-[#3A4B63]">Consultancy / Service Fee</label>
+          <input id="sitConsultancyServiceFeeInput" type="text" placeholder="Enter Consultancy / Service Fee" class="w-full px-3 py-2 rounded-xl border border-black/10 text-[13px] bg-white/70">
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('sitEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
+        <button type="button" onclick="downloadSitQuotationPdf()" class="quotation-download-action flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button id="sitSaveRevisionButton" type="button" onclick="saveSitQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
+      </div>
+    </form>
+
+    <template id="sitCertRowTemplate">
+      <div class="sit-cert-row flex gap-3 items-start p-2 rounded-xl border border-black/10 bg-[#F8FAFF]">
+        <div class="flex-1">
+          <textarea rows="1" placeholder="Enter Certification / Product Name" class="sit-cert-name w-full px-2.5 py-2 rounded-lg border border-black/10 text-[12.5px] bg-white resize-none"></textarea>
+        </div>
+        <button type="button" onclick="sitRemoveCertRow(this)" title="Remove"
+                class="mt-[2px] w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#C0304A] bg-[#FCE9EC] hover:bg-[#F8D2D8] transition">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </template>
+  </div>
+</div>
+
+</body>
+</html>

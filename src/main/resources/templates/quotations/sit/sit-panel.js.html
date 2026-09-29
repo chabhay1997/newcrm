@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="sit-panel-script" th:inline="none">
+	let sitEditingRevisionId = null;
+	const SIT_MAX_CERTS = 3;
+
+	function sitAddCertRow(value) {
+		const container = document.getElementById('sitCertContainer');
+		if (!container) return;
+		if (container.children.length >= SIT_MAX_CERTS) {
+			alert('You can add a maximum of ' + SIT_MAX_CERTS + ' Certification / Product Names.');
+			return;
+		}
+		const template = document.getElementById('sitCertRowTemplate');
+		const row = template.content.firstElementChild.cloneNode(true);
+		if (value !== undefined) row.querySelector('.sit-cert-name').value = value || '';
+		container.appendChild(row);
+	}
+
+	function sitRemoveCertRow(button) {
+		const container = document.getElementById('sitCertContainer');
+		if (container.children.length > 1) button.closest('.sit-cert-row').remove();
+	}
+
+	function sitSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function sitRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('sitRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openSitEditPanel(leadId, 'SIT', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function sitPopulate(quotation, lead) {
+		const q = quotation || {};
+		sitSetInput('sitReferenceNoInput', q.referenceNo || '');
+		sitSetInput('sitQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		sitSetInput('sitClientNameInput', q.clientName || lead.isName || '');
+		sitSetInput('sitDurationInput', q.duration || '');
+		sitSetInput('sitNoOfCertificateInput', q.noOfCertificate);
+		sitSetInput('sitActualFeeInput', q.actualFee || '');
+		sitSetInput('sitRenewalFeeCountInput', q.renewalFeeCount || '');
+		sitSetInput('sitRenewalFeeInput', q.renewalFee || '');
+		sitSetInput('sitAnnualLicCountInput', q.annualLicCount || '');
+		sitSetInput('sitAnnualFeeInput', q.annualFee || '');
+		sitSetInput('sitBisOfficerLiaisoningFeeInput', q.bisOfficerLiaisoningFee || '');
+		sitSetInput('sitSampleTestingFeeInput', q.sampleTestingFee || '');
+		sitSetInput('sitEngVisitFeeInput', q.engVisitFee || '');
+		sitSetInput('sitConsultancyServiceFeeInput', q.consultancyServiceFee || '');
+
+		const container = document.getElementById('sitCertContainer');
+		container.innerHTML = '';
+		let names = (q.certificationName || '').split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
+		if (!names.length) names = [''];
+		names.slice(0, SIT_MAX_CERTS).forEach(function (name) { sitAddCertRow(name); });
+	}
+
+	function openSitEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('sitQuotationForm').reset();
+		document.getElementById('sitLeadIdInput').value = leadId;
+		document.getElementById('sitCertContainer').innerHTML = '';
+		sitSetInput('sitReferenceNoInput', 'REF-' + leadId);
+		sitSetInput('sitQuotationDateInput', new Date().toISOString().slice(0, 10));
+		sitAddCertRow();
+		openModal('sitEditModal');
+		fetch('/leads/' + leadId + '/sit-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				sitRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					sitPopulate(quotation, lead);
+				} else {
+					sitSetInput('sitClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { sitSetInput('sitClientNameInput', companyName || ''); });
+	}
+
+	function sitPayload() {
+		const names = Array.from(document.querySelectorAll('#sitCertContainer .sit-cert-name'))
+			.map(function (el) { return (el.value || '').trim(); })
+			.filter(function (v) { return v !== ''; });
+		return {
+			id: sitEditingRevisionId,
+			leadId: document.getElementById('sitLeadIdInput').value,
+			referenceNo: document.getElementById('sitReferenceNoInput').value,
+			quotationDate: document.getElementById('sitQuotationDateInput').value || null,
+			clientName: document.getElementById('sitClientNameInput').value,
+			duration: document.getElementById('sitDurationInput').value,
+			noOfCertificate: document.getElementById('sitNoOfCertificateInput').value || null,
+			certificationName: names.join(', '),
+			actualFee: document.getElementById('sitActualFeeInput').value,
+			renewalFeeCount: document.getElementById('sitRenewalFeeCountInput').value,
+			renewalFee: document.getElementById('sitRenewalFeeInput').value,
+			annualLicCount: document.getElementById('sitAnnualLicCountInput').value,
+			annualFee: document.getElementById('sitAnnualFeeInput').value,
+			bisOfficerLiaisoningFee: document.getElementById('sitBisOfficerLiaisoningFeeInput').value,
+			sampleTestingFee: document.getElementById('sitSampleTestingFeeInput').value,
+			engVisitFee: document.getElementById('sitEngVisitFeeInput').value,
+			consultancyServiceFee: document.getElementById('sitConsultancyServiceFeeInput').value
+		};
+	}
+
+	function saveSitQuotation() {
+		const leadId = document.getElementById('sitLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/sit-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(sitPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save SIT quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('SIT quotation saved successfully');
+				closeModal('sitEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the SIT quotation.'); });
+	}
+
+	function downloadSitQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

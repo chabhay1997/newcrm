@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="batteryepr-panel-script" th:inline="none">
+	let batteryEprEditingRevisionId = null;
+
+	function batteryEprSetInput(id, value) {
+		const input = document.getElementById(id);
+		if (input) input.value = value == null ? '' : value;
+	}
+
+	function batteryEprRenderRevisions(quotations, leadId, activeId) {
+		const container = document.getElementById('batteryEprRevisionButtons');
+		if (!container) return;
+		container.innerHTML = '';
+		(quotations || []).forEach(function (quotation, index) {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
+			button.textContent = 'R' + (index + 1);
+			button.onclick = function () {
+				openBatteryEprEditPanel(leadId, 'Battery EPR', '', quotation.id);
+			};
+			container.appendChild(button);
+		});
+	}
+
+	function batteryEprPopulate(quotation, lead) {
+		const q = quotation || {};
+		batteryEprSetInput('batteryEprReferenceNoInput', q.referenceNo || '');
+		batteryEprSetInput('batteryEprQuotationDateInput', q.quotationDate || new Date().toISOString().slice(0, 10));
+		batteryEprSetInput('batteryEprClientNameInput', q.clientName || lead.isName || '');
+		batteryEprSetInput('batteryEprProductNameInput', q.productName || '');
+		batteryEprSetInput('batteryEprGovtFeeInput', q.govtFee || '');
+		batteryEprSetInput('batteryEprServiceFeeInput', q.serviceFee || '');
+		batteryEprSetInput('batteryEprRecycleAgreementInput', q.recycleAgreement || '');
+	}
+
+	function openBatteryEprEditPanel(leadId, quotationType, companyName, revisionId) {
+		document.getElementById('batteryEprQuotationForm').reset();
+		document.getElementById('batteryEprLeadIdInput').value = leadId;
+		batteryEprSetInput('batteryEprReferenceNoInput', 'REF-' + leadId);
+		batteryEprSetInput('batteryEprQuotationDateInput', new Date().toISOString().slice(0, 10));
+		openModal('batteryEprEditModal');
+		fetch('/leads/' + leadId + '/batteryepr-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) return;
+				const lead = data.lead || {};
+				const quotation = data.quotation || {};
+				batteryEprRenderRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+				if (revisionId) {
+					batteryEprPopulate(quotation, lead);
+				} else {
+					batteryEprSetInput('batteryEprClientNameInput', lead.isName || companyName || '');
+				}
+			})
+			.catch(function () { batteryEprSetInput('batteryEprClientNameInput', companyName || ''); });
+	}
+
+	function batteryEprPayload() {
+		return {
+			id: batteryEprEditingRevisionId,
+			leadId: document.getElementById('batteryEprLeadIdInput').value,
+			referenceNo: document.getElementById('batteryEprReferenceNoInput').value,
+			quotationDate: document.getElementById('batteryEprQuotationDateInput').value || null,
+			clientName: document.getElementById('batteryEprClientNameInput').value,
+			productName: document.getElementById('batteryEprProductNameInput').value,
+			govtFee: document.getElementById('batteryEprGovtFeeInput').value,
+			serviceFee: document.getElementById('batteryEprServiceFeeInput').value,
+			recycleAgreement: document.getElementById('batteryEprRecycleAgreementInput').value
+		};
+	}
+
+	function saveBatteryEprQuotation() {
+		const leadId = document.getElementById('batteryEprLeadIdInput').value;
+		if (!leadId) return;
+		const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+		const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+		fetch('/leads/' + leadId + '/batteryepr-quotation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+			body: JSON.stringify(batteryEprPayload())
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (!data.success) { alert('Failed to save Battery EPR quotation: ' + (data.message || 'Unknown error')); return; }
+				showLeadToast('Battery EPR quotation saved successfully');
+				closeModal('batteryEprEditModal');
+			})
+			.catch(function () { alert('Something went wrong while saving the Battery EPR quotation.'); });
+	}
+
+	function downloadBatteryEprQuotationPdf() { window.print(); }
+</script>
+</body>
+</html>

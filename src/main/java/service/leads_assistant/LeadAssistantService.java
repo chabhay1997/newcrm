@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.Lead;
 import model.LeadAssistant;
 import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import repository.LeadRepository;
 import repository.leads_assistant.LeadAssistantRepository;
@@ -15,6 +17,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -28,8 +33,11 @@ import java.util.Set;
 @Service
 public class LeadAssistantService {
 
+    private static final Logger log = LoggerFactory.getLogger(LeadAssistantService.class);
     private static final String GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
+    private static final String GROQ_TRANSCRIPTION_ENDPOINT = "https://api.groq.com/openai/v1/audio/transcriptions";
+    private static final String DEFAULT_MODEL = "openai/gpt-oss-120b";
+    private static final int GROQ_CONTEXT_LEAD_LIMIT = 50;
     private static final String OUT_OF_SCOPE_NOTICE = "This is out of reach for my static knowledge. I need to discuss it with an admin. ";
     private static final String[] COMMON_WORDS = {
             "hello", "hi", "hey", "yes", "no", "thanks", "thank", "bye", "goodbye",
@@ -51,8 +59,11 @@ public class LeadAssistantService {
     @Value("${groq.api-key:}")
     private String groqApiKey;
 
-    @Value("${groq.model:llama-3.3-70b-versatile}")
+    @Value("${groq.model:openai/gpt-oss-120b}")
     private String groqModel;
+
+    @Value("${groq.transcription-model:whisper-large-v3-turbo}")
+    private String groqTranscriptionModel;
 
     public LeadAssistantService(LeadRepository leadRepository, LeadAssistantRepository leadAssistantRepository, ObjectMapper objectMapper) {
         this.leadRepository = leadRepository;
@@ -90,17 +101,79 @@ public class LeadAssistantService {
             return response;
         }
 
+        if (isLatestLeadQuestion(message)) {
+            Map<String, Object> latestLead = findLatestLead(leadSnapshot);
+            if (latestLead != null) {
+                String reply = describeLatestLead(latestLead);
+                response.put("reply", reply);
+                saveMessage(sessionId, "assistant", reply, "groq", null, null);
+                return response;
+            }
+        }
+
         try {
             String reply = callGroq(message, leadSnapshot);
             response.put("reply", reply);
             saveMessage(sessionId, "assistant", reply, "groq", null, null);
         } catch (Exception exception) {
+            log.warn("Groq enhanced-mode request failed", exception);
             String reply = staticReply(sessionId, message, leadSnapshot);
             response.put("reply", reply);
             saveMessage(sessionId, "assistant", reply, "static", null, null);
-            response.put("notice", "Enhanced mode is temporarily unavailable, so I used Lead Assistant mode.");
+            String reason = exception.getMessage();
+            response.put("notice", "Enhanced mode failed: "
+                    + (reason == null || reason.isBlank() ? exception.getClass().getSimpleName() : reason));
         }
         return response;
+    }
+
+    public String transcribeVoice(byte[] audio, String filename, String contentType) throws Exception {
+        if (!hasGroqKey()) {
+            throw new IllegalStateException("Voice transcription is not configured on the server.");
+        }
+        if (audio == null || audio.length == 0) {
+            throw new IllegalArgumentException("No audio was recorded.");
+        }
+
+        String boundary = "----NewCrmVoice" + java.util.UUID.randomUUID().toString().replace("-", "");
+        ByteArrayOutputStream body = new ByteArrayOutputStream(audio.length + 512);
+        writeMultipartField(body, boundary, "model", groqTranscriptionModel);
+        writeMultipartField(body, boundary, "language", "en");
+        writeMultipartField(body, boundary, "response_format", "json");
+        String safeFilename = filename == null || filename.isBlank() ? "voice.webm" : filename.replaceAll("[^A-Za-z0-9._-]", "_");
+        String safeContentType = contentType == null || contentType.isBlank() ? "audio/webm" : contentType.split(";")[0].trim();
+        writeMultipart(body, "--" + boundary + "\r\n"
+                + "Content-Disposition: form-data; name=\"file\"; filename=\"" + safeFilename + "\"\r\n"
+                + "Content-Type: " + safeContentType + "\r\n\r\n");
+        body.write(audio);
+        writeMultipart(body, "\r\n--" + boundary + "--\r\n");
+
+        HttpRequest request = HttpRequest.newBuilder(URI.create(GROQ_TRANSCRIPTION_ENDPOINT))
+                .timeout(Duration.ofSeconds(60))
+                .header("Authorization", "Bearer " + groqApiKey)
+                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray()))
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            String details = response.body() == null ? "" : response.body().trim();
+            if (details.length() > 400) details = details.substring(0, 400);
+            throw new IllegalStateException("Groq transcription returned HTTP " + response.statusCode()
+                    + (details.isBlank() ? "" : ": " + details));
+        }
+        String transcript = objectMapper.readTree(response.body()).path("text").asText("").trim();
+        if (transcript.isBlank()) throw new IllegalStateException("No speech was recognized in the recording.");
+        return transcript;
+    }
+
+    private void writeMultipartField(ByteArrayOutputStream body, String boundary, String name, String value) throws Exception {
+        writeMultipart(body, "--" + boundary + "\r\n"
+                + "Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n"
+                + value + "\r\n");
+    }
+
+    private void writeMultipart(ByteArrayOutputStream body, String value) throws Exception {
+        body.write(value.getBytes(StandardCharsets.UTF_8));
     }
 
     public List<Map<String, Object>> history(String sessionId) {
@@ -573,12 +646,13 @@ public class LeadAssistantService {
     }
 
     private String callGroq(String message, List<Map<String, Object>> leadSnapshot) throws Exception {
+        String crmContext = objectMapper.writeValueAsString(compactGroqContext(message, leadSnapshot));
         Map<String, Object> system = new LinkedHashMap<>();
         system.put("role", "system");
         system.put("content", "You are Lead Assistant inside a CRM. Answer concisely and clearly. "
                 + "Use only the supplied lead snapshot for CRM facts. Never claim that a lead was created, updated, or deleted. "
                 + "For any mutation request, explain that the user must confirm the exact action first. "
-                + "Do not expose internal database fields or API secrets. Lead snapshot: " + objectMapper.writeValueAsString(leadSnapshot));
+                + "Do not expose internal database fields or API secrets. CRM context: " + crmContext);
 
         Map<String, Object> user = new LinkedHashMap<>();
         user.put("role", "user");
@@ -598,7 +672,12 @@ public class LeadAssistantService {
 
         HttpResponse<String> result = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (result.statusCode() < 200 || result.statusCode() >= 300) {
-            throw new IllegalStateException("Groq returned HTTP " + result.statusCode());
+            String errorBody = result.body() == null ? "" : result.body().trim();
+            if (errorBody.length() > 500) {
+                errorBody = errorBody.substring(0, 500);
+            }
+            throw new IllegalStateException("Groq returned HTTP " + result.statusCode()
+                    + (errorBody.isBlank() ? "" : ": " + errorBody));
         }
 
         JsonNode root = objectMapper.readTree(result.body());
@@ -607,6 +686,126 @@ public class LeadAssistantService {
             throw new IllegalStateException("Groq returned an empty response");
         }
         return content.trim();
+    }
+
+    /** Keeps the provider request small even when the CRM contains many leads. */
+    private Map<String, Object> compactGroqContext(String question, List<Map<String, Object>> leadSnapshot) {
+        Map<String, Integer> statusCounts = new LinkedHashMap<>();
+        Map<String, Integer> sourceCounts = new LinkedHashMap<>();
+        List<Map<String, Object>> sampleLeads = new ArrayList<>();
+        List<Map<String, Object>> matchingLeads = findGroqRelevantLeads(question, leadSnapshot);
+
+        for (Map<String, Object> lead : leadSnapshot) {
+            String status = String.valueOf(lead.get("status"));
+            String source = String.valueOf(lead.get("source"));
+            statusCounts.merge(status, 1, Integer::sum);
+            sourceCounts.merge(source, 1, Integer::sum);
+
+            if (sampleLeads.size() < GROQ_CONTEXT_LEAD_LIMIT) {
+                Map<String, Object> compactLead = new LinkedHashMap<>();
+                compactLead.put("name", lead.get("name"));
+                compactLead.put("company", lead.get("company"));
+                compactLead.put("status", lead.get("status"));
+                compactLead.put("source", lead.get("source"));
+                compactLead.put("product", lead.get("product"));
+                compactLead.put("leadDate", lead.get("leadDate"));
+                sampleLeads.add(compactLead);
+            }
+        }
+
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put("totalLeadCount", leadSnapshot.size());
+        context.put("statusCounts", statusCounts);
+        context.put("sourceCounts", sourceCounts);
+
+        if (isLatestLeadQuestion(question)) {
+            Map<String, Object> latestLead = findLatestLead(leadSnapshot);
+            if (latestLead != null) {
+                context.put("latestLead", detailedGroqLead(latestLead));
+                context.put("latestLeadNote", "This is the most recently created lead, determined by creation timestamp.");
+            }
+        }
+
+        if (!matchingLeads.isEmpty()) {
+            context.put("matchedLeads", matchingLeads);
+            context.put("matchNote", "These records were selected because they match the user's question.");
+        } else {
+            context.put("sampleLeads", sampleLeads);
+            context.put("sampleNote", "No particular lead was identified. Only the first " + GROQ_CONTEXT_LEAD_LIMIT
+                    + " compact lead records are included; use totals for overall counts.");
+        }
+        return context;
+    }
+
+    /** True when the question is asking for the most recently added lead. */
+    private boolean isLatestLeadQuestion(String question) {
+        if (question == null) return false;
+        String normalized = question.toLowerCase();
+        return normalized.matches(".*\\b(latest|newest|most recent|last added|recently added|just added|new lead)\\b.*");
+    }
+
+    /** Finds the lead with the most recent creation timestamp (falls back to leadDate if missing). */
+    private Map<String, Object> findLatestLead(List<Map<String, Object>> leads) {
+        Map<String, Object> latest = null;
+        Comparable latestKey = null;
+        for (Map<String, Object> lead : leads) {
+            Object createdAt = lead.get("createdAt");
+            Object key = createdAt != null ? createdAt : lead.get("leadDate");
+            if (!(key instanceof Comparable comparableKey)) continue;
+            if (latestKey == null || comparableKey.compareTo(latestKey) > 0) {
+                latestKey = comparableKey;
+                latest = lead;
+            }
+        }
+        return latest;
+    }
+
+    private String describeLatestLead(Map<String, Object> lead) {
+        Object created = lead.get("createdAt") != null ? lead.get("createdAt") : lead.get("leadDate");
+        return "The latest lead is #" + lead.get("id") + " "
+                + valueOrFallback(lead.get("company"), lead.get("name"))
+                + " — " + valueOrFallback(lead.get("name"), "No contact name")
+                + ", " + valueOrFallback(lead.get("phone"), "No phone")
+                + ", " + valueOrFallback(lead.get("email"), "No email")
+                + ", status: " + lead.get("status")
+                + ", source: " + lead.get("source")
+                + ", added on " + created + ".";
+    }
+
+    /** Retrieves the records relevant to a specific lead question before calling Groq. */
+    private List<Map<String, Object>> findGroqRelevantLeads(String question, List<Map<String, Object>> leads) {
+        if (question == null || question.isBlank()) return List.of();
+        Set<String> ignored = Set.of("about", "check", "could", "detail", "details", "find", "give", "have",
+                "information", "lead", "leads", "please", "provide", "search", "show", "tell", "that",
+                "their", "there", "this", "what", "which", "with", "would", "your");
+        List<String> terms = new ArrayList<>();
+        for (String term : question.toLowerCase().split("[^a-z0-9@.+-]+")) {
+            if (term.length() >= 3 && !ignored.contains(term)) terms.add(term);
+        }
+        if (terms.isEmpty()) return List.of();
+
+        List<Map<String, Object>> matches = new ArrayList<>();
+        for (Map<String, Object> lead : leads) {
+            String searchable = String.join(" ",
+                    String.valueOf(lead.get("name")), String.valueOf(lead.get("company")),
+                    String.valueOf(lead.get("email")), String.valueOf(lead.get("phone")),
+                    String.valueOf(lead.get("companyMobile")), String.valueOf(lead.get("officialEmail")),
+                    String.valueOf(lead.get("product")), String.valueOf(lead.get("requirements")),
+                    String.valueOf(lead.get("remarks")), String.valueOf(lead.get("address"))).toLowerCase();
+            boolean matchesQuestion = terms.stream().anyMatch(searchable::contains);
+            if (matchesQuestion && matches.size() < 20) matches.add(detailedGroqLead(lead));
+        }
+        return matches;
+    }
+
+    private Map<String, Object> detailedGroqLead(Map<String, Object> lead) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (String field : List.of("name", "company", "email", "phone", "companyMobile", "officialEmail",
+                "status", "source", "category", "product", "requirements", "remarks", "address", "leadDate", "createdAt", "amount")) {
+            Object value = lead.get(field);
+            result.put(field, value instanceof String text ? text.length() > 500 ? text.substring(0, 500) + "…" : text : value);
+        }
+        return result;
     }
 
     private List<Map<String, Object>> snapshotLeads() {

@@ -1,6 +1,6 @@
 package repository.quotations;
 
-import model.BisDpiitQuotation;
+import model.quotations.BisDpiitQuotation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

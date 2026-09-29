@@ -29,9 +29,8 @@
 			button.className = 'quotation-revision-button' + (quotation.id === activeId ? ' active' : '');
 			button.textContent = 'R' + (index + 1);
 			button.onclick = function () {
-				closeModal('wpcEditModal');
-				setTimeout(function () { openWpcEditPanel(leadId, 'WPC', '', quotation.id); }, 50);
-			};
+    openWpcEditPanel(leadId, 'WPC', '', quotation.id);
+};
 			container.appendChild(button);
 		});
 	}

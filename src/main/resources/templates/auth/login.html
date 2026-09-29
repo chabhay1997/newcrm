@@ -181,8 +181,8 @@
       <form th:action="@{/login}" method="post">
 
         <div class="input-wrap username-wrap">
-          <input id="username" name="username" type="text" placeholder="Enter your username" required class="field-input">
-          <span class="username-suffix">@evtlindia.com</span>
+          <input id="username" name="username" type="text" placeholder="Email or username" autocomplete="username" required class="field-input">
+          <span class="username-suffix">@evtl.in</span>
         </div>
 
         <div class="input-wrap">
@@ -204,6 +204,8 @@
         </div>
 
         <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" id="loginLatitude" name="latitude">
+        <input type="hidden" id="loginLongitude" name="longitude">
 
         <button type="submit" class="btn-continue">Continue</button>
       </form>
@@ -226,8 +228,6 @@ function togglePwd(){
   const p = document.getElementById('password');
   p.type = p.type === 'password' ? 'text' : 'password';
 }
-<<<<<<< HEAD
-=======
 
 const loginForm = document.querySelector('form[action$="/login"]');
 const loginLatitude = document.getElementById('loginLatitude');
@@ -252,7 +252,6 @@ loginForm.addEventListener('submit', function (event) {
   locationRequested = true;
   captureLoginLocation(function () { loginForm.submit(); });
 });
->>>>>>> 91cef887e4e2d034cf24dd0094d8272c8b034ea4
 </script>
 </body>
 </html>

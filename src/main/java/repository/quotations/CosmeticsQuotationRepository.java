@@ -1,6 +1,6 @@
 package repository.quotations;
 
-import model.CosmeticsQuotation;
+import model.quotations.CosmeticsQuotation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

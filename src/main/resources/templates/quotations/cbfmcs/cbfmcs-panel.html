@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- CB-FMCS EDIT PANEL -->
+<div th:fragment="cbfmcs-panel" id="cbfmcsEditModal" class="modal-overlay" onclick="closeModal('cbfmcsEditModal')">
+  <div class="modal-box glass cbfmcs-modal-box" onclick="event.stopPropagation()" style="backdrop-filter:blur(20px);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 32px rgba(31,38,135,.15);">
+
+    <!-- Scoped styles: keeps this panel independent of the compiled Tailwind output.css -->
+    <style th:inline="none">
+      #cbfmcsEditModal .cbfmcs-modal-box { width:1180px; max-width:96vw; max-height:90vh; overflow-y:auto; padding:24px; border-radius:16px; color:#171923; }
+      #cbfmcsEditModal .cbfmcs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+      #cbfmcsEditModal .cbfmcs-title { font-size:16px; font-weight:700; color:#171923; margin:0; }
+      #cbfmcsEditModal .cbfmcs-close { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#8C8FA3; }
+      #cbfmcsEditModal .cbfmcs-close:hover { background:rgba(0,0,0,.05); }
+
+      #cbfmcsEditModal .cbfmcs-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:16px; }
+      #cbfmcsEditModal .cbfmcs-span-2 { grid-column:span 2; }
+      #cbfmcsEditModal .cbfmcs-span-4 { grid-column:span 4; }
+      #cbfmcsEditModal .cbfmcs-label { display:block; font-size:11.5px; font-weight:700; color:#3A4B63; margin-bottom:6px; }
+      #cbfmcsEditModal .cbfmcs-field { display:block; width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid rgba(0,0,0,.1); border-radius:12px; font-size:13px; color:#171923; background:rgba(255,255,255,.7); outline:none; }
+      #cbfmcsEditModal .cbfmcs-field[readonly] { background:#F3F5F8; }
+      #cbfmcsEditModal .cbfmcs-field:focus, #cbfmcsEditModal .cbfmcs-input:focus { border-color:#8A5CF6; box-shadow:0 0 0 3px rgba(138,92,246,.12); }
+
+      #cbfmcsEditModal .cbfmcs-dd { position:relative; }
+      #cbfmcsEditModal .cbfmcs-dd-toggle { display:flex; align-items:center; justify-content:space-between; text-align:left; cursor:pointer; }
+      #cbfmcsEditModal .cbfmcs-dd-menu { display:none; position:absolute; left:0; top:100%; margin-top:4px; width:330px; max-width:80vw; background:#fff; border:1px solid #e3e6f5; border-radius:12px; box-shadow:0 6px 20px rgba(79,70,229,.15); padding:6px; z-index:40; }
+      #cbfmcsEditModal .cbfmcs-dd-menu.open { display:block; }
+      #cbfmcsEditModal .cbfmcs-product-item { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; font-size:12.5px; color:#444; cursor:pointer; }
+      #cbfmcsEditModal .cbfmcs-product-item:hover { background:#F4F2FF; }
+      #cbfmcsEditModal .cbfmcs-product-item input { width:15px; height:15px; margin:0; accent-color:#7c3aed; flex-shrink:0; }
+      #cbfmcsEditModal .cbfmcs-product-all { font-weight:700; color:#4f46e5; }
+      #cbfmcsEditModal .cbfmcs-product-divider { margin:4px 0; border-top:1px solid #eceafc; }
+
+      #cbfmcsEditModal .cbfmcs-section { font-size:13px; font-weight:800; color:#171923; margin:8px 0 10px; padding-top:12px; border-top:1px solid rgba(0,0,0,.08); }
+      #cbfmcsEditModal .cbfmcs-table-wrap { overflow-x:auto; margin-bottom:20px; border:1px solid rgba(0,0,0,.08); border-radius:12px; }
+      #cbfmcsEditModal .cbfmcs-table { width:100%; min-width:900px; border-collapse:collapse; font-size:12px; color:#3A4B63; }
+      #cbfmcsEditModal .cbfmcs-table th { background:#5B8DEF; color:#fff; text-align:left; font-size:11px; font-weight:800; padding:10px 12px; border-right:1px solid rgba(255,255,255,.22); }
+      #cbfmcsEditModal .cbfmcs-table td { padding:8px 12px; border-top:1px solid rgba(0,0,0,.06); vertical-align:middle; line-height:1.35; }
+      #cbfmcsEditModal .cbfmcs-table tbody tr:nth-child(even) { background:#FAFBFE; }
+      #cbfmcsEditModal .cbfmcs-table th.cbfmcs-th-plain { background:#EAF1FF; color:#3A4B63; }
+      #cbfmcsEditModal .cbfmcs-input { display:block; width:100%; min-width:90px; box-sizing:border-box; padding:8px 10px; border:1px solid rgba(0,0,0,.1); border-radius:9px; font-size:12px; color:#171923; background:#fff; outline:none; }
+      #cbfmcsEditModal .cbfmcs-code { display:inline-block; font-weight:700; color:#D33; margin-bottom:4px; }
+      #cbfmcsEditModal .cbfmcs-strong td { font-weight:700; }
+      #cbfmcsEditModal .cbfmcs-remark-wrap { display:flex; gap:6px; align-items:center; }
+      #cbfmcsEditModal .cbfmcs-x-remove { flex-shrink:0; width:30px; height:30px; border-radius:8px; border:none; background:#FCE9EC; color:#C0304A; font-size:16px; cursor:pointer; }
+      #cbfmcsEditModal .cbfmcs-x-remove:hover { background:#F8D2D8; }
+      #cbfmcsEditModal .cbfmcs-add-btn { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:#C0304A; padding:6px 12px; border-radius:999px; border:1px solid rgba(192,48,74,.3); background:rgba(192,48,74,.05); cursor:pointer; }
+      #cbfmcsEditModal .cbfmcs-add-btn:hover { background:rgba(192,48,74,.1); }
+
+      #cbfmcsEditModal .cbfmcs-grand { display:flex; align-items:center; gap:16px; padding:14px 16px; margin-bottom:20px; border:1px solid rgba(91,141,239,.18); border-radius:12px; background:linear-gradient(135deg,#F3F5FF,#F8FAFF); font-size:12px; color:#3A4B63; }
+      #cbfmcsEditModal .cbfmcs-grand b { color:#171923; font-size:13px; }
+      #cbfmcsEditModal .cbfmcs-grand label { display:flex; align-items:center; gap:7px; font-weight:700; white-space:nowrap; }
+      #cbfmcsEditModal .cbfmcs-grand label:first-of-type { margin-left:auto; }
+      #cbfmcsEditModal .cbfmcs-grand .cbfmcs-input { width:150px; }
+
+      #cbfmcsEditModal .cbfmcs-actions { display:flex; gap:8px; }
+      #cbfmcsEditModal .cbfmcs-btn { flex:1; padding:10px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; }
+      #cbfmcsEditModal .cbfmcs-btn-cancel { background:#fff; color:#171923; border:1px solid rgba(0,0,0,.1); }
+      #cbfmcsEditModal .cbfmcs-btn-save { color:#fff; border:none; background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF); box-shadow:0 4px 12px rgba(138,92,246,.25); }
+
+      @media (max-width: 760px) {
+        #cbfmcsEditModal .cbfmcs-modal-box { padding:18px; max-width:94vw; }
+        #cbfmcsEditModal .cbfmcs-grid { grid-template-columns:1fr; }
+        #cbfmcsEditModal .cbfmcs-span-2, #cbfmcsEditModal .cbfmcs-span-4 { grid-column:span 1; }
+        #cbfmcsEditModal .cbfmcs-grand { align-items:stretch; flex-direction:column; }
+        #cbfmcsEditModal .cbfmcs-grand label:first-of-type { margin-left:0; }
+      }
+    </style>
+
+    <div class="cbfmcs-head">
+      <p class="cbfmcs-title">CB - FMCS &mdash; Quotation Details</p>
+      <button type="button" onclick="closeModal('cbfmcsEditModal')" class="spin-close cbfmcs-close">&#10005;</button>
+    </div>
+
+    <form id="cbfmcsQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="cbfmcsLeadIdInput">
+      <input type="hidden" id="cbfmcsRowOrderInput">
+      <input type="hidden" id="cbfmcsProductNameInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="cbfmcsRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="cbfmcs-grid">
+        <div><label class="cbfmcs-label">Quotation No.</label><input id="cbfmcsReferenceNoInput" type="text" readonly class="cbfmcs-field"></div>
+        <div><label class="cbfmcs-label">Certificate Type</label><input type="text" value="CB - FMCS" readonly class="cbfmcs-field"></div>
+        <div><label class="cbfmcs-label">Date</label><input id="cbfmcsQuotationDateInput" type="date" class="cbfmcs-field"></div>
+        <div><label class="cbfmcs-label">Client Name</label><input id="cbfmcsClientNameInput" type="text" placeholder="Enter client name" class="cbfmcs-field"></div>
+
+        <div><label class="cbfmcs-label">Company Name</label><input id="cbfmcsCompanyNameInput" type="text" placeholder="Enter company name" class="cbfmcs-field"></div>
+        <div class="cbfmcs-span-2">
+          <label class="cbfmcs-label">Product Name and IS Code</label>
+          <div class="cbfmcs-dd" id="cbfmcsProductWrap">
+            <button type="button" id="cbfmcsProductToggle" class="cbfmcs-field cbfmcs-dd-toggle"><span id="cbfmcsProductLabel">Select product(s)</span><span>&#9662;</span></button>
+            <div id="cbfmcsProductMenu" class="cbfmcs-dd-menu"></div>
+          </div>
+        </div>
+        <div><label class="cbfmcs-label">Category/Class</label><input id="cbfmcsProductCategoryClassInput" type="text" placeholder="Enter category or class" class="cbfmcs-field"></div>
+
+        <div class="cbfmcs-span-4"><label class="cbfmcs-label">Custom Heading (Optional)</label><input id="cbfmcsCertificateNameInput" type="text" placeholder="Example: Proposal for CB - FMCS" class="cbfmcs-field"></div>
+
+        <div class="cbfmcs-span-2"><label class="cbfmcs-label">Manufacturing Location</label><input id="cbfmcsManufacturingLocationInput" type="text" placeholder="Enter manufacturing location" class="cbfmcs-field"></div>
+        <div class="cbfmcs-span-2"><label class="cbfmcs-label">Model(s)</label><input id="cbfmcsProductModelsInput" type="text" placeholder="Enter model names" class="cbfmcs-field"></div>
+      </div>
+
+      <p class="cbfmcs-section">Estimated Charges</p>
+
+      <!-- 1. Total Service Contract Value -->
+      <div class="cbfmcs-table-wrap">
+        <table class="cbfmcs-table">
+          <thead>
+            <tr><th>1</th><th colspan="2">Total Service Contract Value</th><th>Remark</th></tr>
+            <tr><th>Unit Rate (USD)</th><th>No. of Applications</th><th>Contract Value Per Standard (USD)</th><th>Paid to EVTL INDIA</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input id="cbfmcsContValInrInput" type="text" class="cbfmcs-input" placeholder="$4000.00"></td>
+              <td><input id="cbfmcsNoOfApplicationsInput" type="text" class="cbfmcs-input" placeholder="6"></td>
+              <td><input id="cbfmcsContractValueInput" type="text" class="cbfmcs-input cbfmcs-calc" placeholder="$24,000"></td>
+              <td><input id="cbfmcsPaidToRemarkInput" type="text" class="cbfmcs-input" placeholder="3 Parts"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. BIS Govt. Expenses -->
+      <div class="cbfmcs-table-wrap">
+        <table class="cbfmcs-table">
+          <thead>
+            <tr><th>2</th><th colspan="2">BIS Govt. Expenses per standard - Approx.</th><th>Remark (As per actual)</th></tr>
+            <tr>
+              <th class="cbfmcs-th-plain">To be Paid directly by Applicant</th>
+              <td colspan="2"><input id="cbfmcsApplicantValueInput" type="text" class="cbfmcs-input" placeholder="US $ @ 85.00 (As per actual)"></td>
+              <td><input id="cbfmcsApplicantRemarkInput" type="text" class="cbfmcs-input" placeholder="Will be paid to BIS directly"></td>
+            </tr>
+            <tr><th>BIS Govt. Expenses</th><th>In INR</th><th>In US $</th><th></th></tr>
+          </thead>
+          <tbody id="cbfmcsARows"></tbody>
+          <tbody>
+            <tr><td colspan="4"><button type="button" id="cbfmcsAddExtraRow" class="cbfmcs-add-btn">+ Add Row</button></td></tr>
+          </tbody>
+          <tbody id="cbfmcsExtraRows"></tbody>
+          <tbody>
+            <tr>
+              <td>Bank Charges</td>
+              <td><input id="cbfmcsBankInrInput" type="text" class="cbfmcs-input cbfmcs-calc"></td>
+              <td><input id="cbfmcsBankUsdInput" type="text" class="cbfmcs-input cbfmcs-calc"></td>
+              <td></td>
+            </tr>
+            <tr class="cbfmcs-strong">
+              <td>Charges for 6 Applications - Total Fee</td>
+              <td><input id="cbfmcsTotalInrInput" type="text" class="cbfmcs-input"></td>
+              <td><input id="cbfmcsTotalUsdInput" type="text" class="cbfmcs-input"></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. Travelling Expenses -->
+      <div class="cbfmcs-table-wrap">
+        <table class="cbfmcs-table">
+          <thead>
+            <tr><th>3</th><th colspan="2">Estimated Travelling Expenses per standard to be arranged and Bourne by Applicant</th><th>Remark (As per actual)</th></tr>
+          </thead>
+          <tbody id="cbfmcsBRows"></tbody>
+          <tbody>
+            <tr class="cbfmcs-strong">
+              <td>Total</td>
+              <td><input id="cbfmcsTotalBInrInput" type="text" class="cbfmcs-input"></td>
+              <td><input id="cbfmcsTotalBUsdInput" type="text" class="cbfmcs-input"></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cbfmcs-grand">
+        <b>Grand Estimated Total (1+2)</b>
+        <label>Grand Total INR <input id="cbfmcsGrandTotalInrInput" type="text" class="cbfmcs-input"></label>
+        <label>Grand Total USD <input id="cbfmcsGrandTotalUsdInput" type="text" class="cbfmcs-input"></label>
+      </div>
+
+      <div class="cbfmcs-actions">
+        <button type="button" onclick="closeModal('cbfmcsEditModal')" class="cbfmcs-btn cbfmcs-btn-cancel">Cancel</button>
+        <button id="cbfmcsSaveRevisionButton" type="button" onclick="saveCbfmcsQuotation()" class="cbfmcs-btn cbfmcs-btn-save">Save as New Revision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="cbfmcs-panel-script" th:inline="none">
+  let cbfmcsEditingRevisionId = null;
+
+  const CBFMCS_PRODUCTS = [
+    'IS 17631:2022 Work Chairs',
+    'IS 17632:2022 General Purpose Chairs',
+    'IS 17633:2022 Tables and Desks',
+    'IS 17634:2022 Storage Unit',
+    'IS 17635:2022 Beds',
+    'IS 17636:2022 Bunk Beds'
+  ];
+
+  const CBFMCS_NOMINATION = 'During the Nomination of the BIS Official';
+  const CBFMCS_INSPECTION = 'After Successful Inspection at the Manufacturing Unit';
+  const CBFMCS_SEALING = 'After Sealing of sample By BIS officer during inspection';
+  const CBFMCS_B_REMARK = 'Paid to EVTL INDIA at the time of confirm visit';
+
+  // Default label / remark for A1 - A17 (BIS Govt. Expenses)
+  const CBFMCS_A_ROWS = [
+    { label: 'Application Fee for 6 Applications', remark: 'During the Application' },
+    { label: 'Per Diem Expenses for the BIS Officers', remark: CBFMCS_NOMINATION },
+    { label: 'Charges for the Visit (6 Application)', remark: CBFMCS_NOMINATION },
+    { label: 'Contingency funds', remark: CBFMCS_NOMINATION },
+    { label: 'BIS Charges towards Airfare, Visa, Local Travel, etc.', remark: CBFMCS_NOMINATION },
+    { label: 'Marking Fee (Mini.) (IS 17631:2022)', remark: CBFMCS_NOMINATION },
+    { label: 'Marking Fee (Mini.) (IS 17632:2022)', remark: CBFMCS_INSPECTION },
+    { label: 'Marking Fee (Mini.) (IS 17633:2022)', remark: CBFMCS_INSPECTION },
+    { label: 'Marking Fee (Mini.) (IS 17634:2022)', remark: CBFMCS_INSPECTION },
+    { label: 'Marking Fee (Mini.) (IS 17635:2022)', remark: CBFMCS_INSPECTION },
+    { label: 'Marking Fee (Mini.) (IS 17636:2022)', remark: CBFMCS_INSPECTION },
+    { label: 'Sample testing fee for per type (IS 17631:2022)', remark: CBFMCS_SEALING },
+    { label: 'Sample testing fee for per type (IS 17632:2022)', remark: CBFMCS_SEALING },
+    { label: 'Sample testing fee for per type (IS 17633:2022)', remark: CBFMCS_SEALING },
+    { label: 'Sample testing fee per type (IS 17634:2022)', remark: CBFMCS_SEALING },
+    { label: 'Sample testing fee per type (IS 17635:2022)', remark: CBFMCS_SEALING },
+    { label: 'Sample testing fee per type (IS 17636:2022)', remark: CBFMCS_SEALING }
+  ];
+
+  // Default label / values / remark for B1 - B3 (Travelling expenses)
+  const CBFMCS_B_ROWS = [
+    { label: 'Air ticket, Visa (as per current fare)', inr: 'As per Actual', usd: 'As per Actual', remark: CBFMCS_B_REMARK },
+    { label: 'Hotel for per days Boarding / Food', inr: 'As per Actual', usd: 'As per Actual', remark: CBFMCS_B_REMARK },
+    { label: 'Consultant Daily Allowance Per Day', inr: 'As per Actual', usd: 'As per Actual', remark: CBFMCS_B_REMARK }
+  ];
+
+  // Every name here maps 1:1 to a column of the cb_fmcs table (see CbFmcsQuotation.java)
+  const cbfmcsFields = [
+    'referenceNo', 'quotationDate', 'clientName', 'companyName', 'productName', 'productCategoryClass',
+    'certificateName', 'manufacturingLocation', 'productModels',
+    'contValInr', 'noOfApplications', 'contractValue', 'paidToRemark', 'applicantValue', 'applicantRemark',
+    'bankInr', 'bankUsd', 'totalInr', 'totalUsd', 'totalBInr', 'totalBUsd', 'grandTotalInr', 'grandTotalUsd', 'rowOrder'
+  ];
+  for (let i = 1; i <= 17; i++) ['Label', 'Inr', 'Usd', 'Remark'].forEach(function (s) { cbfmcsFields.push('a' + i + s); });
+  for (let i = 1; i <= 3; i++) ['Label', 'Inr', 'Usd', 'Remark'].forEach(function (s) { cbfmcsFields.push('b' + i + s); });
+
+  function cbfmcsId(name) { return 'cbfmcs' + name.charAt(0).toUpperCase() + name.slice(1) + 'Input'; }
+  function cbfmcsEl(name) { return document.getElementById(cbfmcsId(name)); }
+  function cbfmcsGet(name) { const el = cbfmcsEl(name); return el ? el.value : ''; }
+  function cbfmcsSet(name, value) { const el = cbfmcsEl(name); if (el) el.value = value == null ? '' : value; }
+
+  function cbfmcsNum(value) {
+    const n = parseFloat(String(value == null ? '' : value).replace(/[^0-9.\-]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function cbfmcsMakeInput(id, className, value) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = id;
+    input.className = className;
+    input.value = value == null ? '' : value;
+    return input;
+  }
+
+  // Builds the A1-A17 rows (prefix 'a') or B1-B3 rows (prefix 'b') with their default label / remark
+  function cbfmcsBuildLetterRows(bodyId, prefix, rows, withCalc) {
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    body.innerHTML = '';
+    rows.forEach(function (row, index) {
+      const n = index + 1;
+      const code = prefix.toUpperCase() + n;
+      const base = 'cbfmcs' + code;
+      const tr = document.createElement('tr');
+
+      const labelTd = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'cbfmcs-code';
+      badge.textContent = code;
+      labelTd.appendChild(badge);
+      labelTd.appendChild(cbfmcsMakeInput(base + 'LabelInput', 'cbfmcs-input cbfmcs-label', row.label));
+
+      const inrTd = document.createElement('td');
+      inrTd.appendChild(cbfmcsMakeInput(base + 'InrInput', 'cbfmcs-input' + (withCalc ? ' cbfmcs-calc' : ''), row.inr || ''));
+
+      const usdTd = document.createElement('td');
+      usdTd.appendChild(cbfmcsMakeInput(base + 'UsdInput', 'cbfmcs-input' + (withCalc ? ' cbfmcs-calc' : ''), row.usd || ''));
+
+      const remarkTd = document.createElement('td');
+      remarkTd.appendChild(cbfmcsMakeInput(base + 'RemarkInput', 'cbfmcs-input', row.remark));
+
+      tr.appendChild(labelTd);
+      tr.appendChild(inrTd);
+      tr.appendChild(usdTd);
+      tr.appendChild(remarkTd);
+      body.appendChild(tr);
+    });
+  }
+
+  function cbfmcsAddExtraRow(label, inr, usd, remark) {
+    const body = document.getElementById('cbfmcsExtraRows');
+    if (!body) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><input type="text" class="cbfmcs-input cbfmcs-x-label" placeholder="Description"></td>' +
+      '<td><input type="text" class="cbfmcs-input cbfmcs-x-inr cbfmcs-calc"></td>' +
+      '<td><input type="text" class="cbfmcs-input cbfmcs-x-usd cbfmcs-calc"></td>' +
+      '<td><div class="cbfmcs-remark-wrap"><input type="text" class="cbfmcs-input cbfmcs-x-remark">' +
+      '<button type="button" class="cbfmcs-x-remove" title="Remove row">&times;</button></div></td>';
+    tr.querySelector('.cbfmcs-x-label').value = label == null ? '' : label;
+    tr.querySelector('.cbfmcs-x-inr').value = inr == null ? '' : inr;
+    tr.querySelector('.cbfmcs-x-usd').value = usd == null ? '' : usd;
+    tr.querySelector('.cbfmcs-x-remark').value = remark == null ? '' : remark;
+    tr.querySelector('.cbfmcs-x-remove').addEventListener('click', function () {
+      tr.remove();
+      cbfmcsCalc();
+    });
+    body.appendChild(tr);
+  }
+
+  function cbfmcsCollectExtraRows() {
+    return Array.from(document.querySelectorAll('#cbfmcsExtraRows tr')).map(function (tr) {
+      return {
+        label: tr.querySelector('.cbfmcs-x-label').value,
+        inr: tr.querySelector('.cbfmcs-x-inr').value,
+        usd: tr.querySelector('.cbfmcs-x-usd').value,
+        remark: tr.querySelector('.cbfmcs-x-remark').value
+      };
+    }).filter(function (row) { return row.label || row.inr || row.usd || row.remark; });
+  }
+
+  // Total Fee = A1..A17 + extra rows + bank charges. Grand Total (USD) = contract value + total fee (USD)
+  function cbfmcsCalc() {
+    let usd = 0, inr = 0;
+    for (let i = 1; i <= 17; i++) {
+      usd += cbfmcsNum(cbfmcsGet('a' + i + 'Usd'));
+      inr += cbfmcsNum(cbfmcsGet('a' + i + 'Inr'));
+    }
+    document.querySelectorAll('#cbfmcsExtraRows .cbfmcs-x-usd').forEach(function (el) { usd += cbfmcsNum(el.value); });
+    document.querySelectorAll('#cbfmcsExtraRows .cbfmcs-x-inr').forEach(function (el) { inr += cbfmcsNum(el.value); });
+    usd += cbfmcsNum(cbfmcsGet('bankUsd'));
+    inr += cbfmcsNum(cbfmcsGet('bankInr'));
+    cbfmcsSet('totalUsd', usd.toFixed(2));
+    cbfmcsSet('totalInr', inr.toFixed(2));
+    cbfmcsSet('grandTotalUsd', (cbfmcsNum(cbfmcsGet('contractValue')) + usd).toFixed(2));
+  }
+
+  // ---------- Product Name and IS Code (multi-select dropdown) ----------
+  function cbfmcsProductBoxes() { return Array.from(document.querySelectorAll('#cbfmcsProductMenu .cbfmcs-product-box')); }
+  function cbfmcsAllBox() { return document.querySelector('#cbfmcsProductMenu .cbfmcs-product-all-box'); }
+
+  function cbfmcsRefreshProducts() {
+    const boxes = cbfmcsProductBoxes();
+    const selected = boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+    cbfmcsSet('productName', selected.join(', '));
+    const label = document.getElementById('cbfmcsProductLabel');
+    if (label) label.textContent = selected.length === 0 ? 'Select product(s)' : (selected.length === boxes.length ? 'All ' + boxes.length + ' selected' : selected.length + ' selected');
+    const all = cbfmcsAllBox();
+    if (all) all.checked = boxes.length > 0 && selected.length === boxes.length;
+  }
+
+  function cbfmcsSetProducts(str) {
+    const values = String(str || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    cbfmcsProductBoxes().forEach(function (b) { b.checked = values.indexOf(b.value) !== -1; });
+    cbfmcsRefreshProducts();
+  }
+
+  function cbfmcsBuildProducts() {
+    const menu = document.getElementById('cbfmcsProductMenu');
+    if (!menu) return;
+    menu.innerHTML = '';
+    function addItem(value, text, boxClass, itemClass) {
+      const label = document.createElement('label');
+      label.className = 'cbfmcs-product-item' + (itemClass ? ' ' + itemClass : '');
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.value = value;
+      box.className = boxClass;
+      label.appendChild(box);
+      label.appendChild(document.createTextNode(text));
+      menu.appendChild(label);
+      return box;
+    }
+    const allBox = addItem('all', 'All ' + CBFMCS_PRODUCTS.length, 'cbfmcs-product-all-box', 'cbfmcs-product-all');
+    const divider = document.createElement('div');
+    divider.className = 'cbfmcs-product-divider';
+    menu.appendChild(divider);
+    CBFMCS_PRODUCTS.forEach(function (name, index) { addItem(name, (index + 1) + '. ' + name, 'cbfmcs-product-box'); });
+
+    allBox.addEventListener('change', function () {
+      cbfmcsProductBoxes().forEach(function (b) { b.checked = allBox.checked; });
+      cbfmcsRefreshProducts();
+    });
+    menu.addEventListener('change', function (e) {
+      if (e.target !== allBox) cbfmcsRefreshProducts();
+    });
+  }
+
+  // ---------- Revisions ----------
+  function cbfmcsRenderRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('cbfmcsRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      b.textContent = 'R' + (index + 1);
+      b.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openCbfmcsEditPanel(leadId, 'CB-FMCS', '', item.id);
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function cbfmcsResetForm() {
+    document.getElementById('cbfmcsQuotationForm').reset();
+    cbfmcsBuildLetterRows('cbfmcsARows', 'a', CBFMCS_A_ROWS, true);
+    cbfmcsBuildLetterRows('cbfmcsBRows', 'b', CBFMCS_B_ROWS, false);
+    const extra = document.getElementById('cbfmcsExtraRows');
+    if (extra) extra.innerHTML = '';
+    cbfmcsSetProducts('');
+  }
+
+  function openCbfmcsEditPanel(leadId, quotationType, companyName, revisionId) {
+    const type = (quotationType || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (type !== 'cbfmcs') return;
+
+    cbfmcsEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('cbfmcsSaveRevisionButton', revisionId);
+    cbfmcsResetForm();
+    document.getElementById('cbfmcsLeadIdInput').value = leadId;
+    cbfmcsSet('referenceNo', 'REF-' + leadId);
+    cbfmcsSet('quotationDate', new Date().toISOString().slice(0, 10));
+    openModal('cbfmcsEditModal');
+
+    fetch('/leads/' + leadId + '/cbfmcs-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) return;
+        const q = data.quotation || {}, lead = data.lead || {};
+        cbfmcsRenderRevisions(data.quotations, leadId, revisionId ? q.id : null);
+
+        if (!revisionId) {
+          cbfmcsSet('companyName', companyName || lead.companyName || '');
+          cbfmcsSet('clientName', lead.isName || '');
+          return;
+        }
+
+        // blank saved values keep the default label / remark / "As per Actual" already in the form
+        cbfmcsFields.forEach(function (name) {
+          if (q[name] != null && q[name] !== '') cbfmcsSet(name, q[name]);
+        });
+        if (!q.companyName) cbfmcsSet('companyName', companyName || lead.companyName || '');
+        if (!q.clientName) cbfmcsSet('clientName', lead.isName || '');
+        cbfmcsSetProducts(q.productName);
+
+        if (q.extraRows) {
+          try {
+            JSON.parse(q.extraRows).forEach(function (row) { cbfmcsAddExtraRow(row.label, row.inr, row.usd, row.remark); });
+          } catch (e) { /* ignore malformed extra rows */ }
+        }
+      })
+      .catch(function () {
+        cbfmcsSet('companyName', companyName || '');
+      });
+  }
+
+  function cbfmcsPayload() {
+    const p = {};
+    cbfmcsFields.forEach(function (name) {
+      const el = cbfmcsEl(name);
+      if (el) p[name] = el.value;
+    });
+    p.extraRows = JSON.stringify(cbfmcsCollectExtraRows());
+    p.certificateType = '19';
+    p.id = cbfmcsEditingRevisionId;
+    p.leadId = document.getElementById('cbfmcsLeadIdInput').value;
+    return p;
+  }
+
+  function saveCbfmcsQuotation() {
+    const id = document.getElementById('cbfmcsLeadIdInput').value;
+    if (!id) return;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content,
+          csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    fetch('/leads/' + id + '/cbfmcs-quotation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+      body: JSON.stringify(cbfmcsPayload())
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data.success) { alert('Failed to save CB-FMCS quotation: ' + (data.message || 'Unknown error')); return; }
+      showLeadToast('CB-FMCS quotation saved successfully');
+      closeModal('cbfmcsEditModal');
+    }).catch(function () {
+      alert('Something went wrong while saving the CB-FMCS quotation.');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    cbfmcsBuildProducts();
+    cbfmcsBuildLetterRows('cbfmcsARows', 'a', CBFMCS_A_ROWS, true);
+    cbfmcsBuildLetterRows('cbfmcsBRows', 'b', CBFMCS_B_ROWS, false);
+
+    const form = document.getElementById('cbfmcsQuotationForm');
+    if (form) {
+      form.addEventListener('input', function (e) {
+        if (e.target.classList && e.target.classList.contains('cbfmcs-calc')) cbfmcsCalc();
+      });
+    }
+
+    const addRow = document.getElementById('cbfmcsAddExtraRow');
+    if (addRow) addRow.addEventListener('click', function () { cbfmcsAddExtraRow(); });
+
+    const toggle = document.getElementById('cbfmcsProductToggle');
+    const menu = document.getElementById('cbfmcsProductMenu');
+    if (toggle && menu) {
+      toggle.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
+      menu.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.addEventListener('click', function () { menu.classList.remove('open'); });
+    }
+  });
+</script>
+</body>
+</html>

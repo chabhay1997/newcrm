@@ -1,6 +1,6 @@
 package repository.quotations;
 
-import model.BisFmcsQuotation;
+import model.quotations.BisFmcsQuotation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

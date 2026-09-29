@@ -56,10 +56,9 @@
       button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
       button.textContent = 'R' + (index + 1);
       button.onclick = function (event) {
-        event.preventDefault(); event.stopPropagation();
-        closeModal('dpiitEditModal');
-        setTimeout(function () { openDpiitEditPanel(leadId, 'DPIIT', '', item.id); }, 50);
-      };
+    event.preventDefault(); event.stopPropagation();
+    openDpiitEditPanel(leadId, 'DPIIT', '', item.id);
+};
       box.appendChild(button);
     });
   }
@@ -128,8 +127,6 @@
         } else {
           consultancyItems.forEach(function (row) { dpiitAddConsultancyRow(row.expense, row.amount); });
         }
-        setDpiitFieldValue('dpiitTotalConsultancyInput', quotation.totalConsultancyFees || '');
-
         setDpiitFieldValue('dpiitLabSetupCostInput', quotation.labSetupCost || '');
         setDpiitFieldValue('dpiitLeadTimeInput', quotation.leadTime || '');
       })
@@ -198,7 +195,6 @@
       totalFeesCurrency: document.getElementById('dpiitTotalFeesCurrencyInput').value,
       extraRowsJson: JSON.stringify(collectDpiitExtraRows()),
       consultancyItemsJson: JSON.stringify(collectDpiitConsultancyRows()),
-      totalConsultancyFees: document.getElementById('dpiitTotalConsultancyInput').value,
       labSetupCost: document.getElementById('dpiitLabSetupCostInput').value,
       leadTime: document.getElementById('dpiitLeadTimeInput').value
     };

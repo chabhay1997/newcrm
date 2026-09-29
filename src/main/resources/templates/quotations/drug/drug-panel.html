@@ -141,7 +141,7 @@
           <p class="text-[13px] font-bold text-[#174A68]">List of Required Documents</p>
           <p class="mt-0.5 text-[10.5px] font-medium text-[#5C7890]">Documents required for the drug quotation application</p>
         </div>
-        <button type="button" onclick="drugAddDocumentRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-white px-3 py-1.5 rounded-full border border-[#246B91] bg-[#246B91] hover:bg-[#1B5878] transition">
+        <button type="button" onclick="drugAddDocumentRow()" class="flex items-center gap-1.5 text-[11.5px] font-bold text-[#174A68] px-3 py-1.5 rounded-full border border-[#246B91]/40 bg-white hover:bg-[#EAF4FA] transition shrink-0">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Add Document
         </button>
@@ -150,7 +150,7 @@
 
       <div class="flex gap-2">
         <button type="button" onclick="closeModal('drugEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
-        <button type="button" onclick="downloadDrugQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button type="button" onclick="downloadDrugQuotationPdf()" class="quotation-download-action flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
         <button id="drugSaveRevisionButton" type="button" onclick="saveDrugQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
       </div>
 

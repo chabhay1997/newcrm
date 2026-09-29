@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- CB-RDSO EDIT PANEL -->
+<div th:fragment="cbrdso-panel" id="cbrdsoEditModal" class="modal-overlay" onclick="closeModal('cbrdsoEditModal')">
+  <div class="modal-box glass cbrdso-modal-box" onclick="event.stopPropagation()" style="backdrop-filter:blur(20px);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 32px rgba(31,38,135,.15);">
+
+    <!-- Scoped styles: keeps this panel independent of the compiled Tailwind output.css -->
+    <style th:inline="none">
+      #cbrdsoEditModal .cbrdso-modal-box { width:1180px; max-width:96vw; max-height:90vh; overflow-y:auto; padding:24px; border-radius:16px; color:#171923; }
+      #cbrdsoEditModal .cbrdso-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+      #cbrdsoEditModal .cbrdso-title { font-size:16px; font-weight:700; color:#171923; margin:0; }
+      #cbrdsoEditModal .cbrdso-close { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#8C8FA3; }
+      #cbrdsoEditModal .cbrdso-close:hover { background:rgba(0,0,0,.05); }
+
+      #cbrdsoEditModal .cbrdso-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:16px; }
+      #cbrdsoEditModal .cbrdso-span-2 { grid-column:span 2; }
+      #cbrdsoEditModal .cbrdso-label { display:block; font-size:11.5px; font-weight:700; color:#3A4B63; margin-bottom:6px; }
+      #cbrdsoEditModal .cbrdso-field { display:block; width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid rgba(0,0,0,.1); border-radius:12px; font-size:13px; color:#171923; background:rgba(255,255,255,.7); outline:none; }
+      #cbrdsoEditModal .cbrdso-field[readonly] { background:#F3F5F8; }
+      #cbrdsoEditModal .cbrdso-field:focus, #cbrdsoEditModal .cbrdso-input:focus { border-color:#8A5CF6; box-shadow:0 0 0 3px rgba(138,92,246,.12); }
+
+      #cbrdsoEditModal .cbrdso-section { font-size:13px; font-weight:800; color:#171923; margin:8px 0 10px; padding-top:12px; border-top:1px solid rgba(0,0,0,.08); }
+      #cbrdsoEditModal .cbrdso-table-wrap { overflow-x:auto; border:1px solid rgba(0,0,0,.08); border-radius:12px; }
+      #cbrdsoEditModal .cbrdso-table { width:100%; min-width:1350px; table-layout:fixed; border-collapse:collapse; font-size:12px; color:#3A4B63; }
+      #cbrdsoEditModal .cbrdso-table th { background:#5B8DEF; color:#fff; text-align:left; font-size:11px; font-weight:800; padding:10px 8px; border-right:1px solid rgba(255,255,255,.22); vertical-align:middle; }
+      #cbrdsoEditModal .cbrdso-table th small { font-weight:700; color:#FFE38A; }
+      #cbrdsoEditModal .cbrdso-table td { padding:6px 8px; border-top:1px solid rgba(0,0,0,.06); vertical-align:middle; }
+      #cbrdsoEditModal .cbrdso-table tbody tr:nth-child(even) { background:#FAFBFE; }
+      #cbrdsoEditModal .cbrdso-table tbody td.cbrdso-item-cell { background:#EAF3FF; }
+      #cbrdsoEditModal .cbrdso-input { display:block; width:100%; box-sizing:border-box; padding:6px 8px; border:1px solid #C9D0DC; border-radius:6px; font-size:12px; color:#171923; background:#fff; outline:none; }
+      #cbrdsoEditModal .cbrdso-input[readonly] { background:#F3F5F8; }
+      #cbrdsoEditModal .cbrdso-item-id { font-weight:700; margin-bottom:4px; }
+      #cbrdsoEditModal .cbrdso-del-cell { text-align:center; }
+      #cbrdsoEditModal .cbrdso-remove { width:30px; height:30px; border-radius:8px; border:1px solid #FF6B78; background:#fff; color:#DC3545; font-size:15px; cursor:pointer; }
+      #cbrdsoEditModal .cbrdso-remove:hover { background:#DC3545; color:#fff; }
+      #cbrdsoEditModal .cbrdso-total-row td { background:#fff; font-weight:800; color:#111; font-size:12.5px; padding:10px 8px; border-top:2px solid rgba(91,141,239,.35); }
+      #cbrdsoEditModal .cbrdso-total-row td.cbrdso-total-label { text-align:right; }
+
+      #cbrdsoEditModal .cbrdso-add-btn { display:inline-flex; align-items:center; gap:6px; margin:12px 0 20px; font-size:12px; font-weight:700; color:#0D6EFD; padding:8px 14px; border-radius:6px; border:1px solid #0D6EFD; background:#fff; cursor:pointer; }
+      #cbrdsoEditModal .cbrdso-add-btn:hover { background:#E7F1FF; }
+
+      #cbrdsoEditModal .cbrdso-actions { display:flex; gap:8px; }
+      #cbrdsoEditModal .cbrdso-btn { flex:1; padding:10px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; }
+      #cbrdsoEditModal .cbrdso-btn-cancel { background:#fff; color:#171923; border:1px solid rgba(0,0,0,.1); }
+      #cbrdsoEditModal .cbrdso-btn-save { color:#fff; border:none; background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF); box-shadow:0 4px 12px rgba(138,92,246,.25); }
+
+      @media (max-width: 760px) {
+        #cbrdsoEditModal .cbrdso-modal-box { padding:18px; max-width:94vw; }
+        #cbrdsoEditModal .cbrdso-grid { grid-template-columns:1fr; }
+        #cbrdsoEditModal .cbrdso-span-2 { grid-column:span 1; }
+      }
+    </style>
+
+    <div class="cbrdso-head">
+      <p class="cbrdso-title">CB-RDSO &mdash; Quotation Details</p>
+      <button type="button" onclick="closeModal('cbrdsoEditModal')" class="spin-close cbrdso-close">&#10005;</button>
+    </div>
+
+    <form id="cbrdsoQuotationForm" onsubmit="return false;">
+      <input type="hidden" id="cbrdsoLeadIdInput">
+      <div class="quotation-revision-bar"><span>Revisions</span><div id="cbrdsoRevisionButtons" class="quotation-revision-buttons"></div></div>
+
+      <div class="cbrdso-grid">
+        <div><label class="cbrdso-label">Reference No</label><input id="cbrdsoReferenceNoInput" type="text" readonly class="cbrdso-field"></div>
+        <div><label class="cbrdso-label">Certificate Type</label><input type="text" value="CB-RDSO" readonly class="cbrdso-field"></div>
+        <div><label class="cbrdso-label">Quotation Date</label><input id="cbrdsoQuotationDateInput" type="date" class="cbrdso-field"></div>
+        <div><label class="cbrdso-label">Client Name</label><input id="cbrdsoClientNameInput" type="text" placeholder="Enter Client Name" class="cbrdso-field"></div>
+
+        <div class="cbrdso-span-2"><label class="cbrdso-label">Product Name</label><input id="cbrdsoProductNameInput" type="text" placeholder="Enter Product Name" class="cbrdso-field"></div>
+        <div><label class="cbrdso-label">GST Fee</label><input id="cbrdsoGstFeeInput" type="text" placeholder="Enter GST Fee" class="cbrdso-field"></div>
+      </div>
+
+      <p class="cbrdso-section">Part 2 Commercial Scope RDSO Fee structure</p>
+
+      <div class="cbrdso-table-wrap">
+        <table class="cbrdso-table">
+          <colgroup>
+            <col style="width:5%"><col style="width:20%"><col style="width:10%"><col style="width:12%"><col style="width:11%"><col style="width:10%"><col style="width:11%"><col style="width:12%"><col style="width:9%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th aria-label="Actions"></th>
+              <th>RDSO item ID &amp; Name of Product</th>
+              <th>Registration Fee <small>(18% GST Extra)</small></th>
+              <th>RDSO Officer Visit Charges</th>
+              <th>Sample testing charges</th>
+              <th>Service Fee <small>(120,000)</small></th>
+              <th>Other expenses RDSO Officer</th>
+              <th>Engineer visit travel &amp; food</th>
+              <th>Total Fee</th>
+            </tr>
+          </thead>
+          <tbody id="cbrdsoItemBody"></tbody>
+          <tfoot>
+            <tr class="cbrdso-total-row">
+              <td colspan="8" class="cbrdso-total-label">Total Fee (All Standards)</td>
+              <td id="cbrdsoGrandTotal">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <button type="button" id="cbrdsoAddRowBtn" class="cbrdso-add-btn">+ Add Certification Standard</button>
+
+      <div class="cbrdso-actions">
+        <button type="button" onclick="closeModal('cbrdsoEditModal')" class="cbrdso-btn cbrdso-btn-cancel">Cancel</button>
+        <button id="cbrdsoSaveRevisionButton" type="button" onclick="saveCbrdsoQuotation()" class="cbrdso-btn cbrdso-btn-save">Save as New Revision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

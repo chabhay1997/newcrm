@@ -7,6 +7,7 @@
     if ((quotationType || '').trim().toLowerCase() !== 'bis-isi certification') return;
     document.getElementById('isiLeadIdInput').value = leadId;
     isiEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('isiSaveRevisionButton', revisionId);
     document.getElementById('isiQuotationForm').reset();
     document.getElementById('isiReferenceNoInput').value = 'REF-' + leadId;
     if (!document.getElementById('isiQuotationDateInput').value) {
@@ -29,7 +30,11 @@
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
       button.textContent = 'R' + (index + 1);
-      button.onclick = function (event) { event.preventDefault(); event.stopPropagation(); closeModal('isiEditModal'); setTimeout(function () { openIsiEditPanel(leadId, 'BIS-ISI Certification', '', item.id); }, 50); };
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openIsiEditPanel(leadId, 'BIS-ISI Certification', '', item.id);
+      });
       box.appendChild(button);
     });
   }
@@ -41,8 +46,9 @@
         if (!data || !data.success) return;
         const quotation = data.quotation || {};
         const lead = data.lead || {};
-        isiEditingRevisionId = quotation.id || null;
-        renderIsiRevisions(data.quotations, leadId, quotation.id || null);
+        if (revisionId) isiEditingRevisionId = quotation.id || null;
+        renderIsiRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+        if (!revisionId) { setIsiFieldValue('isiCompanyNameInput', companyName || lead.companyName || ''); return; }
         if (!quotation.id) { setIsiFieldValue('isiCompanyNameInput', companyName || lead.companyName || ''); return; }
         setIsiFieldValue('isiReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
         setIsiFieldValue('isiQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
@@ -183,12 +189,16 @@
   }
 
   function downloadIsiQuotationPdf() {
+    if (window.event) {
+      window.event.preventDefault();
+      window.event.stopPropagation();
+    }
     const leadId = document.getElementById('isiLeadIdInput').value;
     if (!leadId || !isiEditingRevisionId) {
       alert('Save the ISI quotation first before downloading its PDF.');
       return;
     }
-    window.open('/leads/' + encodeURIComponent(leadId) + '/isi-quotation/' + encodeURIComponent(isiEditingRevisionId) + '/pdf', '_blank');
+    window.open('/leads/' + encodeURIComponent(leadId) + '/quotation/bis_isi/' + encodeURIComponent(isiEditingRevisionId) + '/pdf', '_blank');
   }
 </script>
 </body>

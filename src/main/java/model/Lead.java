@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -154,6 +155,8 @@ public class Lead {
 
     public String getIsName() { return isName; }
     public void setIsName(String isName) { this.isName = isName; }
+    public String getIsNumber() { return isNumber; }
+    public void setIsNumber(String isNumber) { this.isNumber = isNumber; }
 
     public String getCompanyMobile() { return companyMobile; }
     public void setCompanyMobile(String companyMobile) { this.companyMobile = companyMobile; }
@@ -240,5 +243,19 @@ public class Lead {
     public void setQuotationType(String quotationType) { this.quotationType = quotationType; }
 
     public Long getCreatedBy() { return createdBy; }
-    public String getIsNumber() { return isNumber; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+
+    public Long getAssignTo() { return assignTo; }
+    public void setAssignTo(Long assignTo) { this.assignTo = assignTo; }
+
+    // Not a DB column — filled in by the controller for display only.
+    @Transient
+    private String createdByName;
+    public String getCreatedByName() { return createdByName; }
+    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+
+    @Transient
+    private String assignToName;
+    public String getAssignToName() { return assignToName; }
+    public void setAssignToName(String assignToName) { this.assignToName = assignToName; }
 }

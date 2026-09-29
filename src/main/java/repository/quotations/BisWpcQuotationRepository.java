@@ -1,6 +1,6 @@
 package repository.quotations;
 
-import model.BisWpcQuotation;
+import model.quotations.BisWpcQuotation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

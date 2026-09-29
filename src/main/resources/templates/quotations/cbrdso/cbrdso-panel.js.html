@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="cbrdso-panel-script" th:inline="none">
+  let cbrdsoEditingRevisionId = null;
+
+  // Default certification standards (same list as the Laravel page)
+  const CBRDSO_DEFAULT_ITEMS = [
+    { id: '3100425002', name: 'i) FABRICATION OF OPEN WEB, COMPOSITE & OTHER STEEL PLATE GIRDER (PART A)' },
+    { id: '3100425001', name: 'ii) FABRICATION OF COMPOSITE & OTHER STEEL PLATE GIRDER (PART B)' },
+    { id: '3100639001', name: 'BFB or RSJ' },
+    { id: '3100639002', name: 'B-Series Mast' },
+    { id: '3100639003', name: 'TTC (TTU, TTB, TTK)' },
+    { id: '3100639004', name: 'N, O & R Type Portal' },
+    { id: '3100649001', name: 'Drop Arm' },
+    { id: '3100649002', name: 'Mast Anchor Fitting' },
+    { id: '3100649003', name: 'Multiple Cantilever Cross Arm' },
+    { id: '3100370', name: 'Body Side Wall, End Wall and Flap Door of BOXNR Wagons' }
+  ];
+
+  const CBRDSO_DEFAULTS = {
+    registrationFee: '10,000',
+    officerVisit: 'As Per Actual',
+    sampleTesting: 'As Per Actual',
+    serviceFee: '120,000',
+    otherExpenses: 'As Per Actual',
+    engineerVisit: 'Manufacture Site',
+    totalFee: '130,000'
+  };
+
+  function cbrdsoEl(id) { return document.getElementById(id); }
+  function cbrdsoSet(id, value) { const el = cbrdsoEl(id); if (el) el.value = value == null ? '' : value; }
+
+  // "10,000" -> 10000, "As Per Actual" -> 0
+  function cbrdsoParse(value) {
+    const n = parseFloat(String(value == null ? '' : value).replace(/[^0-9.]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+  // 1300000 -> "13,00,000"
+  function cbrdsoFormat(num) { return Math.round(num).toLocaleString('en-IN'); }
+  function cbrdsoRowSum(values) { return values.reduce(function (sum, v) { return sum + cbrdsoParse(v); }, 0); }
+
+  function cbrdsoStripId(value) { return String(value || '').replace(/^\s*Item ID:\s*/i, '').trim(); }
+  function cbrdsoIsDefaultId(value) {
+    const id = cbrdsoStripId(value);
+    return CBRDSO_DEFAULT_ITEMS.some(function (item) { return item.id === id; });
+  }
+
+  // ---------- Totals ----------
+  function cbrdsoRecalcRow(tr) {
+    const values = Array.from(tr.querySelectorAll('.cbrdso-calc')).map(function (el) { return el.value; });
+    tr.querySelector('.cbrdso-row-total').value = cbrdsoFormat(cbrdsoRowSum(values));
+  }
+  function cbrdsoRecalcGrand() {
+    const totals = Array.from(document.querySelectorAll('#cbrdsoItemBody .cbrdso-row-total')).map(function (el) { return el.value; });
+    const grand = cbrdsoEl('cbrdsoGrandTotal');
+    if (grand) grand.textContent = cbrdsoFormat(cbrdsoRowSum(totals));
+  }
+  function cbrdsoRecalcAll() {
+    document.querySelectorAll('#cbrdsoItemBody tr').forEach(cbrdsoRecalcRow);
+    cbrdsoRecalcGrand();
+  }
+
+  // ---------- Rows ----------
+  function cbrdsoAddRow(row) {
+    const body = cbrdsoEl('cbrdsoItemBody');
+    if (!body) return;
+    const r = Object.assign({}, CBRDSO_DEFAULTS, row || {});
+    const locked = cbrdsoIsDefaultId(r.itemId);
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="cbrdso-del-cell"><button type="button" class="cbrdso-remove" aria-label="Remove item">&times;</button></td>' +
+      '<td class="cbrdso-item-cell">' +
+        '<input type="text" class="cbrdso-input cbrdso-item-id" placeholder="Item ID">' +
+        '<input type="text" class="cbrdso-input cbrdso-item-name" placeholder="Product name">' +
+      '</td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-registration"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-officer"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-sample"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-service"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-other"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-calc cbrdso-f-engineer"></td>' +
+      '<td><input type="text" class="cbrdso-input cbrdso-row-total" readonly></td>';
+    const set = function (sel, v) { tr.querySelector(sel).value = v == null ? '' : v; };
+    set('.cbrdso-item-id', r.itemId);
+    set('.cbrdso-item-name', r.itemName);
+    set('.cbrdso-f-registration', r.registrationFee);
+    set('.cbrdso-f-officer', r.officerVisit);
+    set('.cbrdso-f-sample', r.sampleTesting);
+    set('.cbrdso-f-service', r.serviceFee);
+    set('.cbrdso-f-other', r.otherExpenses);
+    set('.cbrdso-f-engineer', r.engineerVisit);
+    set('.cbrdso-row-total', r.totalFee);
+    if (locked) {
+      tr.querySelector('.cbrdso-item-id').readOnly = true;
+      tr.querySelector('.cbrdso-item-name').readOnly = true;
+    }
+    body.appendChild(tr);
+  }
+
+  function cbrdsoRenderDefaults() {
+    const body = cbrdsoEl('cbrdsoItemBody');
+    if (!body) return;
+    body.innerHTML = '';
+    CBRDSO_DEFAULT_ITEMS.forEach(function (item) {
+      cbrdsoAddRow({ itemId: 'Item ID: ' + item.id, itemName: item.name });
+    });
+    cbrdsoRecalcAll();
+  }
+
+  // cb_rdso_details row -> form row (null columns fall back to the defaults)
+  function cbrdsoRowFromDetail(d) {
+    const map = {
+      itemId: 'cbRdsoItemId', itemName: 'cbRdsoItemName', registrationFee: 'cbRdsoRegistrationFee',
+      officerVisit: 'cbRdsoOfficerVisit', sampleTesting: 'cbRdsoSampleTesting', serviceFee: 'cbRdsoServiceFee',
+      otherExpenses: 'cbRdsoOtherExpenses', engineerVisit: 'cbRdsoEngineerVisit', totalFee: 'cbRdsoTotalFee'
+    };
+    const row = {};
+    Object.keys(map).forEach(function (key) { if (d[map[key]] != null) row[key] = d[map[key]]; });
+    return row;
+  }
+
+  function cbrdsoRenderRows(details) {
+    const saved = (details || []).filter(function (d) { return d.cbRdsoItemId || d.cbRdsoItemName; });
+    if (!saved.length) { cbrdsoRenderDefaults(); return; }
+    const body = cbrdsoEl('cbrdsoItemBody');
+    body.innerHTML = '';
+    saved.forEach(function (d) { cbrdsoAddRow(cbrdsoRowFromDetail(d)); });
+    cbrdsoRecalcGrand();
+  }
+
+  function cbrdsoCollectDetails() {
+    return Array.from(document.querySelectorAll('#cbrdsoItemBody tr')).map(function (tr) {
+      const val = function (sel) { return tr.querySelector(sel).value; };
+      return {
+        cbRdsoItemId: val('.cbrdso-item-id'),
+        cbRdsoItemName: val('.cbrdso-item-name'),
+        cbRdsoRegistrationFee: val('.cbrdso-f-registration'),
+        cbRdsoOfficerVisit: val('.cbrdso-f-officer'),
+        cbRdsoSampleTesting: val('.cbrdso-f-sample'),
+        cbRdsoServiceFee: val('.cbrdso-f-service'),
+        cbRdsoOtherExpenses: val('.cbrdso-f-other'),
+        cbRdsoEngineerVisit: val('.cbrdso-f-engineer'),
+        cbRdsoTotalFee: val('.cbrdso-row-total')
+      };
+    }).filter(function (d) { return d.cbRdsoItemId.trim() || d.cbRdsoItemName.trim(); });
+  }
+
+  // ---------- Revisions ----------
+  function cbrdsoRenderRevisions(quotations, leadId, activeId) {
+    const box = cbrdsoEl('cbrdsoRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      b.textContent = 'R' + (index + 1);
+      b.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openCbrdsoEditPanel(leadId, 'CB-RDSO', '', item.id);
+      };
+      box.appendChild(b);
+    });
+  }
+
+  // ---------- Open / load ----------
+  function openCbrdsoEditPanel(leadId, quotationType, companyName, revisionId) {
+    const type = (quotationType || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (type !== 'cbrdso') return;
+
+    cbrdsoEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('cbrdsoSaveRevisionButton', revisionId);
+    cbrdsoEl('cbrdsoQuotationForm').reset();
+    cbrdsoEl('cbrdsoLeadIdInput').value = leadId;
+    cbrdsoSet('cbrdsoReferenceNoInput', 'REF-' + leadId);
+    cbrdsoSet('cbrdsoQuotationDateInput', new Date().toISOString().slice(0, 10));
+    cbrdsoRenderDefaults();
+    openModal('cbrdsoEditModal');
+
+    fetch('/leads/' + leadId + '/cbrdso-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) return;
+        const q = data.quotation || {}, lead = data.lead || {};
+        cbrdsoRenderRevisions(data.quotations, leadId, revisionId ? q.id : null);
+
+        if (!revisionId) {
+          // new revision: header from the lead, item rows start from the latest saved revision (if any)
+          cbrdsoSet('cbrdsoClientNameInput', lead.isName || '');
+          cbrdsoSet('cbrdsoProductNameInput', lead.productName || '');
+          cbrdsoRenderRows(data.details);
+          return;
+        }
+
+        cbrdsoSet('cbrdsoReferenceNoInput', q.referenceNo || ('REF-' + leadId));
+        if (q.quotationDate) cbrdsoSet('cbrdsoQuotationDateInput', q.quotationDate);
+        cbrdsoSet('cbrdsoClientNameInput', q.clientName || lead.isName || '');
+        cbrdsoSet('cbrdsoProductNameInput', q.productName || '');
+        cbrdsoSet('cbrdsoGstFeeInput', q.gstFee || '');
+        cbrdsoRenderRows(data.details);
+      })
+      .catch(function () { /* keep the default rows */ });
+  }
+
+  // ---------- Save ----------
+  function cbrdsoPayload() {
+    return {
+      quotation: {
+        id: cbrdsoEditingRevisionId,
+        leadId: cbrdsoEl('cbrdsoLeadIdInput').value,
+        certificateType: 20,
+        referenceNo: cbrdsoEl('cbrdsoReferenceNoInput').value,
+        quotationDate: cbrdsoEl('cbrdsoQuotationDateInput').value || null,
+        clientName: cbrdsoEl('cbrdsoClientNameInput').value,
+        productName: cbrdsoEl('cbrdsoProductNameInput').value,
+        gstFee: cbrdsoEl('cbrdsoGstFeeInput').value
+      },
+      details: cbrdsoCollectDetails()
+    };
+  }
+
+  function saveCbrdsoQuotation() {
+    const id = cbrdsoEl('cbrdsoLeadIdInput').value;
+    if (!id) return;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content,
+          csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    fetch('/leads/' + id + '/cbrdso-quotation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {}) },
+      body: JSON.stringify(cbrdsoPayload())
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data.success) { alert('Failed to save CB-RDSO quotation: ' + (data.message || 'Unknown error')); return; }
+      showLeadToast('CB-RDSO quotation saved successfully');
+      closeModal('cbrdsoEditModal');
+    }).catch(function () {
+      alert('Something went wrong while saving the CB-RDSO quotation.');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const body = cbrdsoEl('cbrdsoItemBody');
+    if (body) {
+      body.addEventListener('input', function (e) {
+        if (e.target.classList && e.target.classList.contains('cbrdso-calc')) {
+          cbrdsoRecalcRow(e.target.closest('tr'));
+          cbrdsoRecalcGrand();
+        }
+      });
+      body.addEventListener('click', function (e) {
+        const btn = e.target.closest ? e.target.closest('.cbrdso-remove') : null;
+        if (btn) { btn.closest('tr').remove(); cbrdsoRecalcGrand(); }
+      });
+    }
+    const add = cbrdsoEl('cbrdsoAddRowBtn');
+    if (add) add.addEventListener('click', function () { cbrdsoAddRow({}); cbrdsoRecalcAll(); });
+    cbrdsoRenderDefaults();
+  });
+</script>
+</body>
+</html>

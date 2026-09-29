@@ -41,7 +41,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-.application.properties
 
 # Tailwind CLI binaries
 tailwindcss
@@ -55,3 +54,7 @@ application-local.properties
 tailwindcss.exe.exe
 node_modules/
 __MACOSX/
+
+# Local H2 database files
+/data/*.mv.db
+/data/*.trace.db

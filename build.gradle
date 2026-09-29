@@ -58,13 +58,18 @@ dependencies {
 
     // HTML-to-PDF rendering for quotation documents.
     implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
-
     // QR generation for the public employee application link.
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'com.google.zxing:javase:3.5.3'
+
+    // SVG support for quotation PDFs.
+    implementation 'com.openhtmltopdf:openhtmltopdf-svg-support:1.0.10'
     
     // MySQL Database Connector
     implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+    // Embedded database used by the local development profile.
+    runtimeOnly 'com.h2database:h2'
 
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     

@@ -1,14 +1,21 @@
 package util;
 
 public enum LeadSource {
-    WEBSITE(1, "Website"),
-    REFERRAL(2, "Referral"),
-    SOCIAL_MEDIA(3, "Social Media"),
-    EMAIL_CAMPAIGN(4, "Email Campaign"),
-    COLD_OUTREACH(5, "Cold Outreach"),
-    JUSTDIAL(6, "Justdial"),
-    INDIAMART(7, "IndiaMART"),
-    OTHERS(8, "Others");
+    INDIAMART(1, "Indiamart"),
+    JUSTDIAL(2, "Justdial"),
+    BY_OWN(3, "ByOwn"),
+    NEW_EVTL_WEBSITE(4, "New EVTL Website"),
+    AXIS_COMPLIANCE(5, "Axis Compliance"),
+    GOOGLE_ADS(6, "Google Ads"),
+    BY_CALL(7, "By Call"),
+    VARUN_SINGH(8, "Varun Singh"),
+    AKHIL_SINGH(9, "Akhil Singh"),
+    NIKHIL_SINGH(10, "Nikhil Singh"),
+    PROLIX_INDIA(11, "Prolix India"),
+    APPROACHING_MAIL(12, "Approaching Mail"),
+    FACEBOOK_ADS(13, "Facebook Ads"),
+    FURNITURE(14, "Furniture"),
+    CDSCO_LANDING_PAGE(15, "CDSCO Landing Page");
 
     private final int id;
     private final String label;

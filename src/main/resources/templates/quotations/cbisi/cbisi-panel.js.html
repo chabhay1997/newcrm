@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script th:fragment="cbisi-panel-script" th:inline="none">
+  let cbisiEditingRevisionId = null;
+
+  const CBISI_DEFAULT_HEADING = 'Proposal for BIS-ISI Certification';
+
+  // Default certification standards (same values as the original CB-ISI quotation form)
+  const cbisiDefaultRows = [
+    { standard_code: 'IS 17631', product_name: 'Work Chair',                   application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 293000, minimum_marking_fee_micro: 58600, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 48000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' },
+    { standard_code: 'IS 17632', product_name: 'Chair and Stool for General',  application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 247000, minimum_marking_fee_micro: 49400, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 42000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' },
+    { standard_code: 'IS 17633', product_name: 'Tables & Desks',               application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 133000, minimum_marking_fee_micro: 26600, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 33000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' },
+    { standard_code: 'IS 17634', product_name: 'Storage Units',                application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 223000, minimum_marking_fee_micro: 44600, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 38000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' },
+    { standard_code: 'IS 17635', product_name: 'Beds',                         application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 206000, minimum_marking_fee_micro: 41200, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 35000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' },
+    { standard_code: 'IS 17636', product_name: 'Bunk Beds',                    application_fee: 1000, bis_officer_visit_charges: 7000, minimum_marking_fee: 161000, minimum_marking_fee_micro: 32200, micro_concession_percent: 80, license_fee: 1000, sample_testing_charges: 32000, services_fee: 40000, other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site' }
+  ];
+
+  // Values used when the user clicks "Add Certification Standard"
+  const cbisiBlankRow = {
+    standard_code: '', product_name: '',
+    application_fee: 1000, bis_officer_visit_charges: 7000,
+    minimum_marking_fee: 0, minimum_marking_fee_micro: null, micro_concession_percent: 80,
+    license_fee: 1000, sample_testing_charges: 0, services_fee: 40000,
+    other_expenses: 'As Per Actual', engineer_visit_travel_food: 'Manufacture Site'
+  };
+
+  /* ---------- number helpers ---------- */
+
+  function cbisiNum(value) {
+    const n = parseFloat(String(value == null ? '' : value).replace(/,/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function cbisiRound(value) {
+    return Math.round(cbisiNum(value));
+  }
+
+  function cbisiInr(value) {
+    return '\u20B9' + cbisiRound(value).toLocaleString('en-IN');
+  }
+
+  function cbisiIsBlank(value) {
+    return value === null || value === undefined || value === '';
+  }
+
+  /* ---------- row calculations ---------- */
+
+  // Marking fee after concession = full fee x (1 - concession%)
+  function cbisiCalcNet(row) {
+    const full = cbisiRound(row.querySelector('.cbisi-marking-full').value);
+    const pct = cbisiNum(row.querySelector('.cbisi-concession').value);
+    row.querySelector('.cbisi-marking-net').value = Math.round(full * (1 - pct / 100));
+  }
+
+  // Total = application + BIS visit + marking (after concession) + license + sample testing + services
+  function cbisiRowTotal(row) {
+    return cbisiRound(row.querySelector('.cbisi-app-fee').value)
+      + cbisiRound(row.querySelector('.cbisi-visit').value)
+      + cbisiRound(row.querySelector('.cbisi-marking-net').value)
+      + cbisiRound(row.querySelector('.cbisi-license').value)
+      + cbisiRound(row.querySelector('.cbisi-sample').value)
+      + cbisiRound(row.querySelector('.cbisi-services').value);
+  }
+
+  function cbisiRecalcAll() {
+    const rows = document.querySelectorAll('#cbisiScopeContainer .cbisi-row');
+    let grand = 0;
+    rows.forEach(function (row, index) {
+      const total = cbisiRowTotal(row);
+      row.querySelector('.cbisi-total').textContent = cbisiInr(total);
+      row.querySelector('.cbisi-badge').textContent = index + 1;
+      grand += total;
+    });
+    document.getElementById('cbisiGrandTotal').textContent = cbisiInr(grand);
+    document.getElementById('cbisiGrandCount').textContent =
+      rows.length ? '(' + rows.length + (rows.length === 1 ? ' standard)' : ' standards)') : '';
+  }
+
+  function cbisiOnInput(event) {
+    const target = event.target;
+    const row = target.closest ? target.closest('.cbisi-row') : null;
+    if (row && (target.classList.contains('cbisi-marking-full') || target.classList.contains('cbisi-concession'))) {
+      cbisiCalcNet(row);
+    }
+    cbisiRecalcAll();
+  }
+
+  /* ---------- row add / remove ---------- */
+
+  function cbisiAddRow(data) {
+    const template = document.getElementById('cbisiScopeRowTemplate');
+    const container = document.getElementById('cbisiScopeContainer');
+    if (!template || !container) return null;
+
+    const d = Object.assign({}, cbisiBlankRow, data || {});
+    const row = template.content.firstElementChild.cloneNode(true);
+
+    row.querySelector('.cbisi-code').value = d.standard_code || '';
+    row.querySelector('.cbisi-product').value = d.product_name || '';
+    row.querySelector('.cbisi-app-fee').value = cbisiIsBlank(d.application_fee) ? '' : d.application_fee;
+    row.querySelector('.cbisi-visit').value = cbisiIsBlank(d.bis_officer_visit_charges) ? '' : d.bis_officer_visit_charges;
+    row.querySelector('.cbisi-marking-full').value = cbisiIsBlank(d.minimum_marking_fee) ? 0 : d.minimum_marking_fee;
+
+    const select = row.querySelector('.cbisi-concession');
+    select.value = String(cbisiIsBlank(d.micro_concession_percent) ? 80 : cbisiNum(d.micro_concession_percent));
+    if (select.value === '') select.value = '80';
+
+    row.querySelector('.cbisi-license').value = cbisiIsBlank(d.license_fee) ? '' : d.license_fee;
+    row.querySelector('.cbisi-sample').value = cbisiIsBlank(d.sample_testing_charges) ? 0 : d.sample_testing_charges;
+    row.querySelector('.cbisi-services').value = cbisiIsBlank(d.services_fee) ? '' : d.services_fee;
+    row.querySelector('.cbisi-other').value = d.other_expenses || 'As Per Actual';
+    row.querySelector('.cbisi-engineer').value = d.engineer_visit_travel_food || 'Manufacture Site';
+
+    // Use the saved "after concession" value when there is one, otherwise calculate it
+    if (cbisiIsBlank(d.minimum_marking_fee_micro)) {
+      cbisiCalcNet(row);
+    } else {
+      row.querySelector('.cbisi-marking-net').value = cbisiRound(d.minimum_marking_fee_micro);
+    }
+
+    container.appendChild(row);
+    cbisiRecalcAll();
+    return row;
+  }
+
+  function cbisiAddNewRow() {
+    const row = cbisiAddRow();
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    row.querySelector('.cbisi-code').focus();
+  }
+
+  function cbisiRemoveRow(button) {
+    const row = button.closest('.cbisi-row');
+    if (row) row.remove();
+    cbisiRecalcAll();
+  }
+
+  function cbisiClearRows() {
+    document.getElementById('cbisiScopeContainer').innerHTML = '';
+    cbisiRecalcAll();
+  }
+
+  function cbisiLoadDefaults() {
+    cbisiDefaultRows.forEach(function (r) { cbisiAddRow(r); });
+  }
+
+  /* ---------- panel open / load ---------- */
+
+  function openCbisiEditPanel(leadId, quotationType, companyName, revisionId) {
+    if ((quotationType || '').trim().toLowerCase() !== 'cb-isi certification') return;
+    document.getElementById('cbisiLeadIdInput').value = leadId;
+    cbisiEditingRevisionId = revisionId || null;
+    setQuotationRevisionButton('cbisiSaveRevisionButton', revisionId);
+    document.getElementById('cbisiQuotationForm').reset();
+    document.getElementById('cbisiReferenceNoInput').value = 'REF-' + leadId;
+    if (!document.getElementById('cbisiQuotationDateInput').value) {
+      document.getElementById('cbisiQuotationDateInput').value = new Date().toISOString().slice(0, 10);
+    }
+    setCbisiFieldValue('cbisiCustomHeadingInput', CBISI_DEFAULT_HEADING);
+    cbisiClearRows();
+    if (!revisionId) cbisiLoadDefaults();
+    openModal('cbisiEditModal');
+    loadCbisiQuotation(leadId, companyName, revisionId);
+  }
+
+  function setCbisiFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value != null ? value : '';
+  }
+
+  function renderCbisiRevisions(quotations, leadId, activeId) {
+    const box = document.getElementById('cbisiRevisionButtons');
+    if (!box) return;
+    box.innerHTML = '';
+    (quotations || []).forEach(function (item, index) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
+      button.textContent = 'R' + (index + 1);
+      button.onclick = function (event) {
+        event.preventDefault(); event.stopPropagation();
+        openCbisiEditPanel(leadId, 'CB-ISI Certification', '', item.id);
+      };
+      box.appendChild(button);
+    });
+  }
+
+  function loadCbisiQuotation(leadId, companyName, revisionId) {
+    fetch('/leads/' + leadId + '/cbisi-quotation' + (revisionId ? '?revisionId=' + encodeURIComponent(revisionId) : ''))
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) return;
+        const quotation = data.quotation || {};
+        const lead = data.lead || {};
+        if (revisionId) cbisiEditingRevisionId = quotation.id || null;
+        renderCbisiRevisions(data.quotations, leadId, revisionId ? quotation.id : null);
+
+        // New quotation: default standards are already on screen, just pre-fill from the lead
+        if (!revisionId || !quotation.id) {
+          setCbisiFieldValue('cbisiCompanyNameInput', companyName || lead.companyName || '');
+          setCbisiFieldValue('cbisiCertificateNameInput', lead.mcatName || '');
+          setCbisiFieldValue('cbisiClientNameInput', lead.isName || '');
+          return;
+        }
+
+        // Existing revision
+        setCbisiFieldValue('cbisiReferenceNoInput', quotation.referenceNo || ('REF-' + leadId));
+        setCbisiFieldValue('cbisiQuotationDateInput', quotation.quotationDate || new Date().toISOString().slice(0, 10));
+        setCbisiFieldValue('cbisiCompanyNameInput', quotation.companyName || companyName || lead.companyName || '');
+        setCbisiFieldValue('cbisiCertificateNameInput', quotation.certificateName || lead.mcatName || '');
+        setCbisiFieldValue('cbisiClientNameInput', quotation.clientName || lead.isName || '');
+        setCbisiFieldValue('cbisiCustomHeadingInput', quotation.customHeading || CBISI_DEFAULT_HEADING);
+
+        let scopeRows = [];
+        try { scopeRows = quotation.scopeRowsJson ? JSON.parse(quotation.scopeRowsJson) : []; } catch (e) { scopeRows = []; }
+        cbisiClearRows();
+        if (!Array.isArray(scopeRows) || scopeRows.length === 0) {
+          cbisiLoadDefaults();
+        } else {
+          scopeRows.forEach(function (r) { cbisiAddRow(r); });
+        }
+      })
+      .catch(function () {
+        setCbisiFieldValue('cbisiCompanyNameInput', companyName || '');
+      });
+  }
+
+  /* ---------- save / pdf ---------- */
+
+  function collectCbisiRows() {
+    const items = [];
+    document.querySelectorAll('#cbisiScopeContainer .cbisi-row').forEach(function (row) {
+      items.push({
+        standard_code: row.querySelector('.cbisi-code').value,
+        product_name: row.querySelector('.cbisi-product').value,
+        application_fee: cbisiNum(row.querySelector('.cbisi-app-fee').value),
+        bis_officer_visit_charges: cbisiNum(row.querySelector('.cbisi-visit').value),
+        minimum_marking_fee: cbisiNum(row.querySelector('.cbisi-marking-full').value),
+        minimum_marking_fee_micro: cbisiNum(row.querySelector('.cbisi-marking-net').value),
+        micro_concession_percent: cbisiNum(row.querySelector('.cbisi-concession').value),
+        license_fee: cbisiNum(row.querySelector('.cbisi-license').value),
+        sample_testing_charges: cbisiNum(row.querySelector('.cbisi-sample').value),
+        services_fee: cbisiNum(row.querySelector('.cbisi-services').value),
+        other_expenses: row.querySelector('.cbisi-other').value || 'As Per Actual',
+        engineer_visit_travel_food: row.querySelector('.cbisi-engineer').value || 'Manufacture Site'
+      });
+    });
+    return items;
+  }
+
+  function saveCbisiQuotation() {
+    const leadId = document.getElementById('cbisiLeadIdInput').value;
+    if (!leadId) return;
+
+    const companyName = document.getElementById('cbisiCompanyNameInput').value;
+    const clientName = document.getElementById('cbisiClientNameInput').value;
+    const rows = collectCbisiRows();
+    if (!companyName || !clientName) { alert('Company Name and Client Name are required'); return; }
+    if (rows.length === 0) { alert('Add at least one certification standard'); return; }
+
+    const payload = {
+      id: cbisiEditingRevisionId,
+      referenceNo: document.getElementById('cbisiReferenceNoInput').value,
+      quotationDate: document.getElementById('cbisiQuotationDateInput').value || null,
+      companyName: companyName,
+      clientName: clientName,
+      certificateName: document.getElementById('cbisiCertificateNameInput').value,
+      customHeading: document.getElementById('cbisiCustomHeadingInput').value,
+      scopeRowsJson: JSON.stringify(rows)
+    };
+
+    fetch('/leads/' + leadId + '/cbisi-quotation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [document.querySelector('meta[name="_csrf_header"]')?.content]: document.querySelector('meta[name="_csrf"]')?.content
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          alert('Failed to save CB-ISI quotation: ' + ((data && data.message) || 'Unknown error'));
+          return;
+        }
+        cbisiEditingRevisionId = data.quotation ? data.quotation.id : cbisiEditingRevisionId;
+        showLeadToast('CB-ISI quotation saved successfully');
+        closeModal('cbisiEditModal');
+      })
+      .catch(function () {
+        alert('Something went wrong while saving the CB-ISI quotation.');
+      });
+  }
+
+  function downloadCbisiQuotationPdf() {
+    if (!cbisiEditingRevisionId) {
+      alert('Save the CB-ISI quotation first before downloading its PDF.');
+      return;
+    }
+    alert('CB-ISI PDF export is not available yet.');
+  }
+</script>
+</body>
+</html>

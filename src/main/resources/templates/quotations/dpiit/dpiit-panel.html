@@ -121,11 +121,6 @@
       </div>
       <div id="dpiitConsultancyContainer" class="flex flex-col gap-2 mb-3"></div>
 
-      <div class="mb-6">
-        <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Total Consultancy Fees</label>
-        <input id="dpiitTotalConsultancyInput" type="text" placeholder="Total consultancy fees" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] bg-[#EAF1FF] focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
-      </div>
-
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div>
           <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Lab Setup Cost</label>
@@ -139,7 +134,7 @@
 
       <div class="flex gap-2">
         <button type="button" onclick="closeModal('dpiitEditModal')" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#171923] bg-white border border-black/10 hover:bg-[#F3F5F8] transition">Cancel</button>
-        <button type="button" onclick="downloadDpiitQuotationPdf()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
+        <button type="button" onclick="downloadDpiitQuotationPdf()" class="quotation-download-action flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-[#115D88] bg-[#EAF4FA] border border-[#B8D5E5] hover:bg-[#DDEEF7] transition">Download PDF</button>
         <button id="dpiitSaveRevisionButton" type="button" onclick="saveDpiitQuotation()" class="flex-1 py-2.5 rounded-full text-[12.5px] font-semibold text-white shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Save as New Revision</button>
       </div>
 

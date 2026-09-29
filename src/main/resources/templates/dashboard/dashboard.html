@@ -84,7 +84,7 @@
           </div>
         </div>
 
-        <div class="stat-card stat-card-purple rounded-2xl p-3 border border-black/5">
+        <div class="stat-card stat-card-purple rounded-2xl p-3 border border-black/5 cursor-pointer" onclick="window.location.href='/leads'" role="link" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location.href='/leads'; }">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <div class="stat-icon-box w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#C6A2F8,#9B6DF2);">
@@ -93,7 +93,7 @@
               <span class="stat-label text-[12px] font-semibold text-[#171923]">Leads</span>
             </div>
             <div class="relative">
-              <button onclick="document.getElementById('menuLeads').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
+              <button onclick="event.stopPropagation(); document.getElementById('menuLeads').classList.toggle('open')" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A7AFC0" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
               </button>
               <div id="menuLeads" class="card-dropdown absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-md shadow-black/10 border border-black/5 overflow-hidden z-[999]">
@@ -105,7 +105,7 @@
           </div>
           <div class="flex items-end justify-between">
             <div class="flex items-baseline gap-1.5">
-              <span class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">129</span>
+              <span id="dashboardLeadsCount" class="stat-value text-[15px] font-extrabold text-[#171923] leading-none">0</span>
               <span class="text-[10px] font-semibold text-emerald-600">↑ 2%</span>
             </div>
             <span class="stat-sub text-[10px] text-[#8C8FA3] font-medium">vs last week</span>
@@ -849,6 +849,22 @@
         }
       }
     });
+  </script>
+
+  <script>
+    function refreshDashboardLeadCount() {
+      fetch('/api/leads/stats', { headers: { 'Accept': 'application/json' } })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (data) {
+          if (data && Number.isFinite(Number(data.totalLeads))) {
+            document.getElementById('dashboardLeadsCount').textContent = Number(data.totalLeads).toLocaleString();
+          }
+        })
+        .catch(function () { /* Keep the last known count when the API is unavailable. */ });
+    }
+
+    refreshDashboardLeadCount();
+    window.setInterval(refreshDashboardLeadCount, 30000);
   </script>
 
   <script>

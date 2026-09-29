@@ -33,10 +33,9 @@
       button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
       button.textContent = 'R' + (index + 1);
       button.onclick = function (event) {
-        event.preventDefault(); event.stopPropagation();
-        closeModal('lmpcEditModal');
-        setTimeout(function () { openLmpcEditPanel(leadId, 'LMPC', '', item.id); }, 50);
-      };
+    event.preventDefault(); event.stopPropagation();
+    openLmpcEditPanel(leadId, 'LMPC', '', item.id);
+};
       box.appendChild(button);
     });
   }

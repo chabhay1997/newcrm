@@ -106,10 +106,9 @@
       button.className = 'quotation-revision-button' + (item.id === activeId ? ' active' : '');
       button.textContent = 'R' + (index + 1);
       button.onclick = function (event) {
-        event.preventDefault(); event.stopPropagation();
-        closeModal('drugEditModal');
-        setTimeout(function () { openDrugEditPanel(leadId, 'Drug Quotation', '', item.id); }, 50);
-      };
+    event.preventDefault(); event.stopPropagation();
+    openDrugEditPanel(leadId, 'Drug Quotation', '', item.id);
+};
       box.appendChild(button);
     });
   }
