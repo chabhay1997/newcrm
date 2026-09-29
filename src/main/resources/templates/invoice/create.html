@@ -235,7 +235,7 @@
             <!-- inv_type: Evtl India / Prolix / Government — GSTIN/PAN aur next inv/po no. isi se driven hain -->
             <select id="invoiceTypeSelect" name="invType" form="invoiceCreateForm"
               class="field-input pr-8 appearance-none cursor-pointer" style="min-width:180px;">
-              <option value="">--Invoice Type--</option>
+              <option value="">--Challan--</option>
               <option value="1" th:selected="${invoice.invType != null and invoice.invType == 1}">Evtl India</option>
               <option value="2" th:selected="${invoice.invType != null and invoice.invType == 2}">Prolix</option>
               <option value="3" th:selected="${invoice.invType != null and invoice.invType == 3}">Government</option>
