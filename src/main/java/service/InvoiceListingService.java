@@ -91,7 +91,7 @@ public class InvoiceListingService {
                 date,
                 nameHtml,
                 escape(invoice.getInvNo()),
-                escape(invoice.getPoNo()),
+                escape(displayPoNumber(invoice.getPoNo())),
                 escape(invoice.getFinalAmt()),
                 invTypeLabel,
                 statusHtml,
@@ -114,6 +114,10 @@ public class InvoiceListingService {
     private String escape(String value) {
         if (value == null) return "";
         return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    private String displayPoNumber(String poNumber) {
+        return poNumber == null || poNumber.isBlank() ? "N/A" : poNumber;
     }
 
 }

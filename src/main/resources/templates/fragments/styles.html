@@ -144,13 +144,19 @@
   }
   .accounts-submenu a.active { color: #7D8FFF; }
   .submenu-chevron { font-size: 21px; font-weight: 400; line-height: 1; }
-  .sidebar-dark:not(:hover) #leadsSubmenu,
-  .sidebar-dark:not(:hover) #hrSubmenu,
   .sidebar-dark:not(:hover) .sidebar-accounts > .accounts-submenu {
     display: none !important;
   }
+  .sidebar-accounts .accounts-submenu .sidebar-sublink svg { display: none; }
+  .sidebar-accounts .accounts-submenu .sidebar-sublink::before {
+    content: '›';
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1;
+  }
   .card-hover { transition: transform .18s ease, box-shadow .18s ease; }
   .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -12px rgba(16,20,32,0.15); }
+
 
   .topbar-pill {
     background: rgba(10, 11, 14, 0.88);

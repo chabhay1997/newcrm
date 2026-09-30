@@ -37,8 +37,8 @@ public class Bank {
     @Column(name = "swift_code")
     private String swiftCode;
 
-    // The legacy bank_details table does not retain an author reference.
-    @Transient
+    // Kept with each bank record so the listing can identify its creator.
+    @Column(name = "created_by")
     private Long createdBy;
 
     // Legacy bank records are all available for use; there is no status column.

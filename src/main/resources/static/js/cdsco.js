@@ -40,7 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlFor = page => { const url = new URL(location.href); url.searchParams.set('page', page - 1); return url.pathname + url.search; };
     const controls = pager.querySelector('.classic-pagination-controls');
     const link = (label, page, disabled, selected) => { const item=document.createElement('a'); item.textContent=label; item.href=urlFor(page); if(disabled){item.className='disabled';item.setAttribute('aria-disabled','true');} if(selected)item.setAttribute('aria-current','page'); return item; };
-    controls.append(link('Previous', Math.max(1,current-1), current===1, false));
+    const input = document.createElement('input');
+    input.type = 'number'; input.min = '1'; input.max = String(pages); input.placeholder = 'Go to...'; input.setAttribute('aria-label', 'Go to page');
+    const go = () => {
+      const page = Number(input.value);
+      if (Number.isInteger(page) && page >= 1 && page <= pages) location.href = urlFor(page);
+      else input.setCustomValidity(`Enter a page from 1 to ${pages}.`);
+    };
+    input.addEventListener('input', () => input.setCustomValidity(''));
+    input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); go(); } });
+    const goButton = document.createElement('button');
+    goButton.type = 'button'; goButton.className = 'go-button'; goButton.textContent = 'Go'; goButton.addEventListener('click', go);
+    controls.append(input, goButton, link('Previous', Math.max(1,current-1), current===1, false));
     for(let page=Math.max(1,current-2);page<=Math.min(pages,current+2);page++) controls.append(link(String(page),page,false,page===current));
     controls.append(link('Next',Math.min(pages,current+1),current===pages,false));
     const first=total?(current-1)*size+1:0,last=total?Math.min(current*size,total):0;
