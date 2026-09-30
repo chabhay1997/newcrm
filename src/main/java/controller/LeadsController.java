@@ -177,6 +177,14 @@ public class LeadsController {
         } catch (Exception ignored) { }
 
         List<Lead> leads = leadRepository.findByFilters(status, sourceId, quotationTypesFilter, userId, startDateTime, endDateTime);
+        Map<Long, String> latestFollowups = new java.util.HashMap<>();
+        if (!leads.isEmpty()) {
+            List<Long> leadIds = leads.stream().map(Lead::getId).toList();
+            for (LeadFollowUpRepository.LatestFollowUpSummary followup
+                    : leadFollowUpRepository.findLatestCommentsByLeadIds(leadIds)) {
+                latestFollowups.put(followup.getLeadId(), followup.getReason());
+            }
+        }
         java.util.Set<Long> leadsWithFollowupComments = new java.util.HashSet<>(leadFollowUpRepository.findLeadIdsWithComments());
 
         java.util.Set<Long> creatorIds = new java.util.HashSet<>();
@@ -256,6 +264,7 @@ public class LeadsController {
         model.addAttribute("activePage", "leads");
         model.addAttribute("totalLeads", (long) leads.size());
         model.addAttribute("leads", leads);
+        model.addAttribute("latestFollowups", latestFollowups);
         model.addAttribute("leadsWithFollowupComments", leadsWithFollowupComments);
         model.addAttribute("allStatuses", LeadStatus.values());
         model.addAttribute("allSources", LeadSource.values());
@@ -282,10 +291,7 @@ public class LeadsController {
         model.addAttribute("selectedStartDate", startDate);
         model.addAttribute("selectedEndDate", endDate);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isSuperAdmin = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        model.addAttribute("isSuperAdmin", isSuperAdmin);
+        model.addAttribute("isSuperAdmin", hasSuperAdminAccess());
 
         return "leads/leads";
     }
@@ -458,28 +464,66 @@ public class LeadsController {
 }
 
     @PostMapping("/leads/add")
-    public String addLead(@ModelAttribute Lead lead) {
+    public String addLead(
+            @ModelAttribute Lead lead,
+            @RequestParam(name = "isName", required = false) String clientName,
+            @RequestParam(name = "companyName", required = false) String companyName) {
+        lead.setIsName(clientName);
+        lead.setCompanyName(companyName);
         leadRepository.save(lead);
         return "redirect:/leads";
     }
 
     @PostMapping("/leads/update/{id}")
-    public String updateLead(@org.springframework.web.bind.annotation.PathVariable Long id, @ModelAttribute Lead lead) {
-        lead.setId(id);
-        leadRepository.save(lead);
+    public String updateLead(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @ModelAttribute Lead lead,
+            @RequestParam(name = "isName", required = false) String clientName,
+            @RequestParam(name = "companyName", required = false) String companyName) {
+        Lead existingLead = leadRepository.findById(id)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Lead not found"));
+
+        existingLead.setIsName(clientName);
+        existingLead.setCompanyName(companyName);
+        existingLead.setEmail(lead.getEmail());
+        existingLead.setPhone(lead.getPhone());
+        existingLead.setProductName(lead.getProductName());
+        existingLead.setServicesId(lead.getServicesId());
+        existingLead.setCountryId(lead.getCountryId());
+        existingLead.setStateId(lead.getStateId());
+        existingLead.setCityId(lead.getCityId());
+        existingLead.setQuotationType(lead.getQuotationType());
+        existingLead.setSourceId(lead.getSourceId());
+        existingLead.setStatus(lead.getStatus());
+        existingLead.setLeadDate(lead.getLeadDate());
+        existingLead.setAddress(lead.getAddress());
+        existingLead.setRequirements(lead.getRequirements());
+        existingLead.setRemarks(lead.getRemarks());
+
+        leadRepository.save(existingLead);
         return "redirect:/leads";
     }
 
     @PostMapping("/leads/delete/{id}")
     public String deleteLead(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        if (!hasSuperAdminAccess()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "Super Admin access only");
+        }
         leadRepository.deleteById(id);
         return "redirect:/leads";
     }
 
     @PostMapping("/leads/{id}/delete-ajax")
     @org.springframework.web.bind.annotation.ResponseBody
-    public Map<String, Object> deleteLeadAjax(@org.springframework.web.bind.annotation.PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteLeadAjax(@org.springframework.web.bind.annotation.PathVariable Long id) {
         Map<String, Object> response = new LinkedHashMap<>();
+        if (!hasSuperAdminAccess()) {
+            response.put("success", false);
+            response.put("message", "Super Admin access only");
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(response);
+        }
         try {
             leadRepository.deleteById(id);
             response.put("success", true);
@@ -487,7 +531,13 @@ public class LeadsController {
             response.put("success", false);
             response.put("message", e.getMessage());
         }
-        return response;
+        return ResponseEntity.ok(response);
+    }
+
+    private boolean hasSuperAdminAccess() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
     @GetMapping("/leads/{id}/json")

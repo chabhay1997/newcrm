@@ -160,7 +160,8 @@
   .quotation-download-action.visible{display:block !important}
   .quotation-back-original{position:absolute;top:24px;right:72px;padding:8px 14px;border:0;border-radius:999px;background:#DC2626;color:#fff;font-size:12px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,.25)}
   .quotation-back-original:hover{background:#B91C1C}
-  .quotation-latest-download{display:none;width:30px;height:30px;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:999px;background:#5B8DEF;color:#fff;cursor:pointer;box-shadow:0 3px 8px rgba(91,141,239,.22)}
+  .quotation-latest-download{display:flex;width:30px;height:30px;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:999px;background:#5B8DEF;color:#fff;cursor:pointer;box-shadow:0 3px 8px rgba(91,141,239,.22)}
+  .quotation-latest-download:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
   .quotation-latest-download.visible{display:flex}
   .quotation-latest-download:hover{background:#456FCB}
   .quotation-revision-compact { width: min(760px, 96vw) !important; }
@@ -773,7 +774,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   #leadsListCard.leads-list-expanded table tbody tr td { padding-top: 1rem; padding-bottom: 1rem; }
 
   #leadsTable { border-collapse: separate; border-spacing: 0; }
-  #leadsTableWrap { width: calc(100% - 48px); margin: 22px 24px 0; max-width: calc(100% - 48px); overflow-x: auto; overflow-y: hidden; border: 1px solid #C7D2E1; border-radius: 14px; background: #fff; box-shadow: 0 10px 24px rgba(28, 49, 83, .08); }
+  #leadsTableWrap { width: calc(100% - 48px); margin: 22px 24px 0; max-width: calc(100% - 48px); overflow-x: auto; overflow-y: hidden; border: 2px solid #AAB5C4; border-radius: 0; background: #fff; box-shadow: 0 10px 24px rgba(28, 49, 83, .08); }
   #leadsTable { width: 100%; max-width: 100%; table-layout: fixed; }
   #leadsTable th:nth-child(1), #leadsTable td:nth-child(1) { width: 7%; }
   #leadsTable th:nth-child(2), #leadsTable td:nth-child(2) { width: 29%; }
@@ -793,16 +794,16 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     text-transform: uppercase;
     color: #FFFFFF !important;
     background: #5B8DEF !important;
-    border-right: 1px solid rgba(255, 255, 255, .42);
-    border-bottom: 2px solid #4275D9;
+    border-right: 1px solid #C4CDD8;
+    border-bottom: 2px solid #AAB5C4;
   }
   #leadsTable thead th:last-child { border-right: none; }
 
   #leadsTable tbody td {
-    border-right: 1px solid #C2CFDE;
-    border-bottom: 1px solid #B8C7D8;
+    border-right: 1px solid #C4CDD8;
+    border-bottom: 1px solid #AAB5C4;
   }
-  #leadsTable tbody tr:first-child td { border-top: 1px solid #B8C7D8; }
+  #leadsTable tbody tr:first-child td { border-top: 1px solid #AAB5C4; }
   #leadsTable tbody td:last-child { border-right: none; }
   #leadsTable tbody tr.leads-table-row:last-child td { border-bottom: none; }
 
@@ -831,14 +832,19 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     z-index: 20;
   }
   #leadsTable tbody td { vertical-align: middle; }
+  #leadsTable tbody td:nth-child(2) { vertical-align: top !important; padding-top: 21px !important; padding-bottom: 2px !important; }
+  #leadsTable tbody td:nth-child(2) .lead-details-stack { transform: none; }
   #leadsTable tbody td:first-child { border-left: 3px solid transparent; }
   #leadsTable tbody tr.leads-table-row:hover td:first-child { border-left-color: #5B8DEF; }
   #leadsTable td:last-child { overflow: hidden; }
   #leadsTable td:last-child > div { min-width: 0; flex-wrap: wrap; }
   #leadsTable td:last-child .isi-arrow-trigger { min-width: 0; max-width: 100%; }
   #leadsTable .lead-select-cell { height: 100%; padding-left: 8px; padding-right: 8px; }
-  #leadsTable .lead-select-cell-inner { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 29px; }
+  #leadsTable .lead-select-cell-inner { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 29px; }
   #leadsTable .lead-select-checkbox { width: 18px; height: 18px; margin: 0; flex: none; }
+  #leadsTable .lead-delete-button { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; margin-top: 9px; padding: 0; border: 1px solid #F1CACA; border-radius: 6px; background: #FFF5F5; color: #B93838; box-shadow: 0 1px 2px rgba(127, 29, 29, .08); cursor: pointer; transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease; }
+  #leadsTable .lead-delete-button:hover { transform: translateY(-1px); border-color: #C24141; background: #C24141; color: #fff; box-shadow: 0 3px 7px rgba(127, 29, 29, .2); }
+  #leadsTable .lead-delete-button:focus-visible { outline: 2px solid #C24141; outline-offset: 2px; }
   @media (max-width: 900px) {
     #leadsTable { min-width: 860px; table-layout: auto; }
     #leadsTable td:last-child { overflow: visible; }
@@ -849,21 +855,70 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   }
   #leadsTable .lead-company-name { color: #1D3557; font-size: 12px; font-weight: 750; line-height: 1.35; }
   #leadsTable .lead-company-missing { color: #C63D48; font-size: 12px; font-weight: 750; }
-  #leadsTable .lead-details-stack { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(118px, .65fr); gap: 7px; }
+  #leadsTable .lead-details-stack { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(118px, .65fr); column-gap: 7px; row-gap: 10px; }
+  #leadsTable .lead-metadata-stack { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(100px, .75fr); gap: 5px; min-width: 0; }
+  #leadsTable .lead-company-details-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; min-width: 0; }
+  #leadsTable .lead-company-reference-selects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 8px; min-width: 0; }
+  #leadsTable .lead-reference-field { display: grid; gap: 4px; min-width: 0; }
+  #leadsTable .lead-reference-label { color: #71809A; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  #leadsTable .lead-source-display { box-sizing: border-box; width: 100%; min-width: 0; overflow: hidden; padding: 7px 10px; border: 1px solid #C8D9F4; border-radius: 8px; background: linear-gradient(135deg, #F2F7FF, #E2ECFF); color: #314967; font-size: 10.5px; font-weight: 650; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-company-reference-selects .lead-status-select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 34px; padding: 7px 26px 7px 10px !important; border: 1px solid #CCD8E7 !important; border-radius: 8px !important; background: #F6F9FD !important; color: #314967 !important; font-size: 11px !important; font-weight: 650; }
+  #leadsTable .lead-company-name-line { min-width: 0; padding: 7px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
+  #leadsTable .lead-company-details-cell { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 9px; min-width: 0; }
+  #leadsTable .lead-company-contact-stack { display: grid; gap: 5px; min-width: 0; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line { min-height: 29px; padding: 5px 8px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 5px; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line > span { flex: 1; min-width: 0; text-align: left; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line strong::after { content: ' -'; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line strong:has(+ span:empty)::after { content: none; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line > span:empty::before { content: '-'; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(3) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Crect x='3' y='7' width='18' height='14' rx='2'/%3E%3Cpath d='M7 7V4h10v3M8 11h8m-8 4h8'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(4) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Cpath d='M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='2.5'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-metadata-stack .lead-details-people { grid-column: 1; grid-row: 1; padding-left: 7px; padding-right: 7px; }
+  #leadsTable .lead-metadata-stack .lead-details-people .lead-detail-line strong { width: 88px; }
+  #leadsTable .lead-metadata-stack .lead-details-created { grid-column: 2; grid-row: 1; min-width: 0; padding-left: 7px; padding-right: 7px; }
+  #leadsTable .lead-details-followup { grid-column: 1 / -1; grid-row: 1; display: flex; align-items: stretch; gap: 7px; min-width: 0; }
+  #leadsTable .lead-details-followup .company-followup-btn { flex: 1; width: auto; min-width: 0; }
+  #leadsTable .lead-reminder-button { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 6px; min-width: 96px; padding: 0 11px; border: 1px solid #D9363E; border-radius: 8px; background: #E5484D; color: #fff; font-size: 11px; font-weight: 750; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+  #leadsTable .lead-reminder-button:hover { background: #CF343C; transform: translateY(-1px); }
+  #leadsTable .lead-reminder-button svg { flex: none; }
+  #leadsTable .lead-client-name-line { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 7px; min-width: 0; padding: 6px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
+  #leadsTable .lead-client-name-label { flex: none; color: #71809A; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+  #leadsTable .lead-client-name-value { position: relative; top: -0.5px; min-width: 0; overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-quotation-choice { grid-column: 1; grid-row: 3; display: flex; align-items: stretch; gap: 2px; width: 100%; min-width: 0; }
+  #leadsTable .lead-quotation-choice > button:first-child { flex: 1; width: auto; min-width: 0; min-height: 32px; padding: 3px 8px; border: 1px solid #8C8C8C; border-radius: 4px; background: #fff !important; text-align: left; }
+  #leadsTable .lead-quotation-choice .lead-quotation-proceed { display: inline-flex; width: 32px; min-width: 32px; height: 32px; align-items: center; justify-content: center; border: 1px solid #16A34A; border-radius: 4px; background: #F0FDF4; color: #16A34A; cursor: pointer; }
+  #leadsTable .lead-quotation-choice .lead-quotation-proceed.hidden { display: none; }
+  #leadsTable .lead-quotation-choice .lead-quotation-proceed:hover { background: #16A34A; color: #fff; }
+  #leadsTable .lead-details-top-actions { grid-column: 2; grid-row: 3; display: flex; align-items: flex-start; justify-content: center; gap: 3px; }
+  #leadsTable .lead-details-icon-button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: #5B8DEF; color: #fff; cursor: pointer; box-shadow: 0 3px 8px rgba(91,141,239,.22); }
+  #leadsTable .lead-details-icon-button:hover:not(:disabled) { background: #456FCB; }
+  #leadsTable .lead-details-icon-button:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
+  #leadsTable .lead-requirement-icon { border-radius: 8px; background: #F3A73D; box-shadow: 0 3px 8px rgba(243,167,61,.24); }
+  #leadsTable .lead-requirement-icon:hover:not(:disabled) { background: #DF922A; }
   #leadsTable .lead-detail-line { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; line-height: 1.25; overflow: hidden; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
-  #leadsTable .lead-detail-line:nth-child(1), #leadsTable .lead-detail-line:nth-child(4), #leadsTable .lead-detail-line:nth-child(5) { grid-column: 1 / -1; }
+  #leadsTable .lead-details-stack > .lead-detail-line:nth-child(1), #leadsTable .lead-details-stack > .lead-detail-line:nth-child(2) { display: none; }
   #leadsTable .lead-detail-line:nth-child(1), #leadsTable .lead-detail-line:nth-child(2) { flex-direction: row; align-items: center; }
   #leadsTable .lead-detail-line strong { display: flex; align-items: center; gap: 5px; color: #71809A; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
   #leadsTable .lead-detail-line strong::before { content: ''; width: 13px; height: 13px; flex: none; background: center/13px 13px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(2) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D75C9' stroke-width='2'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(3) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232EAA79' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='17' rx='2'/%3E%3Cpath d='M8 2v4m8-4v4M3 10h18'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(4) strong::before, #leadsTable .lead-detail-line:nth-child(5) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B46A09' stroke-width='2'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(5) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(1) strong::after, #leadsTable .lead-detail-line:nth-child(2) strong::after, #leadsTable .lead-detail-line:nth-child(4) strong::after, #leadsTable .lead-detail-line:nth-child(5) strong::after { content: ' -'; }
   #leadsTable .lead-detail-line span { overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
   #leadsTable .lead-detail-line:nth-child(1) span { flex: 1; min-width: 0; overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
   #leadsTable .lead-detail-line:nth-child(2) span { flex: 1; min-width: 0; }
   #leadsTable .lead-detail-line:nth-child(4), #leadsTable .lead-detail-line:nth-child(5) { flex-direction: row; align-items: center; justify-content: space-between; }
   #leadsTable .lead-detail-line:nth-child(4), #leadsTable .lead-detail-line:nth-child(5) { min-height: 31px; padding-top: 5px; padding-bottom: 5px; }
+  #leadsTable .lead-details-people { grid-column: 1; grid-row: 4; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; padding: 6px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
+  #leadsTable .lead-details-people .lead-detail-line { min-height: 0; padding: 2px 0; border: 0; background: transparent; flex-direction: row; align-items: center; justify-content: flex-start; }
+  #leadsTable .lead-details-people .lead-detail-line strong { width: 110px; flex: none; white-space: nowrap; }
+  #leadsTable .lead-details-people .lead-person-name { min-width: 0; margin-left: 0; overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-details-people .lead-person-badge { display: inline-block; width: 120px; max-width: 120px; min-height: 0; margin-left: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: transparent; color: #263F61 !important; font-size: 11px !important; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-details-created { grid-column: 2; grid-row: 4; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; gap: 4px !important; padding-top: 3px; padding-bottom: 9px; }
+  #leadsTable .lead-metadata-stack .lead-details-created strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232EAA79' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='17' rx='2'/%3E%3Cpath d='M8 2v4m8-4v4M3 10h18'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-details-created strong::after { content: none; }
+  #leadsTable .lead-details-people .lead-detail-line strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E"); }
   #leadsTable .lead-person-badge { display: inline-flex; align-items: center; min-height: 22px; max-width: 70%; margin-left: 2px; padding: 2px 9px; overflow: hidden; border: 1px solid #F4DFC0; border-radius: 999px; background: #FFF3DF; color: #9A5A0A !important; font-size: 10px !important; font-weight: 750; text-overflow: ellipsis; }
   #leadsTable .lead-source-select { color: #314967 !important; font-weight: 650; background-color: #F6F9FD !important; border: 1px solid #CCD8E7 !important; border-radius: 8px !important; padding: 7px 26px 7px 10px !important; }
   #leadsTable .lead-status-select { min-height: 29px; font-size: 10.5px; letter-spacing: .01em; }
@@ -1485,7 +1540,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
               <p class="font-bold text-[#171923]">Leads</p>
             </div>
           </div>
-          <div class="leads-table-toolbar-actions flex items-center gap-2 flex-wrap">
+          <div class="leads-table-toolbar-actions flex items-center gap-3 flex-wrap">
             <span class="text-[11px] font-bold text-white px-2.5 py-1.5 rounded-lg" style="background:#F3A73D;">Graphs Section</span>
             <label class="mini-toggle" title="Show/Hide Charts">
               <input type="checkbox" id="chartsToggle" onchange="toggleLeadsCharts(this.checked)">
@@ -1495,26 +1550,6 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               <input id="leadsSearchInput" type="text" placeholder="Search leads..." class="text-[12.5px] text-[#171923] focus:outline-none bg-transparent w-40 focus:w-72 transition-all duration-300">
             </div>
-            <div class="relative">
-              <button onclick="document.getElementById('leadsFilterPanel').classList.toggle('open')" class="flex items-center gap-1.5 text-[12px] font-semibold text-[#171923] bg-white border border-black/10 px-3.5 py-2 rounded-xl hover:bg-[#F3F5F8] transition">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#171923" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
-                Filter
-              </button>
-              <div id="leadsFilterPanel" class="card-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-md shadow-black/10 border border-black/5 z-[999] p-4">
-                <label class="block text-[11px] font-semibold text-[#3A4B63] mb-1.5">Status</label>
-                <select id="filterStatusInput" class="w-full mb-3 px-3 py-2 rounded-lg border border-black/10 text-[12.5px] text-[#171923] bg-white focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30">
-                  <option value="">All statuses</option>
-                  <option th:each="st : ${allStatuses}" th:value="${st.id}" th:text="${st.label}">Status</option>
-                </select>
-                <label class="block text-[11px] font-semibold text-[#3A4B63] mb-1.5">Source</label>
-                <select id="filterSourceInput" class="w-full mb-3 px-3 py-2 rounded-lg border border-black/10 text-[12.5px] text-[#171923] bg-white focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30">
-                  <option value="">All sources</option>
-                  <option th:each="src : ${allSources}" th:value="${src.id}" th:text="${src.label}">Source</option>
-                </select>
-                <button onclick="applyLeadsFilter()" class="w-full py-2 rounded-lg text-[12px] font-semibold text-white" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">Apply Filter</button>
-              </div>
-            </div>
-
             <button type="button" onclick="openModal('quotationFilterModal')" class="flex items-center gap-1.5 text-[12.5px] text-[#171923] focus:outline-none border border-black/10 rounded-xl px-3 py-2 bg-white" style="min-width:170px; justify-content:space-between;">
               <span id="selectQuotationLabel">-- Select Quotation --</span>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -1536,11 +1571,10 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                     <table class="w-full text-left" id="leadsTable">
             <thead>
               <tr class="bg-[#5B8DEF]">
-                <th class="py-5 px-1 font-bold text-white text-center text-[11px] whitespace-nowrap">S. No</th>
-                <th class="py-5 px-3 font-bold text-white w-[20%]">Details</th>
-                <th class="py-5 px-3 font-bold text-white w-[16%]">Company</th>
-                <th class="py-5 px-3 font-bold text-white w-[16%]">Reference</th>
-                <th class="py-5 px-3 font-bold text-white w-[24%]">Actions</th>
+                <th class="py-5 px-1 font-bold text-white text-center text-[11px] whitespace-nowrap" style="width:6%">S. No</th>
+                <th class="py-5 px-3 font-bold text-white" style="width:30%">Main Details</th>
+                <th class="py-5 px-3 font-bold text-white" style="width:32%">Lead Details</th>
+                <th class="py-5 px-3 font-bold text-white" style="width:32%">Company Details</th>
               </tr>
             </thead>
             <tbody id="leadsTableBody">
@@ -1549,91 +1583,98 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                   <span class="lead-select-cell-inner">
                     <input type="checkbox" class="lead-select-checkbox rounded border-gray-300 cursor-pointer accent-[#8A5CF6]" th:value="${lead.id}">
                     <span class="lead-serial text-[13px] font-semibold text-[#171923]" th:text="${leadStat.count}">1</span>
+                    <button type="button" class="lead-delete-button" th:if="${isSuperAdmin}" onclick="event.stopPropagation(); deleteLead(this.closest('tr').dataset.leadId)" title="Delete lead" aria-label="Delete lead">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="m5 7 1 13h12l1-13"/><path d="M9 7V4h6v3"/></svg>
+                    </button>
                   </span>
                 </td>
                 <td class="py-4 px-3 text-[#3A4B63]" style="font-size:14px;">
                   <div class="lead-details-stack">
-                    <div class="lead-detail-line"><strong>Email</strong><span th:text="${lead.email ?: lead.officialMailId}">-</span></div>
-                    <div class="lead-detail-line"><strong>Phone</strong><span th:text="${lead.phone ?: lead.companyMobile}">-</span></div>
-                    <div class="lead-detail-line"><strong>Created</strong><span th:text="${lead.createdAt != null ? #temporals.format(lead.createdAt, 'MMM dd, yyyy') : '-'}">-</span></div>
-                    <div class="lead-detail-line">
-                      <strong>Created by</strong>
-                      <span th:if="${lead.createdByName != null and !#strings.isEmpty(lead.createdByName) and (lead.assignToName == null or #strings.isEmpty(lead.assignToName))}" class="lead-person-badge" th:text="${lead.createdByName}"></span>
-                      <span th:if="${lead.createdByName != null and !#strings.isEmpty(lead.createdByName) and lead.assignToName != null and !#strings.isEmpty(lead.assignToName)}" th:text="${lead.createdByName}"></span>
+                    <div class="lead-details-followup">
+                      <button type="button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName}" onclick="openCompanyFollowUpPopup(this)" th:classappend="${(lead.reminder != null and !#strings.isEmpty(lead.reminder)) or leadsWithFollowupComments.contains(lead.id)} ? 'has-followup' : ''" class="company-followup-btn">
+                        <span class="company-followup-btn-label">Company Follow Up</span>
+                        <svg class="company-followup-btn-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </button>
+                      <button type="button" class="lead-reminder-button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName}" onclick="openCompanyFollowUpPopup(this)" title="Set or view reminder">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"/></svg>
+                        <span>Reminder</span>
+                      </button>
                     </div>
-                    <div class="lead-detail-line" th:if="${lead.assignToName != null and !#strings.isEmpty(lead.assignToName)}">
-                      <strong>Assigned to</strong>
-                      <span class="lead-person-badge" th:text="${lead.assignToName}"></span>
+                    <div class="lead-client-name-line">
+                      <span class="lead-client-name-label">Client name -</span>
+                      <span class="lead-client-name-value" th:text="${lead.isName != null and !#strings.isEmpty(lead.isName) ? lead.isName : ''}"></span>
                     </div>
-                  </div>
-                </td>
-                <td class="py-4 px-3 text-[12.5px] text-[#3A4B63] font-medium">
-                  <div class="-mt-1 mb-4">
-                    <button type="button" th:attr="data-lead-id=${lead.id}" onclick="openCompanyFollowUpPopup(this)" th:classappend="${(lead.reminder != null and !#strings.isEmpty(lead.reminder)) or leadsWithFollowupComments.contains(lead.id)} ? 'has-followup' : ''" class="company-followup-btn">
-                      <span class="company-followup-btn-label">Company Follow Up</span>
-                      <svg class="company-followup-btn-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                  </div>
-                  <div class="lead-company-name" th:if="${lead.companyName != null and !#strings.isEmpty(lead.companyName)}" th:text="${lead.companyName}">Company</div>
-                  <div class="lead-company-missing" th:if="${lead.companyName == null or #strings.isEmpty(lead.companyName)}">Company name not given</div>
-                  <div class="mt-3 flex items-center gap-2" th:with="hasReq=${lead.requirements != null and !#strings.isEmpty(lead.requirements)},hasAddress=${lead.address != null and !#strings.isEmpty(lead.address)}">
-                    <button type="button"
-                            th:attr="data-company=${lead.companyName},data-requirement=${lead.requirements}"
-                            th:onclick="${hasReq} ? 'openRequirementPopup(this)' : null"
-                            class="text-[10px] font-bold px-3 py-1 rounded-full shadow-sm transition"
-                            th:style="${hasReq} ? 'background:#E5484D;color:#fff;cursor:pointer;' : 'background:#E4E7EC;color:#9AA0AC;cursor:not-allowed;box-shadow:none;'"
-                            th:onmouseover="${hasReq} ? 'this.style.background=\'#C93A3F\'' : null"
-                            th:onmouseout="${hasReq} ? 'this.style.background=\'#E5484D\'' : null">Requirement</button>
-                    <button type="button"
-                            th:attr="data-company=${lead.companyName},data-address=${lead.address}"
-                            th:onclick="${hasAddress} ? 'openAddressPopup(this)' : null"
-                            class="text-[10px] font-bold px-3 py-1 rounded-full shadow-sm transition"
-                            th:style="${hasAddress} ? 'background:#2C6BE0;color:#fff;cursor:pointer;' : 'background:#E4E7EC;color:#9AA0AC;cursor:not-allowed;box-shadow:none;'"
-                            th:onmouseover="${hasAddress} ? 'this.style.background=\'#2358BE\'' : null"
-                            th:onmouseout="${hasAddress} ? 'this.style.background=\'#2C6BE0\'' : null">Address</button>
-                  </div>
-                </td>
-                <td class="py-4 px-3 space-y-1.5">
-                  <select class="lead-source-select w-full text-[#3A4B63] bg-transparent border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/40 rounded-md px-1 py-1"
-                          th:onchange="'updateLeadField(' + ${lead.id} + ', \'sourceId\', this.value)'">
-                    <option th:each="src : ${allSources}" th:value="${src.id}" th:text="${src.label}"
-                            th:selected="${lead.sourceId != null and src.id == lead.sourceId}"></option>
-                  </select>
-                  <select class="lead-status-select w-full font-semibold px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/40"
-                          th:style="${lead.status == '1' ? 'background:#F0EEFB;color:#7C4FE0;' : (lead.status == '2' ? 'background:#EAF4FE;color:#2C7EC7;' : (lead.status == '3' ? 'background:#FDEBEB;color:#D14343;' : (lead.status == '4' ? 'background:#E7F9F0;color:#1F9D5C;' : 'background:#EDEFF3;color:#4B5567;')))}"
-                          th:onchange="'updateLeadField(' + ${lead.id} + ', \'status\', this.value)'">
-                    <option th:each="st : ${allStatuses}" th:value="${st.id}" th:text="${st.label}"
-                            th:selected="${lead.status != null and lead.status == #strings.toString(st.id)}"></option>
-                  </select>
-                </td>
-
-                <td class="py-4 pl-3 pr-3">
-                  <div class="flex flex-col gap-2.5">
-                    <div class="flex items-center gap-2">
-                      <button type="button" th:id="'quotationBtn' + ${lead.id}" th:onclick="'openQuotationModal(' + ${lead.id} + ')'" class="flex-1 min-w-0 flex items-center justify-between gap-2 bg-[#F3F5F8] rounded-full px-4 py-1.5 text-[11px] font-semibold text-[#3A4B63] hover:opacity-90 transition">
-                        <span th:id="'quotationText' + ${lead.id}" th:text="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType) ? lead.quotationType : 'Quotation'}">Quotation</span>
+                    <div class="lead-quotation-choice flex items-center gap-2">
+                      <button type="button" th:id="'quotationBtn' + ${lead.id}" th:onclick="'openQuotationModal(' + ${lead.id} + ')'" class="flex-1 min-w-0 flex items-center justify-between gap-2 px-4 py-1.5 text-[11px] font-semibold text-[#3A4B63] transition">
+                        <span class="truncate" th:id="'quotationText' + ${lead.id}" th:text="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType) ? lead.quotationType : 'Choose quotation'}">Choose quotation</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"/></svg>
                       </button>
-                      <button type="button" th:id="'quotationDownload' + ${lead.id}" class="quotation-latest-download" title="Download latest quotation" aria-label="Download latest quotation">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                      <div th:id="'quotationArrowBox' + ${lead.id}" th:classappend="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType)} ? 'flex' : 'hidden'" th:attr="data-lead-id=${lead.id},data-quotation-type=${lead.quotationType},data-company-name=${lead.companyName}" onclick="openQuotationEditPanel(this)" class="lead-quotation-proceed cursor-pointer" title="Proceed" aria-label="Proceed to quotation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                      </div>
+                    </div>
+                    <div class="lead-details-top-actions">
+                      <button type="button" th:id="'quotationDownload' + ${lead.id}" class="quotation-latest-download lead-details-icon-button" disabled title="No quotation available to download" aria-label="Download latest quotation">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                      </button>
+                      <button type="button" class="lead-details-icon-button lead-requirement-icon" th:attr="data-company=${lead.companyName},data-requirement=${lead.requirements}" th:onclick="${lead.requirements != null and !#strings.isEmpty(lead.requirements)} ? 'openRequirementPopup(this)' : null" th:disabled="${lead.requirements == null or #strings.isEmpty(lead.requirements)}" title="View requirement" aria-label="View requirement">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                      <button type="button" class="lead-details-icon-button" th:onclick="'openEditLead(' + ${lead.id} + ') '" title="Edit Lead" aria-label="Edit Lead">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"/></svg>
                       </button>
                     </div>
-                    <div class="flex items-center gap-2">
-                      <div th:id="'quotationArrowBox' + ${lead.id}" th:classappend="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType)} ? 'flex' : 'hidden'" th:attr="data-lead-id=${lead.id},data-quotation-type=${lead.quotationType},data-company-name=${lead.companyName}" onclick="openQuotationEditPanel(this)" class="isi-arrow-trigger items-center justify-center shrink-0 cursor-pointer hover:opacity-90 transition px-3 py-1.5 rounded-full text-[11px] font-bold text-white" style="background:#F3A73D;" title="Proceed">
-                        Edit
+                  </div>
+                </td>
+                <td class="py-4 px-3 text-[#3A4B63]">
+                  <div class="lead-company-details-stack">
+                    <div class="lead-company-reference-selects">
+                      <div class="lead-reference-field">
+                        <span class="lead-reference-label">Source</span>
+                        <div class="lead-source-display">
+                        <span th:each="src : ${allSources}" th:if="${lead.sourceId != null and src.id == lead.sourceId}" th:text="${src.label}">Source</span>
+                        <span th:if="${lead.sourceId == null}">-</span>
+                        </div>
                       </div>
-                      <button type="button" th:onclick="'openEditLead(' + ${lead.id} + ')'" class="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold text-white hover:opacity-90 transition" style="background:#5B8DEF;" title="Edit Lead">
-                        Edit Lead
-                      </button>
-                      <button type="button" th:onclick="'deleteLead(' + ${lead.id} + ')'" class="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold text-white hover:opacity-90 transition" style="background:#E5484D;" title="Delete">
-                        Delete
-                      </button>
+                      <label class="lead-reference-field">
+                        <span class="lead-reference-label">Status</span>
+                        <select class="lead-status-select w-full font-semibold px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/40"
+                              th:style="${lead.status == '1' ? 'background:#F0EEFB;color:#7C4FE0;' : (lead.status == '2' ? 'background:#EAF4FE;color:#2C7EC7;' : (lead.status == '3' ? 'background:#FDEBEB;color:#D14343;' : (lead.status == '4' ? 'background:#E7F9F0;color:#1F9D5C;' : 'background:#EDEFF3;color:#4B5567;')))}"
+                              th:onchange="'updateLeadField(' + ${lead.id} + ', \'status\', this.value)'">
+                        <option th:each="st : ${allStatuses}" th:value="${st.id}" th:text="${st.label}"
+                                th:selected="${lead.status != null and lead.status == #strings.toString(st.id)}"></option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="lead-metadata-stack">
+                    <div class="lead-details-people">
+                      <div class="lead-detail-line">
+                        <strong>Created by</strong>
+                        <span class="lead-person-name" th:text="${lead.createdByName != null and !#strings.isEmpty(lead.createdByName) and !#strings.equalsIgnoreCase(lead.createdByName, 'Unknown') ? #strings.arraySplit(#strings.trim(lead.createdByName), ' ')[0] : ''}"></span>
+                      </div>
+                      <div class="lead-detail-line">
+                        <strong>Assigned to</strong>
+                        <span class="lead-person-badge" th:text="${lead.assignToName != null and !#strings.isEmpty(lead.assignToName) and !#strings.equalsIgnoreCase(lead.assignToName, 'Unknown') ? #strings.arraySplit(#strings.trim(lead.assignToName), ' ')[0] : ''}"></span>
+                      </div>
+                    </div>
+                    <div class="lead-detail-line lead-details-created"><strong>Date</strong><span th:text="${lead.createdAt != null ? #temporals.format(lead.createdAt, 'MMM dd, yyyy') : '-'}">-</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 pl-3 pr-3">
+                  <div class="lead-company-details-cell">
+                    <div class="lead-company-contact-stack">
+                      <div class="lead-detail-line"><strong>Email</strong><span th:text="${lead.email ?: lead.officialMailId}"></span></div>
+                      <div class="lead-detail-line"><strong>Phone</strong><span th:text="${lead.phone ?: lead.companyMobile}"></span></div>
+                      <div class="lead-detail-line"><strong>Company Name</strong><span th:text="${lead.companyName}"></span></div>
+                      <div class="lead-detail-line"><strong>Address</strong><span th:text="${lead.address}"></span></div>
+                      <div class="lead-detail-line"><strong>Latest Follow-up</strong><span th:text="${latestFollowups[lead.id] ?: '-'}" th:title="${latestFollowups[lead.id]}"></span></div>
                     </div>
                   </div>
                 </td>
               </tr>
               <tr class="leads-table-row" th:if="${leads == null or #lists.isEmpty(leads)}">
-                <td colspan="6" class="py-6 text-center text-[12.5px] text-[#8C8FA3]">No leads found.</td>
+                <td colspan="4" class="py-6 text-center text-[12.5px] text-[#8C8FA3]">No leads found.</td>
               </tr>
             </tbody>
           </table>
@@ -1717,7 +1758,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
           </div>
           <div>
             <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Type</label>
-            <select id="leadQuotationInput" name="certificateTypeId" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+            <select id="leadQuotationInput" name="quotationType" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
               <option value="">Select quotation type</option>
               <option th:each="qt : ${allQuotationTypes}" th:value="${qt}" th:text="${qt}">Quotation Type</option>
             </select>
@@ -2590,15 +2631,6 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
         .catch(() => alert('Failed to assign leads.'));
     }
 
-    function applyLeadsFilter() {
-      const status = document.getElementById('filterStatusInput').value;
-      const sourceId = document.getElementById('filterSourceInput').value;
-      const params = new URLSearchParams();
-      if (status) params.set('status', status);
-      if (sourceId) params.set('sourceId', sourceId);
-      window.location.href = '/leads' + (params.toString() ? '?' + params.toString() : '');
-    }
-
     function applyQuotationFilter() {
       const checked = Array.from(document.querySelectorAll('.quotation-filter-checkbox:checked')).map(cb => cb.value);
       const params = new URLSearchParams();
@@ -2915,6 +2947,9 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       const arrow = document.getElementById('quotationArrowBox' + leadId);
       const icon = document.getElementById('quotationDownload' + leadId);
       if (!arrow || !icon) return;
+      icon.disabled = true;
+      icon.title = 'No quotation available to download';
+      icon.onclick = null;
       const type = (arrow.dataset.quotationType || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const config = quotationLatestConfig[type];
       if (!config) return;
@@ -2924,6 +2959,8 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
           const quotations = data && data.quotations ? data.quotations : [];
           if (!quotations.length) return;
           icon.classList.add('visible');
+          icon.disabled = false;
+          icon.title = 'Download latest quotation';
           icon.onclick = function (event) {
             event.preventDefault();
             event.stopPropagation();
@@ -2934,7 +2971,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
               + '/quotation/' + pdfType + '/' + encodeURIComponent(latest.id) + '/pdf';
           };
         })
-        .catch(function () { icon.classList.remove('visible'); });
+        .catch(function () { icon.disabled = true; });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -2963,7 +3000,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     function openCompanyFollowUpPopup(btn) {
       const leadId = btn.getAttribute('data-lead-id');
       const row = btn.closest('tr.lead-row');
-      const companyName = row ? (row.querySelector('.lead-company-name')?.textContent || row.querySelector('.lead-company-missing')?.textContent || '') : '';
+      const companyName = (btn.getAttribute('data-company-name') || (row ? (row.querySelector('.lead-company-name')?.textContent || row.querySelector('.lead-company-missing')?.textContent || '') : '')).trim();
       document.getElementById('companyFollowUpCompany').textContent = companyName.trim() || 'Name Not Given';
       document.getElementById('companyFollowUpLeadId').value = leadId;
       document.getElementById('companyFollowUpTextarea').value = 'Loading...';
@@ -3455,7 +3492,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       });
     }
 
-    let leadsTableRefreshInProgress = false;
+    let leadsTableRefreshPromise = null;
 
     function applyLeadsServerSnapshot(html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html');
@@ -3497,26 +3534,32 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       });
     }
 
-    function refreshLeadsTableFromServer() {
-      if (leadsTableRefreshInProgress) return;
+    function refreshLeadsTableFromServer(forceAfterCurrentRefresh) {
+      if (leadsTableRefreshPromise) {
+        return forceAfterCurrentRefresh
+          ? leadsTableRefreshPromise.then(function () { return refreshLeadsTableFromServer(); })
+          : leadsTableRefreshPromise;
+      }
       const tableBody = document.getElementById('leadsTableBody');
-      if (!tableBody) return;
-      leadsTableRefreshInProgress = true;
+      if (!tableBody) return Promise.resolve(false);
       tableBody.style.transition = 'opacity .18s ease';
       tableBody.style.opacity = '0.35';
 
-      fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      leadsTableRefreshPromise = fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(function (response) { return response.ok ? response.text() : Promise.reject(new Error('Table refresh failed')); })
         .then(function (html) {
           applyLeadsServerSnapshot(html);
           requestAnimationFrame(function () { tableBody.style.opacity = '1'; });
+          return true;
         })
         .catch(function () {
           tableBody.style.opacity = '1';
+          return false;
         })
         .finally(function () {
-          leadsTableRefreshInProgress = false;
+          leadsTableRefreshPromise = null;
         });
+      return leadsTableRefreshPromise;
     }
 
     function refreshLeadsTable() {
@@ -3559,20 +3602,30 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       const form = event.currentTarget;
       const submitButton = document.getElementById('addLeadSubmitBtn');
       const wasEditing = Boolean(document.getElementById('leadIdInput').value);
+      const formData = new FormData(form);
+      formData.set('isName', document.getElementById('leadNameInput').value.trim());
+      formData.set('companyName', document.getElementById('leadCompanyInput').value.trim());
       if (submitButton) submitButton.disabled = true;
       fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
+        body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
-        .then(function (response) { return response.ok ? response.text() : Promise.reject(new Error('Lead save failed')); })
-        .then(function (html) {
+        .then(function (response) {
+          if (!response.ok) throw new Error('Lead save failed');
           closeModal('addLeadModal');
-          applyLeadsServerSnapshot(html);
+          return refreshLeadsTableFromServer(true);
+        })
+        .then(function (refreshed) {
+          if (!refreshed) throw new Error('Lead saved but table refresh failed');
           showLeadToast(wasEditing ? 'Lead updated successfully' : 'Lead added successfully');
           resetLeadForm();
         })
-        .catch(function () { alert('Something went wrong while saving the lead.'); })
+        .catch(function (error) {
+          alert(error && error.message === 'Lead saved but table refresh failed'
+            ? 'Lead saved, but the table could not refresh. Please try refreshing the table again.'
+            : 'Something went wrong while saving the lead.');
+        })
         .finally(function () { if (submitButton) submitButton.disabled = false; });
     });
 

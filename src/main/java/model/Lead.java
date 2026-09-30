@@ -185,6 +185,12 @@ public class Lead {
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }
 
+    public String getServicesId() { return servicesId; }
+    public void setServicesId(String servicesId) { this.servicesId = servicesId; }
+
+    public Long getCertificateTypeId() { return certificateTypeId; }
+    public void setCertificateTypeId(Long certificateTypeId) { this.certificateTypeId = certificateTypeId; }
+
     public String getMcatName() { return mcatName; }
     public void setMcatName(String mcatName) { this.mcatName = mcatName; }
 
