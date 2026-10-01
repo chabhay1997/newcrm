@@ -27,6 +27,7 @@ public class BisIsiOperation {
     @Convert(converter=ProcedureConverter.class) @Column(name="`procedure`") private String procedure;
     @Column(name="payment_status") private String paymentStatus;
     @Column(name="payment_remark") private String paymentRemark;
+    @Column(name="payment_data",columnDefinition="LONGTEXT") private String paymentData;
     @Column(name="advance_payment_status") private String advancePaymentStatus;
     @Transient private Integer paymentInstallments;
     @Transient private BigDecimal totalAmount;
@@ -70,6 +71,8 @@ public class BisIsiOperation {
     }
     public String getPaymentRemark(){return paymentRemark;}
     public void setPaymentRemark(String value){paymentRemark=value;}
+    public String getPaymentData(){return paymentData;}
+    public void setPaymentData(String value){paymentData=value;}
     @Converter public static class LegacyDateConverter implements AttributeConverter<LocalDate,String> {
         public String convertToDatabaseColumn(LocalDate value){return value==null?null:value.toString();}
         public LocalDate convertToEntityAttribute(String value){if(value==null||value.isBlank())return null;try{return LocalDate.parse(value);}catch(Exception ignored){}try{return LocalDate.parse(value,java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));}catch(Exception ignored){return null;}}

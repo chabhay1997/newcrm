@@ -12,6 +12,6 @@ public interface BisIsiOperationRepository extends JpaRepository<BisIsiOperation
  @Query("update BisIsiOperation o set o.advancePaymentStatus=:status, o.updatedAt=:updatedAt where o.id=:id")
  int updateAdvancePaymentStatus(@Param("id") Long id,@Param("status") String status,@Param("updatedAt") LocalDateTime updatedAt);
  @Modifying(clearAutomatically=true,flushAutomatically=true)
- @Query("update BisIsiOperation o set o.paymentStatus=:status, o.paymentRemark=:remark, o.updatedAt=:updatedAt where o.id=:id")
- int updatePaymentDetails(@Param("id") Long id,@Param("status") String status,@Param("remark") String remark,@Param("updatedAt") LocalDateTime updatedAt);
+ @Query("update BisIsiOperation o set o.paymentStatus=:status, o.paymentRemark=:remark, o.paymentData=:paymentData, o.updatedAt=:updatedAt where o.id=:id")
+ int updatePaymentDetails(@Param("id") Long id,@Param("status") String status,@Param("remark") String remark,@Param("paymentData") String paymentData,@Param("updatedAt") LocalDateTime updatedAt);
 }

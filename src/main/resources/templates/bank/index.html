@@ -14,9 +14,16 @@
     .add-bank-button { display: inline-flex; align-items: center; gap: 8px; padding: 11px 17px; border-radius: 12px; color: #fff; background: linear-gradient(135deg,#8a5cf6,#6d8cff); box-shadow: 0 9px 20px rgba(109,140,255,.24); font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap; }
     .bank-table-wrap { overflow-x: auto; }
     .bank-table { width: 100%; min-width: 1040px; border-collapse: collapse; text-align: left; }
-    .bank-table th { padding: 13px 18px; background: #f7f8fb; color: #69758a; font-size: 10.5px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+    .bank-table th { padding: 13px 18px; background: linear-gradient(135deg,#6092ec,#5686e2); color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
     .bank-table td { padding: 16px 18px; border-top: 1px solid #edf0f5; color: #293347; font-size: 12.5px; font-weight: 600; vertical-align: middle; }
-    .bank-table tbody tr:hover { background: #fafbfe; }
+    .bank-table tbody tr { transition: background .16s ease; }
+    .bank-table tbody td { transition: background .16s ease, box-shadow .16s ease; }
+    .bank-table tbody tr:hover td { background: #fcfdff; }
+    .bank-table tbody td:hover { background: #edf4ff !important; box-shadow: inset 3px 0 #4e7df2; }
+    .bank-detail-chip { display: inline-flex; align-items: center; min-height: 32px; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .bank-detail-chip.account-number { background: #eef4ff; color: #24569a; }
+    .bank-detail-chip.ifsc-code { background: #f3f0ff; color: #59439b; }
+    .bank-detail-chip.account-type { background: #edf9f5; color: #167152; }
     .bank-name-link { color: #3568de; font-weight: 800; text-decoration: none; }
     .bank-name-link:hover { color: #234fba; text-decoration: underline; }
     .bank-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
@@ -73,9 +80,9 @@
                 <td th:text="${row.count}">1</td>
                 <td th:text="${bank.createdBy}">Admin User</td>
                 <td><a class="bank-name-link" th:href="@{/bank/{id}/edit(id=${bank.id})}" th:text="${bank.bankName}">HDFC Bank</a></td>
-                <td th:text="${#strings.isEmpty(bank.accountNo) ? '—' : bank.accountNo}">0123456789</td>
-                <td th:text="${#strings.isEmpty(bank.ifscCode) ? '—' : bank.ifscCode}">HDFC0000123</td>
-                <td th:text="${bank.accountType}">Current Account</td>
+                <td><span class="bank-detail-chip account-number" th:text="${bank.accountNo == null or bank.accountNo.trim().isEmpty() ? 'N/A' : bank.accountNo}">0123456789</span></td>
+                <td><span class="bank-detail-chip ifsc-code" th:text="${bank.ifscCode == null or bank.ifscCode.trim().isEmpty() ? 'N/A' : bank.ifscCode}">HDFC0000123</span></td>
+                <td><span class="bank-detail-chip account-type" th:text="${bank.accountType}">Current Account</span></td>
                 <td>
                   <span class="bank-status" th:classappend="${bank.status == 1} ? ' active' : ' inactive'"
                         th:text="${bank.status == 1} ? 'Active' : 'Inactive'">Active</span>

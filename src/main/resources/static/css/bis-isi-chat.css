@@ -81,6 +81,53 @@ body.bis-chat-open {
     overflow: hidden;
 }
 
+.bis-chat-notification {
+    position: fixed;
+    z-index: 1200;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    min-width: 250px;
+    max-width: min(390px, calc(100vw - 32px));
+    align-items: center;
+    gap: 11px;
+    border: 1px solid #bde7d0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #145c38;
+    background: #f0fbf5;
+    box-shadow: 0 14px 34px rgba(5, 34, 21, 0.24);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(24px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.bis-chat-notification.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.bis-chat-notification > span {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: none;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: #1f9d62;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.bis-chat-notification p {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
 .bis-chat-backdrop {
     position: fixed;
     z-index: 1100;

@@ -32,6 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SAVED_PROMPTS = 4;
     const SAVED_PROMPTS_KEY = 'evtl.bisIsiAssistant.savedPrompts';
     const conversationHistory = [];
+    let notificationTimer;
+
+    const showDeleteNotification = message => {
+        window.clearTimeout(notificationTimer);
+        document.querySelector('.bis-chat-notification')?.remove();
+
+        const notification = document.createElement('div');
+        notification.className = 'bis-chat-notification';
+        notification.setAttribute('role', 'status');
+        notification.setAttribute('aria-live', 'polite');
+        notification.innerHTML = '<span aria-hidden="true">&#10003;</span><p></p>';
+        notification.querySelector('p').textContent = message;
+        document.body.appendChild(notification);
+
+        requestAnimationFrame(() => notification.classList.add('visible'));
+        notificationTimer = window.setTimeout(() => {
+            notification.classList.remove('visible');
+            window.setTimeout(() => notification.remove(), 180);
+        }, 2000);
+    };
 
     const loadSavedPrompts = () => {
         try {
@@ -110,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 savedPrompts.splice(index, 1);
                 persistSavedPrompts();
                 renderSavedPrompts();
+                showDeleteNotification('Prompt deleted successfully.');
             });
 
             row.append(reuseButton, deleteButton);
@@ -302,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setStatus('');
         input.value = '';
         input.focus();
+        showDeleteNotification('Chat cleared successfully.');
     };
 
     const parseError = async (response) => {

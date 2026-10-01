@@ -18,19 +18,22 @@
       <div th:if="${success}" class="fmcs-one-alert success" role="status" th:text="${success}"></div>
       <div th:if="${error}" class="fmcs-one-alert error" role="alert" th:text="${error}"></div>
       <section class="fmcs-one-status-cards" aria-label="FMCS-1 status overview">
-        <article th:each="card, state : ${statusCards}" th:class="|fmcs-one-status-card tone-${state.index}|">
+        <a th:each="card, state : ${statusCards}"
+           th:href="@{/operation/fmcs-1(startDate=${startDate},endDate=${endDate},status=${status},search=${search},client=${client},payment=${payment},size=${size},card=${card.key})}"
+           th:class="|fmcs-one-status-card tone-${state.index}${selectedCard == card.key ? ' selected' : ''}|"
+           th:attr="aria-pressed=${selectedCard == card.key}">
           <i aria-hidden="true" th:text="${card.icon}">F</i>
           <div>
             <b th:text="${card.label}">Fresh Project</b>
             <strong th:text="${card.count}">0</strong>
             <small>FMCS operations</small>
           </div>
-        </article>
+        </a>
       </section>
       <section id="fmcs-one-analytics" class="fmcs-one-analytics" aria-labelledby="fmcs-yearly-performance-title" hidden>
         <header class="fmcs-one-analytics-head">
           <div><h2 id="fmcs-yearly-performance-title">FMCS Yearly Performance</h2><p>Total applications by country</p></div>
-          <div class="fmcs-one-analytics-controls"><div class="fmcs-one-analytics-year-control"><label>Country</label><div class="fmcs-one-country-select"><input id="fmcs-one-analytics-country" type="hidden" value=""><button id="fmcs-one-country-toggle" type="button" aria-haspopup="listbox" aria-expanded="false"><span>All Countries</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="fmcs-one-country-options" class="fmcs-one-country-options" role="listbox" hidden><button type="button" role="option" data-value="" aria-selected="true">All Countries</button><button type="button" role="option" th:each="country : ${yearlyPerformance}" th:data-value="${country.country}" th:text="${country.country}">Indonesia</button></div></div></div><div class="fmcs-one-analytics-year-control"><label>Type</label><div class="fmcs-one-country-select"><input id="fmcs-one-analytics-type" type="hidden" value=""><button id="fmcs-one-type-toggle" type="button" aria-haspopup="listbox" aria-expanded="false"><span>All Types</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="fmcs-one-type-options" class="fmcs-one-country-options" role="listbox" hidden><button type="button" role="option" data-value="" aria-selected="true">All Types</button><button type="button" role="option" data-value="Quarterly">Quarterly</button><button type="button" role="option" data-value="Half-Yearly">Half-Yearly</button></div></div></div><div class="fmcs-one-analytics-year-control"><label>Year</label><div class="fmcs-one-country-select"><input id="fmcs-one-analytics-year" type="hidden" th:value="${analyticsYear}"><button id="fmcs-one-year-toggle" type="button" aria-haspopup="listbox" aria-expanded="false"><span th:text="${analyticsYear}">2026</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="fmcs-one-year-options" class="fmcs-one-country-options" role="listbox" hidden><button type="button" role="option" data-value="2024" th:attr="aria-selected=${analyticsYear == 2024}">2024</button><button type="button" role="option" data-value="2025" th:attr="aria-selected=${analyticsYear == 2025}">2025</button><button type="button" role="option" data-value="2026" th:attr="aria-selected=${analyticsYear == 2026}">2026</button></div></div></div><button id="fmcs-one-analytics-reset" class="fmcs-one-analytics-reset" type="button">Reset</button></div>
+          <div class="fmcs-one-analytics-controls"><div class="fmcs-one-analytics-year-control"><label>Year</label><div class="fmcs-one-country-select"><input id="fmcs-one-analytics-year" type="hidden" th:value="${analyticsYear}"><button id="fmcs-one-year-toggle" type="button" aria-haspopup="listbox" aria-expanded="false"><span th:text="${analyticsYear}">2026</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="fmcs-one-year-options" class="fmcs-one-country-options" role="listbox" hidden><button type="button" role="option" data-value="2024" th:attr="aria-selected=${analyticsYear == 2024}">2024</button><button type="button" role="option" data-value="2025" th:attr="aria-selected=${analyticsYear == 2025}">2025</button><button type="button" role="option" data-value="2026" th:attr="aria-selected=${analyticsYear == 2026}">2026</button></div></div></div></div>
         </header>
         <div class="fmcs-one-chart" th:with="maximum=${analyticsMax == 0 ? 1 : analyticsMax}">
           <div class="fmcs-one-y-title">Total Applications</div>
@@ -46,12 +49,12 @@
             <div class="fmcs-one-header-filters">
             <button id="fmcs-one-stats-toggle" class="fmcs-one-stats-toggle" type="button" aria-controls="fmcs-one-analytics" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>View Analytics</button>
             <form class="fmcs-one-header-select-form" method="get" th:action="@{/operation/fmcs-1}">
-              <input type="hidden" name="startDate" th:value="${startDate}"><input type="hidden" name="endDate" th:value="${endDate}"><input type="hidden" name="status" th:value="${status}"><input type="hidden" name="payment" th:value="${payment}"><input type="hidden" name="search" th:value="${search}"><input type="hidden" name="size" th:value="${size}">
+              <input type="hidden" name="startDate" th:value="${startDate}"><input type="hidden" name="endDate" th:value="${endDate}"><input type="hidden" name="status" th:value="${status}"><input type="hidden" name="payment" th:value="${payment}"><input type="hidden" name="search" th:value="${search}"><input type="hidden" name="size" th:value="${size}"><input type="hidden" name="card" th:value="${selectedCard}">
               <label for="fmcs-one-client">Filter by Client</label>
               <select id="fmcs-one-client" name="client"><option value="">Filter by Client</option><option value="cocbang" th:selected="${client == 'cocbang'}">cocbang</option><option value="ERIC(ZHONGBANG)" th:selected="${client == 'ERIC(ZHONGBANG)'}">ERIC(ZHONGBANG)</option><option value="GHANSHYAM PATEL" th:selected="${client == 'GHANSHYAM PATEL'}">GHANSHYAM PATEL</option><option value="GRACE" th:selected="${client == 'GRACE'}">GRACE</option><option value="SATYA - TAPARRIA" th:selected="${client == 'SATYA - TAPARRIA'}">SATYA - TAPARRIA</option><option value="Satya Ganendra" th:selected="${client == 'Satya Ganendra'}">Satya Ganendra</option><option value="SHON RAJAN MANAVATH" th:selected="${client == 'SHON RAJAN MANAVATH'}">SHON RAJAN MANAVATH</option><option value="Suresh Panchal" th:selected="${client == 'Suresh Panchal'}">Suresh Panchal</option></select>
             </form>
             <form class="fmcs-one-header-select-form" method="get" th:action="@{/operation/fmcs-1}">
-              <input type="hidden" name="startDate" th:value="${startDate}"><input type="hidden" name="endDate" th:value="${endDate}"><input type="hidden" name="status" th:value="${status}"><input type="hidden" name="client" th:value="${client}"><input type="hidden" name="search" th:value="${search}"><input type="hidden" name="size" th:value="${size}">
+              <input type="hidden" name="startDate" th:value="${startDate}"><input type="hidden" name="endDate" th:value="${endDate}"><input type="hidden" name="status" th:value="${status}"><input type="hidden" name="client" th:value="${client}"><input type="hidden" name="search" th:value="${search}"><input type="hidden" name="size" th:value="${size}"><input type="hidden" name="card" th:value="${selectedCard}">
               <label for="fmcs-one-payment">Filter by Payment</label>
               <select id="fmcs-one-payment" name="payment"><option value="">Filter by Payment</option><option value="Advance" th:selected="${payment == 'Advance'}">Advance</option><option value="After Application" th:selected="${payment == 'After Application'}">After Application</option><option value="After Nomination" th:selected="${payment == 'After Nomination'}">After Nomination</option><option value="After License" th:selected="${payment == 'After License'}">After License</option></select>
             </form>
@@ -61,6 +64,7 @@
               <input type="hidden" name="status" th:value="${status}">
               <input type="hidden" name="client" th:value="${client}">
               <input type="hidden" name="payment" th:value="${payment}">
+              <input type="hidden" name="card" th:value="${selectedCard}">
               <input type="hidden" name="size" th:value="${size}">
               <label for="fmcs-one-search">Search</label>
               <div class="fmcs-one-search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="fmcs-one-search" type="search" name="search" th:value="${search}" placeholder="Search FMCS records" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fmcs-one-search-suggestions"></div>
@@ -74,15 +78,16 @@
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
               <label class="fmcs-one-excel-button import" for="fmcs-one-import-file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4m0 0L6 10m6-6 6 6M5 20h14"/></svg>Import Excel</label>
             </form>
-            <a class="fmcs-one-excel-button export" th:href="@{/operation/fmcs-1/export(startDate=${startDate},endDate=${endDate},status=${status},search=${search},client=${client},payment=${payment})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a>
+            <a class="fmcs-one-excel-button export" th:href="@{/operation/fmcs-1/export(startDate=${startDate},endDate=${endDate},status=${status},search=${search},client=${client},payment=${payment},card=${selectedCard})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12m-4-4 4 4 4-4M5 20h14"/></svg>Export Excel</a>
             <form class="fmcs-one-filter-form" method="get" th:action="@{/operation/fmcs-1}">
               <input type="hidden" name="search" th:value="${search}">
               <input type="hidden" name="client" th:value="${client}">
               <input type="hidden" name="payment" th:value="${payment}">
+              <input type="hidden" name="card" th:value="${selectedCard}">
               <label for="fmcs-one-start-date">Start Date</label>
-              <input id="fmcs-one-start-date" type="date" name="startDate" th:value="${startDate}" onchange="this.form.submit()">
+              <input id="fmcs-one-start-date" type="date" name="startDate" th:value="${startDate}" onchange="this.form.requestSubmit()">
               <label for="fmcs-one-end-date">End Date</label>
-              <input id="fmcs-one-end-date" type="date" name="endDate" th:value="${endDate}" onchange="this.form.submit()">
+              <input id="fmcs-one-end-date" type="date" name="endDate" th:value="${endDate}" onchange="this.form.requestSubmit()">
               <label for="fmcs-one-status">Status</label>
               <select id="fmcs-one-status" name="status">
                 <option value="">All Statuses</option>
@@ -100,7 +105,7 @@
               </select>
             </form>
             <a class="fmcs-one-clear-filters" href="/operation/fmcs-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M5.5 15a7 7 0 0 0 11.7 2.4L20 14M4 10l2.8-3.4A7 7 0 0 1 18.5 9"/></svg>Clear Filters</a>
-            <button class="fmcs-one-add-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add FMCS</button>
+            <a class="fmcs-one-add-button" th:href="@{/operation/fmcs-1/create}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add FMCS</a>
           </div>
         </header>
         <div class="fmcs-one-table-wrap">
@@ -117,24 +122,24 @@
             </thead>
             <tbody>
               <tr th:each="record, row : ${records}">
-                <td class="fmcs-one-sn" th:text="${row.index + 1}">1</td>
+                <td class="fmcs-one-sn" th:text="${page * size + row.index + 1}">1</td>
                 <td class="fmcs-one-created"><strong th:text="${record.creatorName}">User</strong><span th:text="${record.entryDate ?: '—'}">01-01-2026</span></td>
                 <td>
-                  <span th:text="|IS Standard: ${record.isStandard}|">IS Standard: N/A</span>
-                  <span th:text="|Application No: ${record.applicationNo}|">Application No: N/A</span>
-                  <span th:text="|CML No: ${record.cmlNo}|">CML No: N/A</span>
+                  <div class="fmcs-one-detail-line"><strong>IS Standard:</strong><span th:text="${record.isStandard}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>Application No:</strong><span th:text="${record.applicationNo}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>CML No:</strong><span th:text="${record.cmlNo}">N/A</span></div>
                 </td>
                 <td>
-                  <span th:text="|Company Name: ${record.companyName}|">Company Name: N/A</span>
-                  <span th:text="|Product Name: ${record.productName}|">Product Name: N/A</span>
-                  <span th:text="|Country: ${record.countryName}|">Country: N/A</span>
+                  <div class="fmcs-one-detail-line"><strong>Company Name:</strong><span th:text="${record.companyName}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>Product Name:</strong><span th:text="${record.productName}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>Country:</strong><span th:text="${record.countryName}">N/A</span></div>
                 </td>
                 <td>
-                  <span th:text="|L.S: ${record.licenseStatus}|">L.S: N/A</span>
-                  <span th:text="|Client: ${record.clientName}|">Client: N/A</span>
-                  <span th:text="|Service Fee: ${record.serviceFee}|">Service Fee: N/A</span>
+                  <div class="fmcs-one-detail-line"><strong>L.S:</strong><span th:text="${record.licenseStatus}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>Client:</strong><span th:text="${record.clientName}">N/A</span></div>
+                  <div class="fmcs-one-detail-line"><strong>Service Fee:</strong><span th:text="${record.serviceFee}">N/A</span></div>
                 </td>
-                <td class="fmcs-one-action">—</td>
+                <td class="fmcs-one-action"><div class="fmcs-one-row-actions"><button class="fmcs-one-row-action preview" type="button" th:attr="data-preview-id=${record.id}" aria-label="Preview FMCS operation" title="Preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><form method="post" th:action="@{/operation/fmcs-1/{id}/delete(id=${record.id})}" onsubmit="return confirm('Delete this FMCS operation permanently?');"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="fmcs-one-row-action delete" type="submit" aria-label="Delete FMCS operation" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button></form></div></td>
               </tr>
               <tr th:if="${records.empty}">
                 <td colspan="6" class="fmcs-one-empty">No FMCS-1 records available.</td>
@@ -147,6 +152,27 @@
           <nav class="classic-pagination-controls" aria-label="FMCS-1 pages"></nav>
         </footer>
       </section>
+      <dialog id="fmcs-preview-modal" class="fmcs-preview-modal" aria-labelledby="fmcs-preview-title">
+        <div class="fmcs-preview-modal-shell">
+          <header class="fmcs-preview-modal-head"><span class="fmcs-preview-modal-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg></span><div><h2 id="fmcs-preview-title">FMCS Details &amp; Payment</h2><p>Review application, testing, and payment information</p></div><button class="fmcs-preview-close" type="button" aria-label="Close preview">×</button></header>
+          <div class="fmcs-preview-loading">Loading FMCS details…</div>
+          <div class="fmcs-preview-content" hidden>
+            <aside class="fmcs-preview-sidebar">
+              <section class="fmcs-preview-panel blue"><header><span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/></svg></span><div><h3>Application Details</h3></div></header><dl><div><dt>AIR Name</dt><dd data-preview="air_name">N/A</dd></div><div><dt>AIR Email</dt><dd data-preview="air_email">N/A</dd></div><div><dt>BIS Officer</dt><dd data-preview="bis_officer_name">N/A</dd></div><div><dt>BIS Contact</dt><dd data-preview="bis_officer_contact">N/A</dd></div><div><dt>Client Name</dt><dd data-preview="client_name">N/A</dd></div><div><dt>Client Email</dt><dd data-preview="client_email">N/A</dd></div></dl></section>
+              <section class="fmcs-preview-panel amber"><header><span><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8"/></svg></span><div><h3>Testing Timeline</h3></div></header><dl><div><dt>Grant Date</dt><dd data-preview="grant_date">N/A</dd></div><div><dt>Pre Testing</dt><dd data-preview="pre_testing_status_display">N/A</dd></div><div><dt>Post Testing</dt><dd data-preview="post_testing_status_display">N/A</dd></div><div><dt>Sample Testing Date</dt><dd data-preview="insp_date">N/A</dd></div><div><dt>PBG Date</dt><dd data-preview="pbg_submission_date">N/A</dd></div><div><dt>Deadline</dt><dd data-preview="project_deadline_date">N/A</dd></div></dl></section>
+              <section class="fmcs-preview-panel downloads"><header><span><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg></span><div><h3>Downloads</h3></div></header><div class="fmcs-preview-files"><svg viewBox="0 0 24 24"><path d="M4 7h6l2 2h8v10H4z"/></svg><strong data-preview-files>No files available</strong><small>Uploaded files will appear here</small></div></section>
+            </aside>
+            <form class="fmcs-preview-main" id="fmcs-preview-edit-form">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <div class="fmcs-preview-main-title"><span><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4v18M12 9h8v12M2 21h20"/></svg></span><div><h3>Company Information</h3></div></div>
+              <div class="fmcs-preview-fields"><label><b>Company Name <i>*</i></b><input name="company_name" data-preview-input="company_name" placeholder="Enter company name"></label><label><b>Application Number</b><input name="app_no" data-preview-input="app_no" placeholder="Enter application number"></label><label><b>CML No. <i>*</i></b><input name="cml_no" data-preview-input="cml_no" placeholder="Enter CML number"></label><label><b>Indian Standard</b><input name="indian_standard" data-preview-input="indian_standard" placeholder="Enter Indian standard"></label><label><b>BIS Officer Name</b><input name="bis_officer_name" data-preview-input="bis_officer_name" placeholder="Enter BIS officer name"></label><label><b>BIS Officer Contact</b><input name="bis_officer_contact" data-preview-input="bis_officer_contact" placeholder="Enter BIS officer contact"></label></div>
+              <div class="fmcs-preview-section fmcs-preview-payment"><div class="fmcs-preview-main-title"><span><svg viewBox="0 0 24 24"><path d="M4 7h16v11H4zM7 4h10v3M8 12h8"/></svg></span><div><h3>Payment &amp; Status</h3></div></div><input type="hidden" name="service_fee" data-payment-value="service_fee"><input type="hidden" name="bis_pay" data-payment-value="bis_pay"><fieldset class="fmcs-payment-group"><legend>Select Service Fees</legend><div class="fmcs-payment-pills"><label><input type="checkbox" value="1" data-payment-choice="service_fee"><span><i>✓</i><b>1 Payment</b><small>Advance</small></span></label><label><input type="checkbox" value="2" data-payment-choice="service_fee"><span><i>✓</i><b>2 Payment</b><small>After Application</small></span></label><label><input type="checkbox" value="3" data-payment-choice="service_fee"><span><i>✓</i><b>3 Payment</b><small>After Nomination</small></span></label><label><input type="checkbox" value="4" data-payment-choice="service_fee"><span><i>✓</i><b>4 Payment</b><small>After License</small></span></label></div></fieldset><fieldset class="fmcs-payment-group"><legend>BIS Payment Options</legend><div class="fmcs-payment-pills bis"><label><input type="checkbox" value="1" data-payment-choice="bis_pay"><span><i>✓</i><b>Application Fee</b></span></label><label><input type="checkbox" value="2" data-payment-choice="bis_pay"><span><i>✓</i><b>Nomination Fee</b></span></label><label><input type="checkbox" value="3" data-payment-choice="bis_pay"><span><i>✓</i><b>Minimum Fee</b></span></label></div></fieldset></div>
+              <div class="fmcs-preview-section"><div class="fmcs-preview-main-title"><span><svg viewBox="0 0 24 24"><path d="M4 4h16v14H7l-3 3zM8 9h8M8 13h5"/></svg></span><div><h3>Remark</h3></div></div><textarea class="fmcs-preview-remark" name="remark" data-preview-input="remark" placeholder="Enter remark"></textarea></div>
+              <div class="fmcs-preview-save-row"><span class="fmcs-preview-save-message" role="status"></span><button class="fmcs-preview-save" type="submit"><svg viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5zM8 4v6h8V4M8 20v-6h8v6"/></svg>Save Changes</button></div>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </main>
   </div>
 </body>

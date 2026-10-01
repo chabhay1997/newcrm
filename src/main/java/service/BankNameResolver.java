@@ -64,7 +64,7 @@ public class BankNameResolver {
     }
 
     public String resolve(Integer bankCode) {
-        if (bankCode == null) return "Unknown Bank";
+        if (bankCode == null) return "N/A";
         return BANK_NAMES.getOrDefault(bankCode, "Bank " + bankCode);
     }
 

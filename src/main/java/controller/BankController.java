@@ -159,7 +159,7 @@ public class BankController {
     }
 
     private String resolveAccountType(Integer accountType) {
-        if (accountType == null) return "—";
+        if (accountType == null) return "N/A";
         return switch (accountType) {
             case 1 -> "Savings Account";
             case 2 -> "Current Account";

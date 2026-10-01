@@ -7,59 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     statsToggle.setAttribute('aria-expanded', String(visible));
     statsToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>${visible ? 'Hide Analytics' : 'View Analytics'}`;
   };
-  statsToggle?.addEventListener('click', () => setAnalyticsVisible(analytics.hidden));
+  statsToggle?.addEventListener('click', () => {
+    const visible = analytics.hidden;
+    setAnalyticsVisible(visible);
+    showTransientAlert(visible ? 'FMCS analytics opened.' : 'FMCS analytics hidden.');
+  });
 
   const analyticsYear = document.getElementById('fmcs-one-analytics-year');
-  const analyticsCountry = document.getElementById('fmcs-one-analytics-country');
-  const analyticsType = document.getElementById('fmcs-one-analytics-type');
-  const analyticsReset = document.getElementById('fmcs-one-analytics-reset');
-  const countryToggle = document.getElementById('fmcs-one-country-toggle');
-  const countryOptions = document.getElementById('fmcs-one-country-options');
-  const typeToggle = document.getElementById('fmcs-one-type-toggle');
-  const typeOptions = document.getElementById('fmcs-one-type-options');
   const yearToggle = document.getElementById('fmcs-one-year-toggle');
   const yearOptions = document.getElementById('fmcs-one-year-options');
   let analyticsRequestVersion = 0;
-  const closeCountryOptions = () => {
-    if (!countryOptions || !countryToggle) return;
-    countryOptions.hidden = true;
-    countryToggle.setAttribute('aria-expanded', 'false');
-  };
-  countryToggle?.addEventListener('click', () => {
-    const opening = countryOptions.hidden;
-    if (opening) { closeTypeOptions(); closeYearOptions(); }
-    countryOptions.hidden = !opening;
-    countryToggle.setAttribute('aria-expanded', String(opening));
-  });
-  countryOptions?.addEventListener('click', event => {
-    const option = event.target.closest('[role="option"]');
-    if (!option) return;
-    analyticsCountry.value = option.dataset.value;
-    countryToggle.querySelector('span').textContent = option.textContent;
-    countryOptions.querySelectorAll('[role="option"]').forEach(item => item.setAttribute('aria-selected', String(item === option)));
-    closeCountryOptions();
-    updateAnalytics();
-  });
-  const closeTypeOptions = () => {
-    if (!typeOptions || !typeToggle) return;
-    typeOptions.hidden = true;
-    typeToggle.setAttribute('aria-expanded', 'false');
-  };
-  typeToggle?.addEventListener('click', () => {
-    const opening = typeOptions.hidden;
-    if (opening) { closeCountryOptions(); closeYearOptions(); }
-    typeOptions.hidden = !opening;
-    typeToggle.setAttribute('aria-expanded', String(opening));
-  });
-  typeOptions?.addEventListener('click', event => {
-    const option = event.target.closest('[role="option"]');
-    if (!option) return;
-    analyticsType.value = option.dataset.value;
-    typeToggle.querySelector('span').textContent = option.textContent;
-    typeOptions.querySelectorAll('[role="option"]').forEach(item => item.setAttribute('aria-selected', String(item === option)));
-    closeTypeOptions();
-    updateAnalytics();
-  });
   const closeYearOptions = () => {
     if (!yearOptions || !yearToggle) return;
     yearOptions.hidden = true;
@@ -67,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   yearToggle?.addEventListener('click', () => {
     const opening = yearOptions.hidden;
-    if (opening) { closeCountryOptions(); closeTypeOptions(); }
     yearOptions.hidden = !opening;
     yearToggle.setAttribute('aria-expanded', String(opening));
   });
@@ -81,18 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAnalytics();
   });
   document.addEventListener('click', event => {
-    if (!event.target.closest('.fmcs-one-country-select')) closeCountryOptions();
-    if (!event.target.closest('.fmcs-one-country-select')) closeTypeOptions();
     if (!event.target.closest('.fmcs-one-country-select')) closeYearOptions();
   });
   const updateAnalytics = async () => {
-    if (!analytics || !analyticsYear || !analyticsCountry || !analyticsType) return;
+    if (!analytics || !analyticsYear) return;
     const requestVersion = ++analyticsRequestVersion;
-    [analyticsYear, analyticsCountry, analyticsType, analyticsReset, countryToggle, typeToggle, yearToggle].forEach(control => { if (control) control.disabled = true; });
+    [analyticsYear, yearToggle].forEach(control => { if (control) control.disabled = true; });
     try {
       const query = new URLSearchParams({ year: analyticsYear.value });
-      if (analyticsCountry.value) query.set('country', analyticsCountry.value);
-      if (analyticsType.value) query.set('type', analyticsType.value);
       const response = await fetch('/operation/fmcs-1/analytics?' + query, {
         headers: { Accept: 'application/json' }
       });
@@ -128,35 +80,21 @@ document.addEventListener('DOMContentLoaded', () => {
       analytics.querySelector('.fmcs-one-x-title').textContent = data.xAxisTitle;
       const url = new URL(window.location.href);
       url.searchParams.set('analyticsYear', data.year);
-      if (analyticsCountry.value) url.searchParams.set('analyticsCountry', analyticsCountry.value);
-      else url.searchParams.delete('analyticsCountry');
-      if (analyticsType.value) url.searchParams.set('analyticsType', analyticsType.value);
-      else url.searchParams.delete('analyticsType');
+      url.searchParams.delete('analyticsCountry');
+      url.searchParams.delete('analyticsType');
       window.history.replaceState({}, '', url);
+      showTransientAlert('Analytics filters updated successfully.');
     } catch (error) {
-      if (requestVersion === analyticsRequestVersion) console.error(error);
+      if (requestVersion === analyticsRequestVersion) {
+        console.error(error);
+        showTransientAlert('Unable to update FMCS analytics.', 'error');
+      }
     } finally {
       if (requestVersion === analyticsRequestVersion)
-        [analyticsYear, analyticsCountry, analyticsType, analyticsReset, countryToggle, typeToggle, yearToggle].forEach(control => { if (control) control.disabled = false; });
+        [analyticsYear, yearToggle].forEach(control => { if (control) control.disabled = false; });
     }
   };
-  [analyticsYear, analyticsCountry, analyticsType].forEach(control => control?.addEventListener('change', updateAnalytics));
-  analyticsReset?.addEventListener('click', () => {
-    analyticsCountry.value = '';
-    countryToggle.querySelector('span').textContent = 'All Countries';
-    countryOptions.querySelectorAll('[role="option"]').forEach(option => option.setAttribute('aria-selected', String(!option.dataset.value)));
-    closeCountryOptions();
-    analyticsType.value = '';
-    typeToggle.querySelector('span').textContent = 'All Types';
-    typeOptions.querySelectorAll('[role="option"]').forEach(option => option.setAttribute('aria-selected', String(!option.dataset.value)));
-    closeTypeOptions();
-    const currentYear = String(new Date().getFullYear());
-    analyticsYear.value = [...yearOptions.querySelectorAll('[role="option"]')].some(option => option.dataset.value === currentYear) ? currentYear : '2026';
-    yearToggle.querySelector('span').textContent = analyticsYear.value;
-    yearOptions.querySelectorAll('[role="option"]').forEach(option => option.setAttribute('aria-selected', String(option.dataset.value === analyticsYear.value)));
-    closeYearOptions();
-    updateAnalytics();
-  });
+  analyticsYear?.addEventListener('change', updateAnalytics);
 
   const search = document.getElementById('fmcs-one-search');
   const searchForm = search?.form;
@@ -247,7 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (selected) item.setAttribute('aria-current', 'page');
       return item;
     };
-    controls.append(link('Previous', Math.max(1, current - 1), current === 1, false));
+    const input = document.createElement('input');
+    input.type = 'number'; input.min = '1'; input.max = String(pages); input.placeholder = 'Go to...';
+    input.setAttribute('aria-label', 'Go to page');
+    const go = () => {
+      const page = Number(input.value);
+      if (Number.isInteger(page) && page >= 1 && page <= pages) location.href = urlFor(page);
+      else input.setCustomValidity(`Enter a page from 1 to ${pages}.`);
+    };
+    input.addEventListener('input', () => input.setCustomValidity(''));
+    input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); go(); } });
+    const goButton = document.createElement('button');
+    goButton.type = 'button'; goButton.className = 'go-button'; goButton.textContent = 'Go';
+    goButton.addEventListener('click', go);
+    controls.append(input, goButton, link('Previous', Math.max(1, current - 1), current === 1, false));
     for (let page = Math.max(1, current - 2); page <= Math.min(pages, current + 2); page++)
       controls.append(link(String(page), page, false, page === current));
     controls.append(link('Next', Math.min(pages, current + 1), current === pages, false));
@@ -272,14 +223,301 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       window.history.replaceState({}, '', url);
       buildPagination(document.querySelector('.fmcs-one-footer.classic-pagination'));
+      const labels = {client: 'Client filter applied.', payment: 'Payment filter applied.', status: 'Status filter applied.', startDate: 'Start-date filter applied.', endDate: 'End-date filter applied.', size: 'Table row count updated.'};
+      if (changedControl.name !== 'search') showTransientAlert(labels[changedControl.name] || 'Filters applied successfully.');
     } catch (error) {
       console.error(error);
+      if (changedControl.name !== 'search') showTransientAlert('Unable to apply the selected filters.', 'error');
     } finally {
       changedControl.disabled = false;
     }
   };
-  document.querySelectorAll('.fmcs-one-header-select-form, .fmcs-one-filter-form').forEach(form => {
-    form.addEventListener('submit', event => event.preventDefault());
+  let cardRequest;
+  document.querySelectorAll('.fmcs-one-status-card').forEach(card => {
+    card.addEventListener('click', async event => {
+      event.preventDefault();
+      if (cardRequest) cardRequest.abort();
+      cardRequest = new AbortController();
+      const url = new URL(card.href, window.location.origin);
+      url.searchParams.set('page', '0');
+      const cards = document.querySelectorAll('.fmcs-one-status-card');
+      cards.forEach(item => item.setAttribute('aria-busy', 'true'));
+      try {
+        const response = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          signal: cardRequest.signal
+        });
+        if (!response.ok) throw new Error('Unable to filter FMCS records');
+        const documentResult = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const replacementTable = documentResult.querySelector('.fmcs-one-table-wrap');
+        const replacementPager = documentResult.querySelector('.fmcs-one-footer.classic-pagination');
+        if (!replacementTable || !replacementPager) throw new Error('Incomplete FMCS filter response');
+        document.querySelector('.fmcs-one-table-wrap').replaceWith(replacementTable);
+        document.querySelector('.fmcs-one-footer.classic-pagination').replaceWith(replacementPager);
+        cards.forEach(item => {
+          const selected = item === card;
+          item.classList.toggle('selected', selected);
+          item.setAttribute('aria-pressed', String(selected));
+        });
+        document.querySelectorAll('.fmcs-one-table-toolbar [name="card"]').forEach(input => { input.value = url.searchParams.get('card') || ''; });
+        window.history.replaceState({}, '', url.pathname + url.search);
+        buildPagination(document.querySelector('.fmcs-one-footer.classic-pagination'));
+        showTransientAlert(`${card.querySelector('b')?.textContent?.trim() || 'Status'} filter applied.`);
+      } catch (error) {
+        if (error.name !== 'AbortError') window.location.assign(url);
+      } finally {
+        cards.forEach(item => item.removeAttribute('aria-busy'));
+      }
+    });
+  });
+  document.querySelectorAll('.fmcs-one-header-select-form, .fmcs-one-filter-form, .fmcs-one-search-form').forEach(form => {
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const changedControl = document.activeElement?.form === form ? document.activeElement : (form.querySelector('[name="search"]') || form);
+      refreshTable(form, changedControl);
+    });
     form.querySelectorAll('select').forEach(select => select.addEventListener('change', () => refreshTable(form, select)));
+  });
+
+  const showTransientAlert = (message, type = 'success') => {
+    document.querySelectorAll('.fmcs-one-toast').forEach(alert => alert.remove());
+    const alert = document.createElement('div');
+    alert.className = `fmcs-one-toast ${type}`;
+    alert.setAttribute(type === 'error' ? 'role' : 'status', type === 'error' ? 'alert' : 'status');
+    alert.innerHTML = `<span aria-hidden="true">${type === 'error' ? '!' : '✓'}</span><p></p>`;
+    alert.querySelector('p').textContent = message;
+    document.body.append(alert);
+    requestAnimationFrame(() => alert.classList.add('visible'));
+    window.setTimeout(() => {
+      alert.classList.remove('visible');
+      window.setTimeout(() => alert.remove(), 180);
+    }, 2000);
+  };
+  document.querySelectorAll('.fmcs-one-page>.fmcs-one-alert').forEach(alert => {
+    const message = alert.textContent.trim();
+    const type = alert.classList.contains('error') ? 'error' : 'success';
+    alert.remove();
+    showTransientAlert(message, type);
+  });
+  const pendingToast = sessionStorage.getItem('fmcsToast');
+  if (pendingToast) {
+    sessionStorage.removeItem('fmcsToast');
+    showTransientAlert(pendingToast);
+  }
+  document.addEventListener('click', async event => {
+    const clear = event.target.closest('.fmcs-one-clear-filters');
+    if (clear) {
+      event.preventDefault();
+      try {
+        const response = await fetch(clear.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+        if (!response.ok) throw new Error('Unable to clear filters.');
+        const result = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const replacementTable = result.querySelector('.fmcs-one-table-wrap');
+        const replacementPager = result.querySelector('.fmcs-one-footer.classic-pagination');
+        document.querySelector('.fmcs-one-table-wrap').replaceWith(replacementTable);
+        document.querySelector('.fmcs-one-footer.classic-pagination').replaceWith(replacementPager);
+        document.querySelectorAll('.fmcs-one-status-card').forEach(card => {
+          card.classList.remove('selected');
+          card.setAttribute('aria-pressed', 'false');
+        });
+        document.querySelectorAll('.fmcs-one-table-toolbar input:not([type="file"]):not([name="size"]), .fmcs-one-table-toolbar select:not([name="size"])').forEach(control => { control.value = ''; });
+        document.querySelectorAll('.fmcs-one-table-toolbar [name="size"]').forEach(control => { control.value = '25'; });
+        window.history.replaceState({}, '', '/operation/fmcs-1');
+        buildPagination(document.querySelector('.fmcs-one-footer.classic-pagination'));
+        showTransientAlert('All FMCS filters cleared.');
+      } catch (error) {
+        showTransientAlert(error.message, 'error');
+      }
+      return;
+    }
+    if (event.target.closest('.fmcs-one-excel-button.export')) showTransientAlert('FMCS export started.');
+    if (event.target.closest('.fmcs-one-excel-button.import')) showTransientAlert('Choose an Excel file to import.');
+    if (event.target.closest('.fmcs-one-add-button')) showTransientAlert('Opening the Add FMCS form.');
+    const pageControl = event.target.closest('.classic-pagination-controls a, .classic-pagination-controls .go-button');
+    if (pageControl && !pageControl.classList.contains('disabled')) sessionStorage.setItem('fmcsToast', 'FMCS page changed successfully.');
+  });
+  document.addEventListener('submit', async event => {
+    const form = event.target.closest('.fmcs-one-row-actions form');
+    if (!form || event.defaultPrevented) return;
+    event.preventDefault();
+    const deleteButton = form.querySelector('.fmcs-one-row-action.delete');
+    deleteButton.disabled = true;
+    try {
+      const deleteResponse = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      });
+      if (!deleteResponse.ok) throw new Error('Unable to delete the FMCS operation.');
+      const deleteDocument = new DOMParser().parseFromString(await deleteResponse.text(), 'text/html');
+      const serverAlert = deleteDocument.querySelector('.fmcs-one-alert');
+      const message = serverAlert?.textContent?.trim() || 'FMCS operation deleted successfully.';
+      const type = serverAlert?.classList.contains('error') ? 'error' : 'success';
+      const tableResponse = await fetch(window.location.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+      if (!tableResponse.ok) throw new Error('The record was deleted, but the table could not be refreshed.');
+      const tableDocument = new DOMParser().parseFromString(await tableResponse.text(), 'text/html');
+      const replacementTable = tableDocument.querySelector('.fmcs-one-table-wrap');
+      const replacementPager = tableDocument.querySelector('.fmcs-one-footer.classic-pagination');
+      if (!replacementTable || !replacementPager) throw new Error('The refreshed FMCS table is incomplete.');
+      document.querySelector('.fmcs-one-table-wrap').replaceWith(replacementTable);
+      document.querySelector('.fmcs-one-footer.classic-pagination').replaceWith(replacementPager);
+      buildPagination(document.querySelector('.fmcs-one-footer.classic-pagination'));
+      showTransientAlert(message, type);
+    } catch (error) {
+      deleteButton.disabled = false;
+      showTransientAlert(error.message, 'error');
+    }
+  });
+
+  const previewModal = document.querySelector('#fmcs-preview-modal');
+  const previewLoading = previewModal?.querySelector('.fmcs-preview-loading');
+  const previewContent = previewModal?.querySelector('.fmcs-preview-content');
+  const previewEditForm = previewModal?.querySelector('#fmcs-preview-edit-form');
+  let activePreviewId = null;
+  const displayPreviewValue = value => {
+    if (value === null || value === undefined || String(value).trim() === '') return 'N/A';
+    if (Array.isArray(value) && value.length >= 3) return `${String(value[2]).padStart(2, '0')}-${String(value[1]).padStart(2, '0')}-${value[0]}`;
+    const text = String(value).trim();
+    const isoDate = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/);
+    return isoDate ? `${isoDate[3]}-${isoDate[2]}-${isoDate[1]}` : text;
+  };
+  const syncPaymentValue = name => {
+    if (!previewModal) return;
+    const selected = [...previewModal.querySelectorAll(`[data-payment-choice="${name}"]:checked`)].map(input => input.value);
+    const hidden = previewModal.querySelector(`[data-payment-value="${name}"]`);
+    if (hidden) hidden.value = selected.join(',');
+  };
+  const openPreview = async (id, announce = true) => {
+    if (!previewModal) return;
+    activePreviewId = id;
+    previewLoading.textContent = 'Loading FMCS details…';
+    previewLoading.hidden = false;
+    previewContent.hidden = true;
+    if (!previewModal.open) previewModal.showModal();
+    try {
+      const response = await fetch(`/operation/fmcs-1/${encodeURIComponent(id)}/preview-data`, {
+        headers: {Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+      });
+      if (!response.ok) throw new Error('Unable to load this FMCS operation.');
+      const record = await response.json();
+      previewModal.querySelectorAll('[data-preview]').forEach(element => {
+        element.textContent = displayPreviewValue(record[element.dataset.preview]);
+        element.title = element.textContent;
+      });
+      previewModal.querySelectorAll('[data-preview-input]').forEach(control => {
+        const key = control.dataset.previewInput;
+        if (key === 'country_id') {
+          const countries = Array.isArray(record.country_options) ? record.country_options : [];
+          control.replaceChildren(new Option('--select--', ''), ...countries.map(country => new Option(country.name, country.id)));
+        } else if (key === 'license_status') {
+          const statuses = [
+            ['', '--select--'], ['1', 'Fresh Project'], ['2', 'Docs Review'],
+            ['3', 'Document Submit To BIS'], ['4', 'Application No.'], ['6', 'Nomination Pending'],
+            ['7', 'Nomination Done'], ['8', 'Inspection Pending'], ['14', 'Inspection Done'],
+            ['15', 'License Granted'], ['16', 'Project Hold'], ['18', 'PBG Done'],
+            ['19', 'SIT Done'], ['20', 'Payment Status']
+          ];
+          control.replaceChildren(...statuses.map(([value, label]) => new Option(label, value)));
+        }
+        control.value = record[key] === null || record[key] === undefined ? '' : String(record[key]);
+      });
+      ['service_fee', 'bis_pay'].forEach(name => {
+        const selected = new Set(String(record[name] || '').split(',').map(value => value.trim()).filter(Boolean));
+        previewModal.querySelectorAll(`[data-payment-choice="${name}"]`).forEach(input => {
+          input.checked = selected.has(input.value);
+        });
+        syncPaymentValue(name);
+      });
+      const saveMessage = previewModal.querySelector('.fmcs-preview-save-message');
+      saveMessage.textContent = '';
+      saveMessage.classList.remove('error');
+      const files = ['pbg_upload', 'certificate_upload', 'upload', 'uploads']
+        .map(key => record[key]).filter(value => value !== null && value !== undefined && String(value).trim() !== '');
+      const filesElement = previewModal.querySelector('[data-preview-files]');
+      filesElement.textContent = files.length ? files.join(', ') : 'No files available';
+      filesElement.title = filesElement.textContent;
+      previewLoading.hidden = true;
+      previewContent.hidden = false;
+      if (announce) showTransientAlert('FMCS preview loaded.');
+    } catch (error) {
+      previewLoading.textContent = error.message;
+      showTransientAlert(error.message, 'error');
+    }
+  };
+  document.addEventListener('click', event => {
+    const previewButton = event.target.closest('[data-preview-id]');
+    if (previewButton) openPreview(previewButton.dataset.previewId);
+  });
+  previewModal?.querySelector('.fmcs-preview-close')?.addEventListener('click', () => {
+    previewModal.close();
+    showTransientAlert('FMCS preview closed.');
+  });
+  previewModal?.addEventListener('click', event => {
+    if (event.target === previewModal) {
+      previewModal.close();
+      showTransientAlert('FMCS preview closed.');
+    }
+  });
+  previewModal?.addEventListener('change', event => {
+    const paymentChoice = event.target.closest('[data-payment-choice]');
+    if (paymentChoice) {
+      syncPaymentValue(paymentChoice.dataset.paymentChoice);
+      showTransientAlert('Payment selection updated. Save changes to store it.');
+    }
+  });
+  previewEditForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!activePreviewId) return;
+    const saveButton = previewEditForm.querySelector('.fmcs-preview-save');
+    const saveMessage = previewEditForm.querySelector('.fmcs-preview-save-message');
+    saveButton.disabled = true;
+    syncPaymentValue('service_fee');
+    syncPaymentValue('bis_pay');
+    saveMessage.classList.remove('error');
+    saveMessage.textContent = 'Saving changes…';
+    try {
+      const formData = new FormData(previewEditForm);
+      const requestBody = new URLSearchParams();
+      formData.forEach((value, key) => requestBody.append(key, String(value)));
+      const csrfInput = previewEditForm.querySelector('input[type="hidden"][name]');
+      const requestHeaders = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+      };
+      if (csrfInput?.value) requestHeaders['X-CSRF-TOKEN'] = csrfInput.value;
+      const response = await fetch(`/operation/fmcs-1/${encodeURIComponent(activePreviewId)}/update`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: requestHeaders,
+        body: requestBody
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Unable to save the FMCS operation.');
+      saveMessage.textContent = result.message || 'Changes saved successfully.';
+      showTransientAlert(result.message || 'FMCS changes saved successfully.');
+      const tableResponse = await fetch(window.location.href, {
+        credentials: 'same-origin',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      });
+      if (tableResponse.ok) {
+        const tableDocument = new DOMParser().parseFromString(await tableResponse.text(), 'text/html');
+        const replacementTable = tableDocument.querySelector('.fmcs-one-table-wrap');
+        const replacementPager = tableDocument.querySelector('.fmcs-one-footer.classic-pagination');
+        if (replacementTable) document.querySelector('.fmcs-one-table-wrap')?.replaceWith(replacementTable);
+        if (replacementPager) {
+          document.querySelector('.fmcs-one-footer.classic-pagination')?.replaceWith(replacementPager);
+          buildPagination(document.querySelector('.fmcs-one-footer.classic-pagination'));
+        }
+      }
+      await openPreview(activePreviewId, false);
+      saveMessage.textContent = result.message || 'Changes saved successfully.';
+      saveButton.disabled = false;
+    } catch (error) {
+      saveMessage.classList.add('error');
+      saveMessage.textContent = error.message;
+      showTransientAlert(error.message, 'error');
+      saveButton.disabled = false;
+    }
   });
 });

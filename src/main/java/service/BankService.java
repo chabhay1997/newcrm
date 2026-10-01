@@ -45,7 +45,8 @@ public class BankService {
         bank.setAccType(request.getAccType());
         bank.setMicrCode(request.getMicrCode());
         bank.setSwiftCode(request.getSwiftCode());
-        bank.setCreatedBy(currentUserId());
+        // Bank accounts are maintained by the Accountant account (users.id = 1).
+        bank.setCreatedBy(1L);
         bank.setStatus(1);
         bank.setCreatedAt(LocalDateTime.now());
         bank.setUpdatedAt(LocalDateTime.now());
@@ -81,8 +82,9 @@ public class BankService {
     }
 
     public String creatorName(Long userId) {
-        if (userId == null) return "—";
-        return userRepository.findById(userId).map(user -> user.getName()).orElse("—");
+        if (userId != null && userId == 1L) return "Accountant";
+        if (userId == null) return "N/A";
+        return userRepository.findById(userId).map(user -> user.getName()).orElse("N/A");
     }
 
     private Long currentUserId() {

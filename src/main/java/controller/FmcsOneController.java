@@ -1,6 +1,7 @@
 package controller;
 
 import model.User;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 public class FmcsOneController {
     public record SearchSuggestion(String value, String detail) {}
     public record CountryCount(String country, int count) {}
+    public record CountryOption(Long id, String name) {}
     public record AnalyticsResponse(int year, List<CountryCount> countries, int maximum, String xAxisTitle) {}
     private static final List<String> ANALYTICS_COUNTRIES = List.of("Indonesia", "Thailand", "Vietnam", "China", "South Korea", "Turkey", "Italy", "Nepal", "Zambia", "Czech Republic", "Germany", "Malaysia", "Bangladesh", "Denmark", "Egypt", "France", "Japan", "Saudi Arabia", "United Kingdom", "Morocco", "Taiwan");
     /* The FMCS table stores the legacy country catalogue IDs rather than country names. */
@@ -53,6 +58,140 @@ public class FmcsOneController {
         this.jdbc = jdbc;
         this.users = users;
         this.excel = excel;
+    }
+
+    @GetMapping("/operation/fmcs-1/create")
+    public String create(Authentication authentication, Model model) {
+        access.require(authentication);
+        model.addAttribute("activePage", "operation-fmcs-1");
+        model.addAttribute("today", LocalDate.now());
+        model.addAttribute("countries", jdbc.query("select id, name from countries order by name",
+                (resultSet, rowNumber) -> new CountryOption(resultSet.getLong("id"), resultSet.getString("name"))));
+        return "operation/fmcs-1/form";
+    }
+
+    @PostMapping("/operation/fmcs-1")
+    public String store(Authentication authentication, @RequestParam Map<String, String> form,
+                        RedirectAttributes redirectAttributes) {
+        User user = access.require(authentication);
+        if (blank(form.get("company_name")) || blank(form.get("indian_standard")) || blank(form.get("product_name")) || blank(form.get("air_name")) || blank(form.get("air_email"))) {
+            redirectAttributes.addFlashAttribute("error", "Complete all required FMCS fields.");
+            return "redirect:/operation/fmcs-1/create";
+        }
+        Set<String> columns = fmcsColumns();
+        Map<String, Object> values = new LinkedHashMap<>();
+        form.forEach((name, value) -> { if (columns.contains(name) && !blank(value)) values.put(name, value.trim()); });
+        if (!blank(form.get("inspection_date")) && columns.contains("insp_date")) values.put("insp_date", form.get("inspection_date").trim());
+        if (!blank(form.get("license_granted_date")) && columns.contains("grant_date")) values.put("grant_date", form.get("license_granted_date").trim());
+        String licenseStatus = form.get("license_status");
+        if (!blank(licenseStatus) && columns.contains("license_status")) {
+            Long licenseStatusId = switch (licenseStatus.trim().toLowerCase(Locale.ROOT)) {
+                case "granted", "license granted" -> 15L;
+                case "pending" -> 2L;
+                default -> {
+                    try { yield Long.valueOf(licenseStatus.trim()); }
+                    catch (NumberFormatException ignored) { yield null; }
+                }
+            };
+            if (licenseStatusId == null) {
+                redirectAttributes.addFlashAttribute("error", "Select a valid license status.");
+                return "redirect:/operation/fmcs-1/create";
+            }
+            values.put("license_status", licenseStatusId);
+        }
+        if (columns.contains("created_by")) values.put("created_by", user.getId());
+        if (columns.contains("updated_by")) values.put("updated_by", user.getId());
+        if (columns.contains("created_at")) values.put("created_at", new java.sql.Timestamp(System.currentTimeMillis()));
+        if (columns.contains("updated_at")) values.put("updated_at", new java.sql.Timestamp(System.currentTimeMillis()));
+        String names = String.join(",", values.keySet());
+        String marks = String.join(",", java.util.Collections.nCopies(values.size(), "?"));
+        try {
+            jdbc.update("insert into f_m_c_s_operations (" + names + ") values (" + marks + ")", values.values().toArray());
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("error", "The FMCS operation could not be saved. Check the entered values and try again.");
+            return "redirect:/operation/fmcs-1/create";
+        }
+        redirectAttributes.addFlashAttribute("success", "FMCS operation created successfully.");
+        return "redirect:/operation/fmcs-1";
+    }
+
+    @GetMapping("/operation/fmcs-1/{id}/preview-data")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> previewData(Authentication authentication, @PathVariable Long id) {
+        access.require(authentication);
+        List<Map<String, Object>> matches = jdbc.queryForList("""
+                select operation.*, country.name country_name
+                from f_m_c_s_operations operation
+                left join countries country on country.id = operation.country_id
+                where operation.id = ?
+                """, id);
+        if (matches.isEmpty()) return ResponseEntity.notFound().build();
+        Map<String, Object> record = matches.getFirst();
+        Long creatorId = asLong(record.get("created_by"));
+        record.put("creator_name", creatorId == null ? "N/A" : users.findById(creatorId).map(User::getName).orElse("N/A"));
+        record.put("license_status_name", licenseStatusName(record.get("license_status")));
+        record.put("pre_testing_status_display", testingStatusName(record.get("pre_testing_status"), true));
+        record.put("post_testing_status_display", testingStatusName(record.get("post_testing_status"), false));
+        record.put("country_options", jdbc.queryForList("select id, name from countries order by name"));
+        return ResponseEntity.ok(record);
+    }
+
+    @PostMapping("/operation/fmcs-1/{id}/update")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> update(Authentication authentication, @PathVariable Long id,
+                                                       @RequestParam Map<String, String> form) {
+        User user = access.require(authentication);
+        if (jdbc.queryForObject("select count(*) from f_m_c_s_operations where id = ?", Integer.class, id) == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        Set<String> editable = Set.of("company_name", "app_no", "cml_no", "indian_standard", "product_name",
+                "country_id", "bis_officer_name", "bis_officer_contact", "bis_pay", "service_fee", "license_status", "remark");
+        Map<String, Object> values = new LinkedHashMap<>();
+        editable.forEach(column -> {
+            if (form.containsKey(column)) {
+                String value = form.get(column);
+                values.put(column, blank(value) ? null : value.trim());
+            }
+        });
+        try {
+            if (form.containsKey("service_fee")) values.put("service_fee", normalizedCsvSelection(form.get("service_fee"), Set.of("1", "2", "3", "4")));
+            if (form.containsKey("bis_pay")) values.put("bis_pay", normalizedCsvSelection(form.get("bis_pay"), Set.of("1", "2", "3")));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(Map.of("error", exception.getMessage()));
+        }
+        if (values.containsKey("country_id") && values.get("country_id") != null) {
+            try { values.put("country_id", Long.valueOf(values.get("country_id").toString())); }
+            catch (NumberFormatException exception) { return ResponseEntity.badRequest().body(Map.of("error", "Select a valid country.")); }
+        }
+        if (values.containsKey("license_status") && values.get("license_status") != null) {
+            try { values.put("license_status", Long.valueOf(values.get("license_status").toString())); }
+            catch (NumberFormatException exception) { return ResponseEntity.badRequest().body(Map.of("error", "Select a valid license status.")); }
+        }
+        if (values.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "No editable values were supplied."));
+        values.put("updated_by", user.getId());
+        values.put("updated_at", new java.sql.Timestamp(System.currentTimeMillis()));
+        String assignments = values.keySet().stream().map(column -> column + " = ?").collect(Collectors.joining(", "));
+        List<Object> arguments = new ArrayList<>(values.values());
+        arguments.add(id);
+        try {
+            int updated = jdbc.update("update f_m_c_s_operations set " + assignments + " where id = ?", arguments.toArray());
+            if (updated != 1) {
+                return ResponseEntity.internalServerError().body(Map.of("error", "The FMCS operation was not updated. Please try again."));
+            }
+            return ResponseEntity.ok(Map.of("success", true, "message", "FMCS operation updated successfully."));
+        } catch (DataAccessException exception) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "The FMCS operation could not be saved. Check the entered values and try again."));
+        }
+    }
+
+    @PostMapping("/operation/fmcs-1/{id}/delete")
+    public String delete(Authentication authentication, @PathVariable Long id,
+                         RedirectAttributes redirectAttributes) {
+        access.require(authentication);
+        int deleted = jdbc.update("delete from f_m_c_s_operations where id = ?", id);
+        if (deleted == 1) redirectAttributes.addFlashAttribute("success", "FMCS operation deleted successfully.");
+        else redirectAttributes.addFlashAttribute("error", "FMCS operation was not found or had already been deleted.");
+        return "redirect:/operation/fmcs-1";
     }
 
     @PostMapping("/operation/fmcs-1/import")
@@ -77,7 +216,7 @@ public class FmcsOneController {
         String term = query == null ? "" : query.trim();
         if (term.isBlank()) return List.of();
         List<Object> arguments = new ArrayList<>();
-        String where = filterWhere(null, null, "", term, "", "", arguments);
+        String where = filterWhere(null, null, "", term, "", "", "", arguments);
         List<Map<String, Object>> rows = jdbc.queryForList("""
                 select cml_no, company_name, client_name, client_email, indian_standard, product_name, app_no
                 from f_m_c_s_operations """ + " " + where + " limit 20", arguments.toArray());
@@ -100,10 +239,11 @@ public class FmcsOneController {
                                                @RequestParam(required = false) String status,
                                                @RequestParam(required = false) String search,
                                                @RequestParam(required = false) String client,
-                                               @RequestParam(required = false) String payment) {
+                                               @RequestParam(required = false) String payment,
+                                               @RequestParam(required = false) String card) {
         access.require(authentication);
         List<Object> arguments = new ArrayList<>();
-        String where = filterWhere(parseDate(startDate), parseDate(endDate), normalizedStatus(status), search, normalizedClient(client), normalizedPayment(payment), arguments);
+        String where = filterWhere(parseDate(startDate), parseDate(endDate), normalizedStatus(status), search, normalizedClient(client), normalizedPayment(payment), normalizedCard(card), arguments);
         List<Map<String, Object>> records = jdbc.queryForList("""
                 select cml_no, company_name, client_name, client_email, indian_standard,
                        product_name, app_no, bis_pay, license_status
@@ -125,6 +265,7 @@ public class FmcsOneController {
                         @RequestParam(required = false) String search,
                         @RequestParam(required = false) String client,
                         @RequestParam(required = false) String payment,
+                        @RequestParam(required = false) String card,
                         @RequestParam(defaultValue = "2026") int analyticsYear) {
         access.require(authentication);
         int selectedSize = List.of(10, 25, 50, 100).contains(size) ? size : 25;
@@ -134,8 +275,9 @@ public class FmcsOneController {
         String selectedSearch = search == null ? "" : search.trim();
         String selectedClient = normalizedClient(client);
         String selectedPayment = normalizedPayment(payment);
+        String selectedCard = normalizedCard(card);
         List<Object> filterArguments = new ArrayList<>();
-        String where = filterWhere(start, end, selectedStatus, selectedSearch, selectedClient, selectedPayment, filterArguments);
+        String where = filterWhere(start, end, selectedStatus, selectedSearch, selectedClient, selectedPayment, selectedCard, filterArguments);
         int total = jdbc.queryForObject("select count(*) from f_m_c_s_operations" + where, Integer.class, filterArguments.toArray());
         int pages = Math.max(1, (int) Math.ceil(total / (double) selectedSize));
         int currentPage = Math.min(Math.max(0, page), pages - 1);
@@ -179,7 +321,7 @@ public class FmcsOneController {
             record.put("countryName", countryId == null ? "N/A" : FMCS_COUNTRY_NAMES.getOrDefault(countryId.intValue(), "N/A"));
             record.put("licenseStatus", displayValue(record.get("license_status")));
             record.put("clientName", displayValue(record.get("client_name")));
-            record.put("serviceFee", displayValue(record.get("service_fee")));
+            record.put("serviceFee", serviceFeeName(record.get("service_fee")));
         });
         model.addAttribute("activePage", "operation-fmcs-1");
         model.addAttribute("records", records);
@@ -193,6 +335,7 @@ public class FmcsOneController {
         model.addAttribute("search", selectedSearch);
         model.addAttribute("client", selectedClient);
         model.addAttribute("payment", selectedPayment);
+        model.addAttribute("selectedCard", selectedCard);
         Map<String, Integer> countryCounts = new LinkedHashMap<>();
         jdbc.queryForList("""
                 select country_id, count(*) total
@@ -223,39 +366,9 @@ public class FmcsOneController {
 
     @GetMapping("/operation/fmcs-1/analytics")
     @ResponseBody
-    public AnalyticsResponse analytics(Authentication authentication, @RequestParam(defaultValue = "2026") int year,
-                                       @RequestParam(name = "country", required = false) String countryFilter,
-                                       @RequestParam(required = false) String type) {
+    public AnalyticsResponse analytics(Authentication authentication, @RequestParam(defaultValue = "2026") int year) {
         access.require(authentication);
         int selectedYear = List.of(2024, 2025, 2026).contains(year) ? year : 2026;
-        String selectedCountry = ANALYTICS_COUNTRIES.contains(countryFilter) ? countryFilter : "";
-        String selectedType = List.of("Quarterly", "Half-Yearly").contains(type) ? type : "";
-        if (!selectedType.isBlank() || !selectedCountry.isBlank()) {
-            Integer countryId = selectedCountry.isBlank() ? null : FMCS_COUNTRY_NAMES.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(selectedCountry)).map(Map.Entry::getKey).findFirst().orElse(null);
-            String countryClause = countryId == null ? "" : " and country_id = ?";
-            String effectiveDate = "coalesce(nullif(`date`, '0000-00-00'), date(created_at))";
-            String periodExpression = selectedType.equals("Quarterly") ? "quarter(" + effectiveDate + ")"
-                    : "if(month(" + effectiveDate + ") <= 6, 1, 2)";
-            List<Object> periodArguments = new ArrayList<>();
-            periodArguments.add(selectedYear);
-            if (countryId != null) periodArguments.add(countryId);
-            Integer latestPeriod = selectedType.isBlank() ? null : jdbc.queryForObject(
-                    "select max(" + periodExpression + ") from f_m_c_s_operations where coalesce(nullif(year(nullif(`date`, '0000-00-00')), 0), year(created_at)) = ?" + countryClause,
-                    Integer.class, periodArguments.toArray());
-            if (!selectedType.isBlank() && (latestPeriod == null || latestPeriod == 0))
-                return new AnalyticsResponse(selectedYear, List.of(), 0, "Companies");
-            List<Object> arguments = new ArrayList<>();
-            arguments.add(selectedYear);
-            if (!selectedType.isBlank()) arguments.add(latestPeriod);
-            if (countryId != null) arguments.add(countryId);
-            List<CountryCount> performance = jdbc.queryForList("select coalesce(nullif(trim(company_name), ''), 'Unknown Company') company, count(*) total from f_m_c_s_operations "
-                    + "where coalesce(nullif(year(nullif(`date`, '0000-00-00')), 0), year(created_at)) = ?"
-                    + (selectedType.isBlank() ? "" : " and " + periodExpression + " = ?")
-                    + countryClause + " group by company order by total desc, company asc limit 24", arguments.toArray()).stream()
-                    .map(row -> new CountryCount(String.valueOf(row.get("company")), ((Number) row.get("total")).intValue())).toList();
-            return new AnalyticsResponse(selectedYear, performance, performance.stream().mapToInt(CountryCount::count).max().orElse(0), "Companies");
-        }
         Map<String, Integer> countryCounts = new LinkedHashMap<>();
         jdbc.queryForList("""
                 select country_id, count(*) total
@@ -271,7 +384,6 @@ public class FmcsOneController {
             }
         });
         List<CountryCount> performance = ANALYTICS_COUNTRIES.stream()
-                .filter(item -> selectedCountry.isBlank() || item.equals(selectedCountry))
                 .map(country -> new CountryCount(country, countryCounts.getOrDefault(country, 0))).toList();
         return new AnalyticsResponse(selectedYear, performance, performance.stream().mapToInt(CountryCount::count).max().orElse(0), "Countries");
     }
@@ -282,13 +394,80 @@ public class FmcsOneController {
         catch (NumberFormatException ignored) { return null; }
     }
 
+    private String licenseStatusName(Object value) {
+        Long id = asLong(value);
+        if (id == null) return "N/A";
+        return switch (id.intValue()) {
+            case 1 -> "Fresh Project";
+            case 2 -> "Docs Review";
+            case 3 -> "Document Submit To BIS";
+            case 4 -> "Application No.";
+            case 6 -> "Nomination Pending";
+            case 7 -> "Nomination Done";
+            case 8 -> "Inspection Pending";
+            case 14 -> "Inspection Done";
+            case 15 -> "License Granted";
+            case 16 -> "Project Hold";
+            case 18 -> "PBG Done";
+            case 19 -> "SIT Done";
+            case 20 -> "Payment Status";
+            default -> String.valueOf(id);
+        };
+    }
+
+    private String testingStatusName(Object value, boolean preTesting) {
+        String status = value == null ? "" : value.toString().trim();
+        if (status.isBlank()) return "N/A";
+        if (preTesting) {
+            if (status.equals("1")) return "Yes";
+            if (status.equals("0")) return "No";
+        } else {
+            if (status.equals("1")) return "Done";
+            if (status.equals("0")) return "Under Process";
+        }
+        return status;
+    }
+
+    private Set<String> fmcsColumns() {
+        return jdbc.query("select * from f_m_c_s_operations limit 0", resultSet -> {
+            Set<String> columns = new HashSet<>();
+            java.sql.ResultSetMetaData metadata = resultSet.getMetaData();
+            for (int index = 1; index <= metadata.getColumnCount(); index++) columns.add(metadata.getColumnLabel(index).toLowerCase(Locale.ROOT));
+            return columns;
+        });
+    }
+
+    private boolean blank(String value) { return value == null || value.isBlank(); }
+
     private String displayValue(Object value) {
         String text = value == null ? "" : value.toString().trim();
         return text.isBlank() || text.equalsIgnoreCase("NA") || text.equalsIgnoreCase("N/A") ? "N/A" : text;
     }
 
+    private Map<String, Object> card(String key, String label, String icon, Object count) {
+        return Map.of("key", key, "label", label, "icon", icon, "count", count == null ? 0 : count);
+    }
+
     private Map<String, Object> card(String label, String icon, Object count) {
-        return Map.of("label", label, "icon", icon, "count", count == null ? 0 : count);
+        return card(cardKey(label), label, icon, count);
+    }
+
+    private String cardKey(String label) {
+        return switch (label) {
+            case "Fresh Project" -> "fresh-project";
+            case "Docs Review" -> "docs-review";
+            case "Document Submit To BIS" -> "document-submit";
+            case "Application No." -> "application-no";
+            case "Nomination Pending" -> "nomination-pending";
+            case "Nomination Done" -> "nomination-done";
+            case "Inspection Pending" -> "inspection-pending";
+            case "Inspection Done" -> "inspection-done";
+            case "Lic. Grant" -> "license-grant";
+            case "Hold" -> "hold";
+            case "PBG Done" -> "pbg-done";
+            case "Payment" -> "payment";
+            default -> "";
+        };
     }
 
     private void addSuggestion(Map<String, SearchSuggestion> matches, Object value, String detail) {
@@ -302,7 +481,7 @@ public class FmcsOneController {
         catch (java.time.format.DateTimeParseException ignored) { return null; }
     }
 
-    private String filterWhere(LocalDate startDate, LocalDate endDate, String status, String search, String client, String payment, List<Object> arguments) {
+    private String filterWhere(LocalDate startDate, LocalDate endDate, String status, String search, String client, String payment, String card, List<Object> arguments) {
         List<String> clauses = new ArrayList<>();
         if (startDate != null) { clauses.add("`date` >= ?"); arguments.add(java.sql.Date.valueOf(startDate)); }
         if (endDate != null) { clauses.add("`date` <= ?"); arguments.add(java.sql.Date.valueOf(endDate)); }
@@ -313,13 +492,31 @@ public class FmcsOneController {
             case "SIT" -> clauses.add("trim(coalesce(sit, '')) not in ('', 'NA', 'N/A')");
             default -> { }
         }
+        switch (card) {
+            case "fresh-project" -> clauses.add("lower(trim(coalesce(status, ''))) in ('fresh project', 'fresh')");
+            case "docs-review" -> clauses.add("lower(trim(coalesce(status, ''))) like '%docs review%'");
+            case "document-submit" -> clauses.add("lower(trim(coalesce(status, ''))) like '%document submit%bis%'");
+            case "application-no" -> clauses.add("trim(coalesce(app_no, '')) not in ('', 'NA', 'N/A')");
+            case "nomination-pending" -> clauses.add("lower(trim(coalesce(status, ''))) like '%nomination%pending%'");
+            case "nomination-done" -> clauses.add("lower(trim(coalesce(status, ''))) like '%nomination%done%'");
+            case "inspection-pending" -> clauses.add("lower(trim(coalesce(status, ''))) like '%inspection%pending%'");
+            case "inspection-done" -> clauses.add("lower(trim(coalesce(status, ''))) like '%inspection%done%'");
+            case "license-grant" -> clauses.add("(lower(trim(coalesce(license_status, ''))) like '%grant%' or lower(trim(coalesce(status, ''))) like '%lic%grant%')");
+            case "hold" -> clauses.add("lower(trim(coalesce(status, ''))) like '%hold%'");
+            case "pbg-done" -> clauses.add("(trim(coalesce(pbg_upload, '')) not in ('', 'NA', 'N/A') or lower(trim(coalesce(status, ''))) like '%pbg%done%')");
+            case "payment" -> clauses.add("trim(coalesce(bis_pay, '')) not in ('', 'NA', 'N/A')");
+            default -> { }
+        }
         if (search != null && !search.isBlank()) {
             clauses.add("(lower(coalesce(cml_no, '')) like ? or lower(coalesce(company_name, '')) like ? or lower(coalesce(client_name, '')) like ? or lower(coalesce(client_email, '')) like ? or lower(coalesce(indian_standard, '')) like ? or lower(coalesce(product_name, '')) like ? or lower(coalesce(app_no, '')) like ?)");
             String term = "%" + search.trim().toLowerCase(java.util.Locale.ROOT) + "%";
             for (int index = 0; index < 7; index++) arguments.add(term);
         }
         if (!client.isBlank()) { clauses.add("lower(trim(coalesce(client_name, ''))) = ?"); arguments.add(client.toLowerCase(Locale.ROOT)); }
-        if (!payment.isBlank()) { clauses.add("lower(trim(coalesce(bis_pay, ''))) = ?"); arguments.add(payment.toLowerCase(Locale.ROOT)); }
+        if (!payment.isBlank()) {
+            clauses.add("find_in_set(?, replace(coalesce(service_fee, ''), ' ', '')) > 0");
+            arguments.add(paymentStageCode(payment));
+        }
         return clauses.isEmpty() ? "" : " where " + String.join(" and ", clauses);
     }
 
@@ -335,6 +532,38 @@ public class FmcsOneController {
     private String normalizedPayment(String payment) {
         List<String> payments = List.of("Advance", "After Application", "After Nomination", "After License");
         return payment != null && payments.contains(payment) ? payment : "";
+    }
+
+    private String paymentStageCode(String payment) {
+        return switch (payment) {
+            case "Advance" -> "1";
+            case "After Application" -> "2";
+            case "After Nomination" -> "3";
+            case "After License" -> "4";
+            default -> "";
+        };
+    }
+
+    private String normalizedCsvSelection(String value, Set<String> allowed) {
+        if (blank(value)) return null;
+        List<String> selected = java.util.Arrays.stream(value.split(","))
+                .map(String::trim).filter(item -> !item.isBlank()).distinct().sorted().toList();
+        if (selected.isEmpty()) return null;
+        if (!allowed.containsAll(selected)) throw new IllegalArgumentException("One or more payment selections are invalid.");
+        return String.join(",", selected);
+    }
+
+    private String serviceFeeName(Object value) {
+        if (value == null || value.toString().isBlank()) return "N/A";
+        Map<String, String> labels = Map.of("1", "Advance", "2", "After Application", "3", "After Nomination", "4", "After License");
+        return java.util.Arrays.stream(value.toString().split(","))
+                .map(String::trim).map(item -> labels.getOrDefault(item, item)).collect(Collectors.joining(", "));
+    }
+
+    private String normalizedCard(String card) {
+        return card != null && List.of("fresh-project", "docs-review", "document-submit", "application-no",
+                "nomination-pending", "nomination-done", "inspection-pending", "inspection-done",
+                "license-grant", "hold", "pbg-done", "payment").contains(card) ? card : "";
     }
 
     private List<Object> pageArguments(List<Object> filters, int size, int offset) {
