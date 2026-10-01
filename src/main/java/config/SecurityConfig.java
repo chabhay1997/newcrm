@@ -42,6 +42,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/justdial/lead"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
@@ -61,7 +62,8 @@ public class SecurityConfig {
                     "/emp-application-form/success",
                     "/evtl.webp",
                     "/*.webp",
-                    "/favicon.ico"
+                    "/favicon.ico",
+                    "/api/justdial/lead"
                 )
                 .permitAll()
                 .anyRequest()

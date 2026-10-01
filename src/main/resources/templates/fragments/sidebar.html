@@ -34,7 +34,7 @@
         <p class="sidebar-label px-3 mb-2 text-[10.5px] font-bold uppercase tracking-wider text-white/60">Workspace</p>
         <div class="space-y-0.5">
 
-          <details class="sidebar-accounts" th:attr="open=${activePage == 'leads'}">
+          <details class="sidebar-accounts" th:attr="open=${activePage == 'leads'}" th:if="${canAccessLeads}">
             <summary
             class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition"
             th:classappend="${activePage == 'leads'} ? ' active' : ''">

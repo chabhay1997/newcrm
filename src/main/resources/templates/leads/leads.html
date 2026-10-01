@@ -9,13 +9,7 @@
 <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
 <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
 <script>
-  (function () {
-    try {
-      if (localStorage.getItem('leadsChartsVisible') === '0') {
-        document.documentElement.classList.add('charts-hidden-init');
-      }
-    } catch (e) {}
-  })();
+  document.documentElement.classList.add('charts-hidden-init');
 </script>
 
 <th:block th:replace="~{fragments/styles :: layout-styles}"></th:block>
@@ -773,15 +767,9 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   #leadsListCard .leads-table-toolbar-actions > button.no-hover-lift:hover { transform: none; }
   #leadsListCard.leads-list-expanded table tbody tr td { padding-top: 1rem; padding-bottom: 1rem; }
 
-  #leadsTable { border-collapse: separate; border-spacing: 0; }
+  #leadsTable { border-collapse: collapse; border-spacing: 0; }
   #leadsTableWrap { width: calc(100% - 48px); margin: 22px 24px 0; max-width: calc(100% - 48px); overflow-x: auto; overflow-y: hidden; border: 2px solid #AAB5C4; border-radius: 0; background: #fff; box-shadow: 0 10px 24px rgba(28, 49, 83, .08); }
   #leadsTable { width: 100%; max-width: 100%; table-layout: fixed; }
-  #leadsTable th:nth-child(1), #leadsTable td:nth-child(1) { width: 7%; }
-  #leadsTable th:nth-child(2), #leadsTable td:nth-child(2) { width: 29%; }
-  #leadsTable th:nth-child(3), #leadsTable td:nth-child(3) { width: 20%; }
-  #leadsTable th:nth-child(4), #leadsTable td:nth-child(4) { width: 20%; }
-  #leadsTable th:nth-child(5), #leadsTable td:nth-child(5) { width: 24%; }
-
   #leadsTable th, #leadsTable td { font-size: 11px !important; }
 
   #leadsTable thead th {
@@ -794,21 +782,18 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     text-transform: uppercase;
     color: #FFFFFF !important;
     background: #5B8DEF !important;
-    border-right: 1px solid #C4CDD8;
-    border-bottom: 2px solid #AAB5C4;
+    border-right: 1px solid rgba(255, 255, 255, .9);
+    border-bottom: 0;
   }
   #leadsTable thead th:last-child { border-right: none; }
 
   #leadsTable tbody td {
-    border-right: 1px solid #C4CDD8;
-    border-bottom: 1px solid #AAB5C4;
+    border-right: 1px solid #536273;
+    border-bottom: 1px solid #536273 !important;
   }
-  #leadsTable tbody tr:first-child td { border-top: 1px solid #AAB5C4; }
   #leadsTable tbody td:last-child { border-right: none; }
-  #leadsTable tbody tr.leads-table-row:last-child td { border-bottom: none; }
 
   #leadsTable tbody tr.leads-table-row {
-    transition: box-shadow .22s ease, transform .22s ease;
     position: relative;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -817,14 +802,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     -webkit-touch-callout: none;
   }
   #leadsTable tbody tr.leads-table-row:nth-child(even) { background-color: #F7F9FC; }
-  #leadsTable tbody tr.leads-table-row:hover {
-    background-color: #EEF4FC;
-    box-shadow: inset 3px 0 #3B82D0, 0 10px 26px rgba(36, 62, 102, .11);
-    transform: translateY(-1px);
-    z-index: 5;
-  }
-  #leadsTable tbody tr.leads-table-row.table-select-open,
-  #leadsTable tbody tr.leads-table-row.table-select-open:hover {
+  #leadsTable tbody tr.leads-table-row.table-select-open {
     box-shadow: none !important;
     transform: none !important;
     transition: none !important;
@@ -832,19 +810,24 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     z-index: 20;
   }
   #leadsTable tbody td { vertical-align: middle; }
-  #leadsTable tbody td:nth-child(2) { vertical-align: top !important; padding-top: 21px !important; padding-bottom: 2px !important; }
-  #leadsTable tbody td:nth-child(2) .lead-details-stack { transform: none; }
-  #leadsTable tbody td:first-child { border-left: 3px solid transparent; }
-  #leadsTable tbody tr.leads-table-row:hover td:first-child { border-left-color: #5B8DEF; }
+  #leadsTable tbody td:nth-child(3) { vertical-align: middle !important; padding-top: 21px !important; padding-bottom: 21px !important; }
+  #leadsTable tbody td:nth-child(3) .lead-details-stack { transform: none; }
   #leadsTable td:last-child { overflow: hidden; }
   #leadsTable td:last-child > div { min-width: 0; flex-wrap: wrap; }
   #leadsTable td:last-child .isi-arrow-trigger { min-width: 0; max-width: 100%; }
   #leadsTable .lead-select-cell { height: 100%; padding-left: 8px; padding-right: 8px; }
-  #leadsTable .lead-select-cell-inner { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 29px; }
+  #leadsTable .lead-select-cell-inner { display: inline-grid; grid-template-columns: 18px auto; align-items: center; justify-items: center; column-gap: 7px; row-gap: 9px; min-height: 29px; }
   #leadsTable .lead-select-checkbox { width: 18px; height: 18px; margin: 0; flex: none; }
-  #leadsTable .lead-delete-button { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; margin-top: 9px; padding: 0; border: 1px solid #F1CACA; border-radius: 6px; background: #FFF5F5; color: #B93838; box-shadow: 0 1px 2px rgba(127, 29, 29, .08); cursor: pointer; transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease; }
-  #leadsTable .lead-delete-button:hover { transform: translateY(-1px); border-color: #C24141; background: #C24141; color: #fff; box-shadow: 0 3px 7px rgba(127, 29, 29, .2); }
-  #leadsTable .lead-delete-button:focus-visible { outline: 2px solid #C24141; outline-offset: 2px; }
+  #leadsTable .lead-serial { position: relative; top: -1px; }
+  #leadsTable .lead-created-by { overflow: hidden; padding: 0 10px; color: #314967; font-size: 13px !important; font-weight: 650; line-height: 1.45; text-overflow: ellipsis; overflow-wrap: anywhere; }
+  .lead-created-by-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; min-width: 0; }
+  .lead-assigned-to { max-width: 100%; padding: 5px 7px; border: 1px solid #C8DCCF; border-radius: 5px; background: #F1F8F3; color: #315B40; line-height: 1.2; }
+  .lead-assigned-to-label { display: block; margin-bottom: 2px; color: #64806C; font-size: 9px; font-weight: 700; }
+  .lead-assigned-to-name { display: block; overflow-wrap: anywhere; font-size: 11px; font-weight: 650; }
+  .lead-bulk-delete-button { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; padding: 0; border: 1px solid #F0C9C9; border-radius: 9px; background: #FFF5F5; color: #C24141; cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease; }
+  .lead-bulk-delete-button:hover:not(:disabled) { transform: translateY(-1px); border-color: #C24141; background: #C24141; color: #fff; }
+  .lead-bulk-delete-button:disabled { opacity: .38; cursor: not-allowed; }
+  .lead-bulk-delete-button:focus-visible { outline: 2px solid #C24141; outline-offset: 2px; }
   @media (max-width: 900px) {
     #leadsTable { min-width: 860px; table-layout: auto; }
     #leadsTable td:last-child { overflow: visible; }
@@ -855,41 +838,80 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   }
   #leadsTable .lead-company-name { color: #1D3557; font-size: 12px; font-weight: 750; line-height: 1.35; }
   #leadsTable .lead-company-missing { color: #C63D48; font-size: 12px; font-weight: 750; }
-  #leadsTable .lead-details-stack { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(118px, .65fr); column-gap: 7px; row-gap: 10px; }
-  #leadsTable .lead-metadata-stack { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(100px, .75fr); gap: 5px; min-width: 0; }
+  #leadsTable .lead-details-stack { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 10px; }
+  #leadsTable .lead-metadata-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; min-width: 0; }
   #leadsTable .lead-company-details-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; min-width: 0; }
-  #leadsTable .lead-company-reference-selects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 8px; min-width: 0; }
-  #leadsTable .lead-reference-field { display: grid; gap: 4px; min-width: 0; }
-  #leadsTable .lead-reference-label { color: #71809A; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-  #leadsTable .lead-source-display { box-sizing: border-box; width: 100%; min-width: 0; overflow: hidden; padding: 7px 10px; border: 1px solid #C8D9F4; border-radius: 8px; background: linear-gradient(135deg, #F2F7FF, #E2ECFF); color: #314967; font-size: 10.5px; font-weight: 650; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
-  #leadsTable .lead-company-reference-selects .lead-status-select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 34px; padding: 7px 26px 7px 10px !important; border: 1px solid #CCD8E7 !important; border-radius: 8px !important; background: #F6F9FD !important; color: #314967 !important; font-size: 11px !important; font-weight: 650; }
+  #leadsTable .lead-company-reference-selects { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; min-width: 0; }
+  #leadsTable .lead-reference-field { display: grid; grid-template-rows: 14px 38px; align-content: start; gap: 4px; min-width: 0; }
+  #leadsTable .lead-reference-label { height: 14px; color: #71809A; font-size: 11px; font-weight: 800; line-height: 14px; letter-spacing: .06em; text-transform: uppercase; }
+  #leadsTable .lead-source-display { box-sizing: border-box; display: flex; width: 100%; height: 38px; min-width: 0; align-items: center; overflow: hidden; padding: 0 10px; border: 1px solid #C8D9F4; border-radius: 8px; background: linear-gradient(135deg, #F2F7FF, #E2ECFF); color: #314967; font-size: 12px; font-weight: 700; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-company-reference-selects .lead-status-select { box-sizing: border-box; width: 100%; height: 38px; min-width: 0; min-height: 38px; padding: 0 26px 0 10px !important; border: 1px solid #CCD8E7 !important; border-radius: 8px !important; background: #F6F9FD !important; color: #314967 !important; font-size: 12px !important; font-weight: 700; line-height: 1.2; }
   #leadsTable .lead-company-name-line { min-width: 0; padding: 7px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
   #leadsTable .lead-company-details-cell { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 9px; min-width: 0; }
   #leadsTable .lead-company-contact-stack { display: grid; gap: 5px; min-width: 0; }
   #leadsTable .lead-company-contact-stack .lead-detail-line { min-height: 29px; padding: 5px 8px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 5px; }
   #leadsTable .lead-company-contact-stack .lead-detail-line > span { flex: 1; min-width: 0; text-align: left; }
+  #leadsTable .lead-company-primary-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7px; min-width: 0; }
+  #leadsTable .lead-contact-pair { display: grid; grid-template-rows: repeat(2, minmax(36px, 1fr)); gap: 6px; min-width: 0; }
+  #leadsTable .lead-contact-edit-button { display: flex; width: 100%; min-width: 0; min-height: 36px; align-items: center; flex-direction: row; gap: 5px; font: inherit; text-align: left; cursor: pointer; }
+  #leadsTable .lead-contact-edit-button:hover { border-color: #C8D9F4; background: #F0F6FF; }
+  #leadsTable .lead-contact-edit-button:focus-visible { outline: 2px solid #5B8DEF; outline-offset: 2px; }
+  #leadsTable .lead-contact-edit-button svg, #leadsTable .lead-contact-address svg { width: 15px; height: 15px; flex: none; color: #4C89D5; }
+  #leadsTable .lead-contact-text { display: block; flex: 1; min-width: 0; overflow: hidden; color: #263F61; font-size: 12px; font-weight: 650; line-height: 1.3; text-align: left; text-overflow: ellipsis; white-space: nowrap !important; overflow-wrap: normal !important; }
+  #leadsTable .lead-company-primary-details > .lead-contact-address { box-sizing: border-box; display: flex; width: 100%; min-width: 0; height: 100%; min-height: 0; align-self: stretch; align-items: center; flex-direction: row; gap: 5px; }
+  #leadsTable .lead-company-contact-stack .lead-contact-text:empty::before { content: none; }
+  #leadsTable button.lead-latest-followup-link { width: 100%; font: inherit; text-align: left; cursor: pointer; }
+  #leadsTable button.lead-latest-followup-link:hover { border-color: #C8D9F4; background: #F0F6FF; }
+  #leadsTable button.lead-latest-followup-link:focus-visible { outline: 2px solid #5B8DEF; outline-offset: 2px; }
+  #leadsTable .lead-latest-followup-link > span { flex: 1; min-width: 0; overflow: hidden; color: #263F61; text-overflow: ellipsis; white-space: nowrap; }
   #leadsTable .lead-company-contact-stack .lead-detail-line strong::after { content: ' -'; }
   #leadsTable .lead-company-contact-stack .lead-detail-line strong:has(+ span:empty)::after { content: none; }
   #leadsTable .lead-company-contact-stack .lead-detail-line > span:empty::before { content: '-'; }
-  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(3) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Crect x='3' y='7' width='18' height='14' rx='2'/%3E%3Cpath d='M7 7V4h10v3M8 11h8m-8 4h8'/%3E%3C/svg%3E"); }
-  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(4) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Cpath d='M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='2.5'/%3E%3C/svg%3E"); }
-  #leadsTable .lead-metadata-stack .lead-details-people { grid-column: 1; grid-row: 1; padding-left: 7px; padding-right: 7px; }
-  #leadsTable .lead-metadata-stack .lead-details-people .lead-detail-line strong { width: 88px; }
-  #leadsTable .lead-metadata-stack .lead-details-created { grid-column: 2; grid-row: 1; min-width: 0; padding-left: 7px; padding-right: 7px; }
+  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(2) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Crect x='3' y='7' width='18' height='14' rx='2'/%3E%3Cpath d='M7 7V4h10v3M8 11h8m-8 4h8'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-metadata-stack .lead-details-people { grid-column: 1; grid-row: 1; padding-left: 9px; padding-right: 9px; }
+  #leadsTable .lead-metadata-stack .lead-details-people .lead-detail-line strong { width: 100px; }
+  #leadsTable .lead-reference-date { display: flex; min-height: 20px; align-items: center; gap: 7px; color: #263F61; font-size: 13px; font-weight: 700; }
+  #leadsTable tbody td:nth-child(4) { vertical-align: middle !important; }
+  #leadsTable .lead-reference-date svg { width: 16px; height: 16px; flex: none; color: #2EAA79; }
+  #leadsTable .lead-reference-date .lead-reference-date-dash { color: #71809A; }
   #leadsTable .lead-details-followup { grid-column: 1 / -1; grid-row: 1; display: flex; align-items: stretch; gap: 7px; min-width: 0; }
   #leadsTable .lead-details-followup .company-followup-btn { flex: 1; width: auto; min-width: 0; }
-  #leadsTable .lead-reminder-button { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 6px; min-width: 96px; padding: 0 11px; border: 1px solid #D9363E; border-radius: 8px; background: #E5484D; color: #fff; font-size: 11px; font-weight: 750; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+  #leadsTable .lead-reminder-button { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 6px; min-width: 96px; padding: 0 11px; border: 1px solid #D9363E; border-radius: 8px; background: #E5484D; color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; transition: background .15s ease, transform .15s ease; }
   #leadsTable .lead-reminder-button:hover { background: #CF343C; transform: translateY(-1px); }
   #leadsTable .lead-reminder-button svg { flex: none; }
+  #meetingReminderModal { position: fixed; inset: 0; z-index: 1100; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(20, 28, 39, .48); backdrop-filter: blur(6px); }
+  #meetingReminderModal.open { display: flex; }
+  #meetingReminderModal .meeting-reminder-dialog { width: min(520px, 100%); overflow: hidden; border: 1px solid #D8E0E9; border-radius: 16px; background: #fff; box-shadow: 0 28px 80px rgba(20, 32, 48, .28); animation: modalPop .2s cubic-bezier(.22, 1, .36, 1); }
+  #meetingReminderModal .meeting-reminder-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 18px; border-bottom: 1px solid #E5EAF0; background: #F8FAFC; }
+  #meetingReminderModal .meeting-reminder-title { margin: 0; color: #1E344F; font-size: 18px; font-weight: 800; }
+  #meetingReminderModal .meeting-reminder-caption { margin: 5px 0 0; color: #6A788A; font-size: 12px; }
+  #meetingReminderModal .meeting-reminder-close { display: inline-flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; border: 1px solid #DCE3EB; border-radius: 8px; background: #fff; color: #59697C; cursor: pointer; }
+  #meetingReminderModal .meeting-reminder-close:hover { background: #EEF2F6; }
+  #meetingReminderModal .meeting-reminder-body { display: grid; gap: 16px; padding: 22px 24px 24px; }
+  #meetingReminderModal .meeting-reminder-lead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; padding: 13px 15px; border-left: 3px solid #E7A63C; background: #FFF9EF; }
+  #meetingReminderModal .meeting-reminder-lead span { min-width: 0; overflow: hidden; color: #40546B; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  #meetingReminderModal .meeting-reminder-lead strong { color: #748195; font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+  #meetingReminderModal .meeting-reminder-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #meetingReminderModal .meeting-reminder-field { display: grid; gap: 6px; min-width: 0; }
+  #meetingReminderModal .meeting-reminder-field > span { color: #42536A; font-size: 11px; font-weight: 750; }
+  #meetingReminderModal .meeting-reminder-field input { box-sizing: border-box; width: 100%; height: 40px; padding: 0 10px; border: 1px solid #D7DFE9; border-radius: 7px; background: #fff; color: #263F5D; font: inherit; font-size: 12px; outline: none; }
+  #meetingReminderModal .meeting-reminder-field input:focus { border-color: #4D82D8; box-shadow: 0 0 0 3px rgba(77, 130, 216, .13); }
+  #meetingReminderModal .meeting-reminder-footer { display: flex; justify-content: flex-end; gap: 9px; padding-top: 2px; }
+  #meetingReminderModal .meeting-reminder-cancel, #meetingReminderModal .meeting-reminder-save { min-height: 38px; padding: 0 15px; border: 1px solid #D8E0E9; border-radius: 7px; background: #fff; color: #42536A; font-size: 12px; font-weight: 750; cursor: pointer; }
+  #meetingReminderModal .meeting-reminder-save { border-color: #244F7D; background: #244F7D; color: #fff; }
+  #meetingReminderModal .meeting-reminder-save:hover { background: #193F68; }
+  @media (max-width: 520px) { #meetingReminderModal { padding: 12px; } #meetingReminderModal .meeting-reminder-header { padding: 18px; } #meetingReminderModal .meeting-reminder-body { padding: 18px; } }
   #leadsTable .lead-client-name-line { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 7px; min-width: 0; padding: 6px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
-  #leadsTable .lead-client-name-label { flex: none; color: #71809A; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
-  #leadsTable .lead-client-name-value { position: relative; top: -0.5px; min-width: 0; overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-  #leadsTable .lead-quotation-choice { grid-column: 1; grid-row: 3; display: flex; align-items: stretch; gap: 2px; width: 100%; min-width: 0; }
-  #leadsTable .lead-quotation-choice > button:first-child { flex: 1; width: auto; min-width: 0; min-height: 32px; padding: 3px 8px; border: 1px solid #8C8C8C; border-radius: 4px; background: #fff !important; text-align: left; }
+  #leadsTable .lead-client-name-label { flex: none; color: #71809A; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+  #leadsTable .lead-client-name-value { position: relative; top: -0.5px; min-width: 0; overflow: hidden; color: #263F61; font-size: 13px; font-weight: 750; text-shadow: 0 0 5px rgba(91, 141, 239, .16); text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable .lead-quotation-choice { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: stretch; gap: 5px; width: 100%; min-width: 0; }
+  #leadsTable .lead-quotation-choice > button:first-child { flex: 1; width: auto; min-width: 0; min-height: 32px; padding: 3px 8px; border: 1px solid #A8D8B7; border-radius: 4px; background: #fff !important; box-shadow: 0 0 0 2px rgba(34, 160, 82, .08), 0 1px 4px rgba(34, 160, 82, .08); font-size: 12px !important; text-align: left; }
   #leadsTable .lead-quotation-choice .lead-quotation-proceed { display: inline-flex; width: 32px; min-width: 32px; height: 32px; align-items: center; justify-content: center; border: 1px solid #16A34A; border-radius: 4px; background: #F0FDF4; color: #16A34A; cursor: pointer; }
   #leadsTable .lead-quotation-choice .lead-quotation-proceed.hidden { display: none; }
   #leadsTable .lead-quotation-choice .lead-quotation-proceed:hover { background: #16A34A; color: #fff; }
-  #leadsTable .lead-details-top-actions { grid-column: 2; grid-row: 3; display: flex; align-items: flex-start; justify-content: center; gap: 3px; }
+  #leadsTable .lead-details-top-actions { grid-column: 1 / -1; grid-row: 4; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  #leadsTable .lead-details-top-actions .custom-select-wrapper:has(> .lead-client-logos-select) { width: auto; min-width: 0; flex: 1; }
+  #leadsTable .lead-client-logos-select.custom-select-trigger { box-sizing: border-box; width: 100%; height: 32px; min-width: 0; padding: 0 26px 0 9px !important; border: 1px solid #CCD8E7; border-radius: 6px; background-color: #F8FAFD; color: #314967; font-size: 12px; font-weight: 700; }
   #leadsTable .lead-details-icon-button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: #5B8DEF; color: #fff; cursor: pointer; box-shadow: 0 3px 8px rgba(91,141,239,.22); }
   #leadsTable .lead-details-icon-button:hover:not(:disabled) { background: #456FCB; }
   #leadsTable .lead-details-icon-button:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
@@ -903,11 +925,12 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   #leadsTable .lead-detail-line:nth-child(2) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D75C9' stroke-width='2'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(3) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232EAA79' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='17' rx='2'/%3E%3Cpath d='M8 2v4m8-4v4M3 10h18'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(4) strong::before, #leadsTable .lead-detail-line:nth-child(5) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B46A09' stroke-width='2'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E"); }
-  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(5) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z'/%3E%3C/svg%3E"); }
+  #leadsTable .lead-company-contact-stack .lead-detail-line:nth-child(3) strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z'/%3E%3C/svg%3E"); }
   #leadsTable .lead-detail-line:nth-child(1) strong::after, #leadsTable .lead-detail-line:nth-child(2) strong::after, #leadsTable .lead-detail-line:nth-child(4) strong::after, #leadsTable .lead-detail-line:nth-child(5) strong::after { content: ' -'; }
   #leadsTable .lead-detail-line span { overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
   #leadsTable .lead-detail-line:nth-child(1) span { flex: 1; min-width: 0; overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
   #leadsTable .lead-detail-line:nth-child(2) span { flex: 1; min-width: 0; }
+  #leadsTable .lead-company-contact-stack .lead-contact-text { flex: 1; min-width: 0; overflow: hidden; color: #263F61; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
   #leadsTable .lead-detail-line:nth-child(4), #leadsTable .lead-detail-line:nth-child(5) { flex-direction: row; align-items: center; justify-content: space-between; }
   #leadsTable .lead-detail-line:nth-child(4), #leadsTable .lead-detail-line:nth-child(5) { min-height: 31px; padding-top: 5px; padding-bottom: 5px; }
   #leadsTable .lead-details-people { grid-column: 1; grid-row: 4; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; padding: 6px 9px; border: 1px solid #E0E8F2; border-radius: 8px; background: #F8FAFD; }
@@ -915,7 +938,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   #leadsTable .lead-details-people .lead-detail-line strong { width: 110px; flex: none; white-space: nowrap; }
   #leadsTable .lead-details-people .lead-person-name { min-width: 0; margin-left: 0; overflow: hidden; color: #263F61; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
   #leadsTable .lead-details-people .lead-person-badge { display: inline-block; width: 120px; max-width: 120px; min-height: 0; margin-left: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: transparent; color: #263F61 !important; font-size: 11px !important; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
-  #leadsTable .lead-details-created { grid-column: 2; grid-row: 4; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; gap: 4px !important; padding-top: 3px; padding-bottom: 9px; }
+  #leadsTable .lead-details-created { display: none !important; }
   #leadsTable .lead-metadata-stack .lead-details-created strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232EAA79' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='17' rx='2'/%3E%3Cpath d='M8 2v4m8-4v4M3 10h18'/%3E%3C/svg%3E"); }
   #leadsTable .lead-details-created strong::after { content: none; }
   #leadsTable .lead-details-people .lead-detail-line strong::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234C89D5' stroke-width='2'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E"); }
@@ -948,7 +971,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   #addressPopupModal .address-note-body { padding: 18px 20px 22px; background: #FAFBFC; }
   #addressPopupModal .address-note-content { margin: 0; padding: 14px 15px; color: #303841; border: 1px solid #D2D7DE; border-radius: 10px; background: #fff; font-size: 13.5px; font-weight: 500; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
 
-.company-followup-btn { display: flex; align-items: center; width: 100%; font-size: 11px; font-weight: 650; color: #314967; background: #F6F9FD; padding: 7px 10px; border-radius: 8px; border: 1px solid #CCD8E7; cursor: pointer; box-shadow: none; transition: background .15s ease, color .15s ease; }
+.company-followup-btn { display: flex; align-items: center; width: 100%; font-size: 12px; font-weight: 650; color: #314967; background: #F6F9FD; padding: 7px 10px; border-radius: 8px; border: 1px solid #CCD8E7; cursor: pointer; box-shadow: none; transition: background .15s ease, color .15s ease; }
 .company-followup-btn:hover { background: #EDF2FA; }
 .company-followup-btn-label { flex: 1; text-align: center; }
 .company-followup-btn-arrow { flex: none; margin-left: 6px; color: #8C9AB3; }
@@ -1076,6 +1099,180 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
   .custom-select-wrapper:has(> .lead-status-select) .custom-select-option {
     font-size: 9.5px;
   }
+  /* ===== New Company Details card ===== */
+  #leadsTable td:last-child .lcd-card { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 7px; border: 1px solid #DCE5F1; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(38, 54, 83, .05); }
+  #leadsTable td:last-child .lcd-ico { display: flex; width: 24px; height: 24px; flex: none; align-items: center; justify-content: center; border-radius: 7px; }
+  #leadsTable td:last-child .lcd-ico svg { width: 14px; height: 14px; }
+  #leadsTable td:last-child .lcd-company { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 3px 6px 7px; margin-bottom: 2px; border-bottom: 1px solid #E8EEF6; }
+  #leadsTable td:last-child .lcd-ico-company { background: #DCE6F8; color: #1D3557; }
+  #leadsTable td:last-child .lcd-company-name { min-width: 0; flex: 1; color: #14305A; font-size: 13px; font-weight: 800; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable td:last-child .lcd-row { display: flex; align-items: center; gap: 8px; box-sizing: border-box; width: 100%; min-width: 0; margin: 0; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent; box-shadow: none; font: inherit; text-align: left; }
+  #leadsTable td:last-child button.lcd-row { cursor: pointer; transition: background .15s ease; }
+  #leadsTable td:last-child .lcd-value { min-width: 0; flex: 1; font-size: 12.5px; font-weight: 700; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #leadsTable td:last-child .lcd-empty { color: #A3AEC0 !important; font-style: italic; font-weight: 600; }
+
+  #leadsTable td:last-child .lcd-mail .lcd-ico { background: #DCE8FF; color: #2563C9; }
+  #leadsTable td:last-child .lcd-mail .lcd-value { color: #2563C9; }
+  #leadsTable td:last-child button.lcd-mail:hover { background: #EEF4FF; }
+
+  #leadsTable td:last-child .lcd-phone .lcd-ico { background: #D9F3E5; color: #17804F; }
+  #leadsTable td:last-child .lcd-phone .lcd-value { color: #17804F; }
+  #leadsTable td:last-child button.lcd-phone:hover { background: #EDF9F2; }
+
+  #leadsTable td:last-child .lcd-loc .lcd-ico { background: #FFE9C7; color: #B45F06; }
+  #leadsTable td:last-child .lcd-loc .lcd-value { color: #A85A06; }
+
+  #leadsTable td:last-child .lcd-followup { margin-top: 3px; padding: 5px 8px; border: 1px solid #DDD5FB; border-radius: 8px; background: #F5F2FF; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+  #leadsTable td:last-child .lcd-followup:hover { border-color: #C4B6F7; background: #ECE7FF; }
+  #leadsTable td:last-child .lcd-followup .lcd-ico { background: #E3DBFF; color: #5B3FD0; }
+  #leadsTable td:last-child .lcd-followup .lcd-value { color: #4B2FC0; }
+  #leadsTable td:last-child .lcd-followup .lcd-chevron { width: 15px; height: 15px; flex: none; color: #8E7BE0; }
+  #leadsTable td:last-child .lcd-row:focus-visible { outline: 2px solid #5B8DEF; outline-offset: 1px; }
+  #leadsTable td:last-child button.lcd-loc { cursor: pointer; transition: background .15s ease; }
+  #leadsTable td:last-child button.lcd-loc:hover { background: #FFF5E5; }
+
+  /* ===== Status styles (one look per status) ===== */
+  #leadsTable .lead-reference-field[data-status] .lead-status-select { font-weight: 800 !important; letter-spacing: .02em; border-width: 1px !important; border-style: solid !important; transition: box-shadow .2s ease; }
+  #leadsTable .lead-reference-field[data-status] .lead-status-select.custom-select-trigger { padding-left: 14px !important; }
+  #leadsTable .lead-reference-field[data-status] .lead-status-select.custom-select-trigger::before { content: ''; width: 8px; height: 8px; margin-right: 9px; flex: none; border-radius: 50%; background: currentColor; }
+
+  /* 1 Fresh Leads - violet */
+  #leadsTable .lead-reference-field[data-status="1"] .lead-status-select { background: linear-gradient(135deg, #F5F0FF, #E4D9FF) !important; color: #5B2FD1 !important; border-color: #CDBBFA !important; box-shadow: inset 5px 0 0 #7C4FE0 !important; }
+
+  /* 2 Following Up - blue */
+  #leadsTable .lead-reference-field[data-status="2"] .lead-status-select { background: linear-gradient(135deg, #EAF4FF, #D0E6FF) !important; color: #1D5FB0 !important; border-color: #A9CCF3 !important; box-shadow: inset 5px 0 0 #2C7EC7 !important; }
+
+  /* 3 Hot Follow Up - red/orange, pulsing */
+  #leadsTable .lead-reference-field[data-status="3"] .lead-status-select { background: linear-gradient(135deg, #FFEEE8, #FFD3C7) !important; color: #C22B12 !important; border-color: #F5A593 !important; box-shadow: inset 5px 0 0 #E5391B, 0 2px 8px rgba(229, 57, 27, .18) !important; }
+  #leadsTable .lead-reference-field[data-status="3"] .lead-status-select.custom-select-trigger::before { box-shadow: 0 0 0 0 rgba(229, 57, 27, .55); animation: leadStatusPulse 1.4s infinite; }
+  @keyframes leadStatusPulse { 0% { box-shadow: 0 0 0 0 rgba(229, 57, 27, .55); } 70% { box-shadow: 0 0 0 7px rgba(229, 57, 27, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 57, 27, 0); } }
+
+  /* 4 Converted - green, tick */
+  #leadsTable .lead-reference-field[data-status="4"] .lead-status-select { background: linear-gradient(135deg, #E3F8EC, #BDEFD3) !important; color: #137A45 !important; border-color: #8FD8B1 !important; box-shadow: inset 5px 0 0 #1F9D5C !important; }
+  #leadsTable .lead-reference-field[data-status="4"] .lead-status-select.custom-select-trigger::before { content: '\2713'; width: auto; height: auto; background: none; font-size: 14px; font-weight: 900; line-height: 1; }
+
+  /* 5 Denied - rose, cross */
+  #leadsTable .lead-reference-field[data-status="5"] .lead-status-select { background: linear-gradient(135deg, #FDEEF0, #F6D3D9) !important; color: #A3182E !important; border-color: #EBA3AF !important; box-shadow: inset 5px 0 0 #D1344B !important; }
+  #leadsTable .lead-reference-field[data-status="5"] .lead-status-select.custom-select-trigger::before { content: '\2715'; width: auto; height: auto; background: none; font-size: 12px; font-weight: 900; line-height: 1; }
+
+  /* 6 Pending - amber, dashed, ring */
+  #leadsTable .lead-reference-field[data-status="6"] .lead-status-select { background: linear-gradient(135deg, #FFF8E1, #FFECB3) !important; color: #8A5A00 !important; border-color: #E8C463 !important; border-style: dashed !important; box-shadow: inset 5px 0 0 #E3A008 !important; }
+  #leadsTable .lead-reference-field[data-status="6"] .lead-status-select.custom-select-trigger::before { background: transparent; border: 2px solid currentColor; box-sizing: border-box; }
+
+  /* 7 Wrong Lead - grey, dashed, warning */
+  #leadsTable .lead-reference-field[data-status="7"] .lead-status-select { background: linear-gradient(135deg, #F1F3F6, #DDE2E9) !important; color: #4A5568 !important; border-color: #B3BECC !important; border-style: dashed !important; box-shadow: inset 5px 0 0 #7B8798 !important; }
+  #leadsTable .lead-reference-field[data-status="7"] .lead-status-select.custom-select-trigger::before { content: '\26A0'; width: auto; height: auto; background: none; font-size: 13px; line-height: 1; }
+
+  /* 8 Call Not Picked - teal, phone */
+  #leadsTable .lead-reference-field[data-status="8"] .lead-status-select { background: linear-gradient(135deg, #E6F8FA, #C4EBF0) !important; color: #0E7480 !important; border-color: #8FD3DB !important; box-shadow: inset 5px 0 0 #14A3B3 !important; }
+  #leadsTable .lead-reference-field[data-status="8"] .lead-status-select.custom-select-trigger::before { content: '\260E'; width: auto; height: auto; background: none; font-size: 13px; line-height: 1; }
+  /* ===== Status badges v2 (overrides the earlier status styles) ===== */
+  #leadsTable .lead-reference-field[data-status] .lead-status-select.custom-select-trigger::before { content: none !important; display: none !important; }
+  #leadsTable .lead-reference-field[data-status] .lead-status-select { font-size: 11px !important; font-weight: 800 !important; letter-spacing: .06em; text-transform: uppercase; border-width: 1px !important; border-style: solid !important; box-shadow: none !important; }
+  #leadsTable .lead-reference-field[data-status] .lead-status-select.custom-select-trigger { justify-content: center; padding: 0 12px !important; }
+
+  /* 1 Fresh Leads - soft violet */
+  #leadsTable .lead-reference-field[data-status="1"] .lead-status-select { background: #EFE9FF !important; color: #5B2FD1 !important; border-color: #D5C7FB !important; }
+
+  /* 2 Following Up - soft blue */
+  #leadsTable .lead-reference-field[data-status="2"] .lead-status-select { background: #E3F0FF !important; color: #1D5FB0 !important; border-color: #B5D3F5 !important; }
+
+  /* 3 Hot Follow Up - solid red/orange */
+  #leadsTable .lead-reference-field[data-status="3"] .lead-status-select { background: linear-gradient(135deg, #F0502D, #D6301A) !important; color: #fff !important; border-color: #C42A15 !important; box-shadow: 0 3px 10px rgba(214, 48, 26, .35) !important; }
+
+  /* 4 Converted - solid green */
+  #leadsTable .lead-reference-field[data-status="4"] .lead-status-select { background: linear-gradient(135deg, #26B26B, #16904F) !important; color: #fff !important; border-color: #12804A !important; box-shadow: 0 3px 10px rgba(22, 144, 79, .32) !important; }
+
+  /* 5 Denied - outlined rose */
+  #leadsTable .lead-reference-field[data-status="5"] .lead-status-select { background: #fff !important; color: #B3263C !important; border-color: #D1344B !important; }
+
+  /* 6 Pending - soft amber */
+  #leadsTable .lead-reference-field[data-status="6"] .lead-status-select { background: #FFF1CC !important; color: #8A5A00 !important; border-color: #EBCB6B !important; }
+
+  /* 7 Wrong Lead - flat slate */
+  #leadsTable .lead-reference-field[data-status="7"] .lead-status-select { background: #E9EDF2 !important; color: #475467 !important; border-color: #C3CCD8 !important; }
+
+  /* 8 Call Not Picked - soft teal */
+  #leadsTable .lead-reference-field[data-status="8"] .lead-status-select { background: #DDF4F7 !important; color: #0E6F7B !important; border-color: #9ED8E0 !important; }
+  /* ===== Date box (Reference column) ===== */
+  #leadsTable .lead-date-display { box-sizing: border-box; display: flex; width: 100%; height: 38px; min-width: 0; align-items: center; gap: 8px; overflow: hidden; padding: 0 10px; border: 1px solid #C9E6D6; border-radius: 8px; background: linear-gradient(135deg, #F3FBF7, #E0F4E9); color: #314967; font-size: 12px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+  #leadsTable .lead-date-display svg { width: 15px; height: 15px; flex: none; color: #2EAA79; }
+  /* ===== Leads AI button: dark hanging tag ===== */
+  #leadsAiAssistantCard { position: relative; background: linear-gradient(135deg, #0F172A, #1E293B); border: 1px solid #334155; color: #fff; box-shadow: 0 8px 18px rgba(15, 23, 42, .32), inset 0 1px 0 rgba(255, 255, 255, .10);  animation: leadsAiDrop .9s cubic-bezier(.22, 1, .36, 1) both, leadsAiHang 4s ease-in-out .9s infinite; }
+  #leadsAiAssistantCard svg { color: #FBBF24; }
+
+  #leadsAiAssistantCard:hover { animation-play-state: paused; background: linear-gradient(135deg, #1E293B, #0F172A); border-color: #FBBF24; box-shadow: 0 10px 22px rgba(15, 23, 42, .40), 0 0 0 3px rgba(251, 191, 36, .22), inset 0 1px 0 rgba(255, 255, 255, .12); }
+  #leadsAiAssistantCard.assistant-auto-press { animation: assistantAutoPress .75s ease; }
+  @keyframes leadsAiDrop {
+    0%   { transform: translateY(-34px) rotate(0deg); opacity: 0; }
+    55%  { transform: translateY(6px) rotate(-3deg); opacity: 1; }
+    75%  { transform: translateY(-2px) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  }
+  @keyframes leadsAiHang {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    75% { transform: rotate(-3deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { #leadsAiAssistantCard { animation: none; } }
+  /* ===== Meeting reminder modal v2 ===== */
+  #meetingReminderModal { background: rgba(8, 16, 32, .58); backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%); }
+  #meetingReminderModal .rm-dialog { position: relative; width: min(580px, 100%); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255, 255, 255, .7); border-radius: 22px; background: #fff; box-shadow: 0 40px 100px rgba(8, 16, 32, .45), 0 0 0 1px rgba(15, 30, 60, .06); animation: rmPop .3s cubic-bezier(.22, 1, .36, 1); }
+  @keyframes rmPop { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  #meetingReminderModal .rm-header { position: relative; display: flex; align-items: center; gap: 15px; padding: 24px 26px; overflow: hidden; color: #fff; background: linear-gradient(135deg, #0B1F3F, #17376B 58%, #1F4E94); }
+  #meetingReminderModal .rm-header::after { content: ''; position: absolute; right: -50px; top: -70px; width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, .13), rgba(255, 255, 255, 0) 70%); pointer-events: none; }
+  #meetingReminderModal .rm-header-icon { position: relative; z-index: 1; display: flex; width: 48px; height: 48px; flex: none; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, .22); border-radius: 15px; background: rgba(255, 255, 255, .12); color: #FFC857; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2); }
+  #meetingReminderModal .rm-header-text { position: relative; z-index: 1; min-width: 0; flex: 1; }
+  #meetingReminderModal .rm-eyebrow { margin: 0 0 3px; color: #8FB4EE; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  #meetingReminderModal .rm-title { margin: 0; color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.01em; line-height: 1.25; }
+  #meetingReminderModal .rm-caption { margin: 4px 0 0; color: rgba(255, 255, 255, .68); font-size: 12px; }
+  #meetingReminderModal .rm-close { position: relative; z-index: 1; display: flex; width: 36px; height: 36px; flex: none; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, .18); border-radius: 11px; background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background .2s ease; }
+  #meetingReminderModal .rm-close:hover { transform: rotate(90deg); background: rgba(255, 255, 255, .22); }
+
+  #meetingReminderModal .rm-body { display: grid; gap: 20px; padding: 22px 26px 24px; overflow-y: auto; background: #fff; }
+  #meetingReminderModal .rm-section-label { margin: 0 0 9px; color: #6B7A90; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+
+  #meetingReminderModal .rm-lead-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; padding: 15px; border: 1px solid #E3E9F2; border-radius: 15px; background: linear-gradient(180deg, #FAFCFF, #F3F7FC); }
+  #meetingReminderModal .rm-info { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  #meetingReminderModal .rm-info-icon { display: flex; width: 34px; height: 34px; flex: none; align-items: center; justify-content: center; border-radius: 10px; }
+  #meetingReminderModal .rm-info-icon svg { width: 16px; height: 16px; }
+  #meetingReminderModal .rm-ic-blue { background: #E1ECFF; color: #2563C9; }
+  #meetingReminderModal .rm-ic-violet { background: #EAE3FF; color: #5B3FD0; }
+  #meetingReminderModal .rm-ic-green { background: #DBF3E6; color: #17804F; }
+  #meetingReminderModal .rm-ic-amber { background: #FFEBCB; color: #B45F06; }
+  #meetingReminderModal .rm-info-body { display: grid; gap: 2px; min-width: 0; }
+  #meetingReminderModal .rm-info-label { color: #8493A8; font-size: 9.5px; font-weight: 800; letter-spacing: .08em; line-height: 1.2; text-transform: uppercase; }
+  #meetingReminderModal .rm-info-value { overflow: hidden; color: #1B2F4B; font-size: 13px; font-weight: 700; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+
+  #meetingReminderModal .rm-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  #meetingReminderModal .rm-preset { height: 32px; padding: 0 13px; border: 1px solid #D6E0EE; border-radius: 999px; background: #fff; color: #38506F; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+  #meetingReminderModal .rm-preset:hover { border-color: #2F6FD6; background: #F2F7FF; color: #1D4FA8; }
+  #meetingReminderModal .rm-preset.active { border-color: #17376B; background: #17376B; color: #fff; box-shadow: 0 4px 10px rgba(23, 55, 107, .25); }
+
+  #meetingReminderModal .rm-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  #meetingReminderModal .rm-field { display: grid; gap: 7px; min-width: 0; }
+  #meetingReminderModal .rm-field-label { display: flex; align-items: center; gap: 6px; color: #34475F; font-size: 12px; font-weight: 700; }
+  #meetingReminderModal .rm-field-label svg { width: 14px; height: 14px; flex: none; color: #2F6FD6; }
+  #meetingReminderModal .rm-field input { box-sizing: border-box; width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid #D9E2EE; border-radius: 12px; background: #fff; color: #1B2F4B; color-scheme: light; font: inherit; font-size: 13.5px; font-weight: 600; outline: none; transition: border-color .18s ease, box-shadow .18s ease; }
+  #meetingReminderModal .rm-field input:hover { border-color: #B9C7DA; }
+  #meetingReminderModal .rm-field input:focus { border-color: #2F6FD6; box-shadow: 0 0 0 4px rgba(47, 111, 214, .14); }
+
+  #meetingReminderModal .rm-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 2px; padding-top: 18px; border-top: 1px solid #EDF1F6; }
+  #meetingReminderModal .rm-btn { display: inline-flex; height: 44px; align-items: center; justify-content: center; gap: 8px; padding: 0 22px; border-radius: 12px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background .15s ease; }
+  #meetingReminderModal .rm-btn.rm-cancel { border: 1px solid #D6DFEB; background: #fff; color: #3C4F69; }
+  #meetingReminderModal .rm-btn.rm-cancel:hover { background: #F5F8FC; }
+  #meetingReminderModal .rm-btn.rm-primary { min-height: 44px; border: 0; background: linear-gradient(135deg, #1F4E94, #12315F); color: #fff; box-shadow: 0 8px 18px rgba(18, 49, 95, .32); }
+  #meetingReminderModal .rm-btn.rm-primary:hover { background: linear-gradient(135deg, #2557A3, #153869); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(18, 49, 95, .4); }
+  #meetingReminderModal .rm-btn.rm-primary:disabled { opacity: .7; cursor: wait; transform: none; }
+  #meetingReminderModal .rm-btn.rm-primary::before { content: ''; width: 16px; height: 16px; background: center / 16px 16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='17' rx='2'/%3E%3Cpath d='M8 2v4m8-4v4M3 10h18m-11 5 2 2 4-4'/%3E%3C/svg%3E"); }
+
+  @media (max-width: 560px) {
+    #meetingReminderModal .rm-lead-grid, #meetingReminderModal .rm-fields { grid-template-columns: 1fr; }
+    #meetingReminderModal .rm-header { padding: 20px; }
+    #meetingReminderModal .rm-body { padding: 18px 20px 22px; }
+  }
+  /* ===== End new Company Details card ===== */
 </style>
 </head>
 
@@ -1170,7 +1367,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
         </div>
 
         <div class="leads-toolbar-right">
-          <button type="button" onclick="openBulkAssignTo()" class="leads-primary-button">Assign To</button>
+          <button type="button" onclick="openBulkAssignTo()" class="leads-primary-button" th:if="${canLeadEdit}">Assign To</button>
 
           <button type="button" id="leadsAiAssistantCard" onclick="openLeadAssistant()" class="leads-clear-filter-btn">
             <svg class="leads-ai-icon-anim" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 4.9L5 9.8l5.1 1.9L12 16.6l1.9-4.9 5.1-1.9-5.1-1.9L12 3Z"/><path d="M19 15v3M17.5 16.5h3"/></svg>
@@ -1383,7 +1580,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       </div>
 
       <!-- LEADS OVERVIEW + LEADS BY SOURCE + LEADS BY STATUS -->
-      <div id="leadsChartsGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div id="leadsChartsGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5" th:style="${canLeadDashboard ? '' : 'display:none'}">
 
         <!-- LEADS MOMENTUM -->
         <div class="glass rounded-2xl p-5 lg:col-span-6 flex flex-col overflow-hidden relative">
@@ -1541,8 +1738,11 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
             </div>
           </div>
           <div class="leads-table-toolbar-actions flex items-center gap-3 flex-wrap">
-            <span class="text-[11px] font-bold text-white px-2.5 py-1.5 rounded-lg" style="background:#F3A73D;">Graphs Section</span>
-            <label class="mini-toggle" title="Show/Hide Charts">
+            <button type="button" id="deleteSelectedLeadsButton" class="lead-bulk-delete-button" th:if="${canLeadDeleteButton}" onclick="deleteSelectedLeads()" disabled title="Select leads to delete" aria-label="Delete selected leads">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="m5 7 1 13h12l1-13"/><path d="M9 7V4h6v3"/></svg>
+            </button>
+            <span class="text-[11px] font-bold text-white px-2.5 py-1.5 rounded-lg" style="background:#F3A73D;" th:if="${canLeadDashboard}">Graphs Section</span>
+            <label class="mini-toggle" title="Show/Hide Charts" th:if="${canLeadDashboard}">
               <input type="checkbox" id="chartsToggle" onchange="toggleLeadsCharts(this.checked)">
               <span class="mini-toggle-track"><span class="mini-toggle-thumb"></span></span>
             </label>
@@ -1555,26 +1755,35 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </button>
 
-            <button type="button" class="no-hover-lift flex items-center gap-1.5 text-[12px] font-semibold text-white px-4 py-2 rounded-xl" style="background:#F3A73D;">
+            <button type="button" class="no-hover-lift flex items-center gap-1.5 text-[12px] font-semibold text-white px-4 py-2 rounded-xl" style="background:#F3A73D;" th:if="${canLeadExcel}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg>
               Import
             </button>
 
-            <button onclick="openAddLead()" class="no-hover-lift flex items-center gap-1.5 text-[12px] font-semibold text-white px-4 py-2 rounded-xl shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);">
+            <button onclick="openAddLead()" class="no-hover-lift flex items-center gap-1.5 text-[12px] font-semibold text-white px-4 py-2 rounded-xl shadow-md shadow-purple-500/25" style="background-image:linear-gradient(135deg,#8A5CF6,#6D8CFF);" th:if="${canLeadWrite}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               Add Lead
             </button>
+
           </div>
         </div>
 
         <div id="leadsTableWrap">
                     <table class="w-full text-left" id="leadsTable">
+                    <colgroup>
+                      <col style="width:6%">
+                      <col style="width:14%">
+                      <col style="width:30%">
+                      <col style="width:16%">
+                      <col style="width:34%">
+                    </colgroup>
             <thead>
               <tr class="bg-[#5B8DEF]">
-                <th class="py-5 px-1 font-bold text-white text-center text-[11px] whitespace-nowrap" style="width:6%">S. No</th>
-                <th class="py-5 px-3 font-bold text-white" style="width:30%">Main Details</th>
-                <th class="py-5 px-3 font-bold text-white" style="width:32%">Lead Details</th>
-                <th class="py-5 px-3 font-bold text-white" style="width:32%">Company Details</th>
+                        <th class="py-5 px-1 font-bold text-white text-center text-[11px] whitespace-nowrap">S. No</th>
+                        <th class="py-5 px-3 font-bold text-white">Created By</th>
+                        <th class="py-5 px-3 font-bold text-white">Main Details</th>
+                        <th class="py-5 px-3 font-bold text-white">Reference</th>
+                        <th class="py-5 px-3 font-bold text-white">Company Details</th>
               </tr>
             </thead>
             <tbody id="leadsTableBody">
@@ -1583,19 +1792,25 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                   <span class="lead-select-cell-inner">
                     <input type="checkbox" class="lead-select-checkbox rounded border-gray-300 cursor-pointer accent-[#8A5CF6]" th:value="${lead.id}">
                     <span class="lead-serial text-[13px] font-semibold text-[#171923]" th:text="${leadStat.count}">1</span>
-                    <button type="button" class="lead-delete-button" th:if="${isSuperAdmin}" onclick="event.stopPropagation(); deleteLead(this.closest('tr').dataset.leadId)" title="Delete lead" aria-label="Delete lead">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="m5 7 1 13h12l1-13"/><path d="M9 7V4h6v3"/></svg>
-                    </button>
                   </span>
+                </td>
+                <td class="lead-created-by">
+                  <div class="lead-created-by-stack">
+                    <span th:text="${lead.createdByName != null and !#strings.isEmpty(lead.createdByName) and !#strings.equalsIgnoreCase(lead.createdByName, 'Unknown') ? lead.createdByName : '-'}">Sofia</span>
+                    <div class="lead-assigned-to" th:if="${lead.assignToName != null and !#strings.isEmpty(lead.assignToName) and !#strings.equalsIgnoreCase(lead.assignToName, 'Unknown')}">
+                      <span class="lead-assigned-to-label">Assigned to</span>
+                      <span class="lead-assigned-to-name" th:text="${lead.assignToName}">Assigned user</span>
+                    </div>
+                  </div>
                 </td>
                 <td class="py-4 px-3 text-[#3A4B63]" style="font-size:14px;">
                   <div class="lead-details-stack">
                     <div class="lead-details-followup">
-                      <button type="button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName}" onclick="openCompanyFollowUpPopup(this)" th:classappend="${(lead.reminder != null and !#strings.isEmpty(lead.reminder)) or leadsWithFollowupComments.contains(lead.id)} ? 'has-followup' : ''" class="company-followup-btn">
+                      <button type="button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName}" onclick="openCompanyFollowUpPopup(this)" th:classappend="${(lead.reminder != null and !#strings.isEmpty(lead.reminder)) or leadsWithFollowupComments.contains(lead.id)} ? 'has-followup' : ''" class="company-followup-btn" th:if="${canLeadEdit}">
                         <span class="company-followup-btn-label">Company Follow Up</span>
                         <svg class="company-followup-btn-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                       </button>
-                      <button type="button" class="lead-reminder-button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName}" onclick="openCompanyFollowUpPopup(this)" title="Set or view reminder">
+                      <button type="button" class="lead-reminder-button" th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName},data-client-name=${lead.isName},data-phone=${lead.phone ?: lead.companyMobile},data-email=${lead.email ?: lead.officialMailId}" onclick="openMeetingReminderPopup(this)" title="Schedule a private meeting reminder" th:if="${canLeadWrite}">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"/></svg>
                         <span>Reminder</span>
                       </button>
@@ -1605,22 +1820,37 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                       <span class="lead-client-name-value" th:text="${lead.isName != null and !#strings.isEmpty(lead.isName) ? lead.isName : ''}"></span>
                     </div>
                     <div class="lead-quotation-choice flex items-center gap-2">
-                      <button type="button" th:id="'quotationBtn' + ${lead.id}" th:onclick="'openQuotationModal(' + ${lead.id} + ')'" class="flex-1 min-w-0 flex items-center justify-between gap-2 px-4 py-1.5 text-[11px] font-semibold text-[#3A4B63] transition">
-                        <span class="truncate" th:id="'quotationText' + ${lead.id}" th:text="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType) ? lead.quotationType : 'Choose quotation'}">Choose quotation</span>
+                      <button type="button" th:id="'quotationBtn' + ${lead.id}" th:onclick="'openQuotationModal(' + ${lead.id} + ')'" class="flex-1 min-w-0 flex items-center justify-between gap-2 px-4 py-1.5 text-[11px] font-semibold text-[#3A4B63] transition" th:disabled="${!canLeadWrite}">
+                        <span class="truncate" th:id="'quotationText' + ${lead.id}" th:text="${lead.selectedQuotationTypeLabel != null and !#strings.isEmpty(lead.selectedQuotationTypeLabel) ? lead.selectedQuotationTypeLabel : 'Choose quotation'}">Choose quotation</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8C8FA3" stroke-width="2" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"/></svg>
                       </button>
-                      <div th:id="'quotationArrowBox' + ${lead.id}" th:classappend="${lead.quotationType != null and !#strings.isEmpty(lead.quotationType)} ? 'flex' : 'hidden'" th:attr="data-lead-id=${lead.id},data-quotation-type=${lead.quotationType},data-company-name=${lead.companyName}" onclick="openQuotationEditPanel(this)" class="lead-quotation-proceed cursor-pointer" title="Proceed" aria-label="Proceed to quotation">
+                      <div th:id="'quotationArrowBox' + ${lead.id}" th:classappend="${lead.selectedQuotationTypeLabel != null and !#strings.isEmpty(lead.selectedQuotationTypeLabel)} ? 'flex' : 'hidden'" th:attr="data-lead-id=${lead.id},data-quotation-type=${lead.selectedQuotationTypeLabel},data-certificate-type-id=${lead.certificateTypeId},data-company-name=${lead.companyName}" onclick="openQuotationEditPanel(this)" class="lead-quotation-proceed cursor-pointer" title="Proceed" aria-label="Proceed to quotation" th:if="${canLeadWrite}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                       </div>
                     </div>
                     <div class="lead-details-top-actions">
+                      <select class="lead-client-logos-select" aria-label="Client Logos">
+                        <option value="client-logos">Client Logos</option>
+                        <option value="none">None</option>
+                        <option value="bearings">Bearings</option>
+                        <option value="chemicals">Chemicals</option>
+                        <option value="cosmetics">Cosmetics</option>
+                        <option value="electricals">Electricals</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="handtools">Handtools</option>
+                        <option value="home-appliances">Home Appliances</option>
+                        <option value="iron-and-steel-industry">Iron and Steel Industry</option>
+                        <option value="scheme-x">Scheme X</option>
+                        <option value="toys">Toys</option>
+                      </select>
                       <button type="button" th:id="'quotationDownload' + ${lead.id}" class="quotation-latest-download lead-details-icon-button" disabled title="No quotation available to download" aria-label="Download latest quotation">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
                       </button>
                       <button type="button" class="lead-details-icon-button lead-requirement-icon" th:attr="data-company=${lead.companyName},data-requirement=${lead.requirements}" th:onclick="${lead.requirements != null and !#strings.isEmpty(lead.requirements)} ? 'openRequirementPopup(this)' : null" th:disabled="${lead.requirements == null or #strings.isEmpty(lead.requirements)}" title="View requirement" aria-label="View requirement">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
-                      <button type="button" class="lead-details-icon-button" th:onclick="'openEditLead(' + ${lead.id} + ') '" title="Edit Lead" aria-label="Edit Lead">
+                      <button type="button" class="lead-details-icon-button" th:onclick="'openEditLead(' + ${lead.id} + ') '" title="Edit Lead" aria-label="Edit Lead" th:if="${canLeadEdit}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"/></svg>
                       </button>
                     </div>
@@ -1636,45 +1866,76 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                         <span th:if="${lead.sourceId == null}">-</span>
                         </div>
                       </div>
-                      <label class="lead-reference-field">
+                      <label class="lead-reference-field" th:attr="data-status=${lead.status}">
                         <span class="lead-reference-label">Status</span>
-                        <select class="lead-status-select w-full font-semibold px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/40"
+                        <select class="lead-status-select w-full font-semibold px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/40" th:disabled="${!canLeadEdit}"
                               th:style="${lead.status == '1' ? 'background:#F0EEFB;color:#7C4FE0;' : (lead.status == '2' ? 'background:#EAF4FE;color:#2C7EC7;' : (lead.status == '3' ? 'background:#FDEBEB;color:#D14343;' : (lead.status == '4' ? 'background:#E7F9F0;color:#1F9D5C;' : 'background:#EDEFF3;color:#4B5567;')))}"
                               th:onchange="'updateLeadField(' + ${lead.id} + ', \'status\', this.value)'">
                         <option th:each="st : ${allStatuses}" th:value="${st.id}" th:text="${st.label}"
                                 th:selected="${lead.status != null and lead.status == #strings.toString(st.id)}"></option>
                         </select>
                       </label>
-                    </div>
-                    <div class="lead-metadata-stack">
-                    <div class="lead-details-people">
-                      <div class="lead-detail-line">
-                        <strong>Created by</strong>
-                        <span class="lead-person-name" th:text="${lead.createdByName != null and !#strings.isEmpty(lead.createdByName) and !#strings.equalsIgnoreCase(lead.createdByName, 'Unknown') ? #strings.arraySplit(#strings.trim(lead.createdByName), ' ')[0] : ''}"></span>
+                      <div class="lead-reference-field">
+                        <span class="lead-reference-label">Date</span>
+                        <div class="lead-date-display">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4m8-4v4M3 10h18"/></svg>
+                          <span th:text="${lead.createdAt != null ? #temporals.format(lead.createdAt, 'MMM dd, yyyy') : '-'}">Aug 26, 2026</span>
+                        </div>
                       </div>
-                      <div class="lead-detail-line">
-                        <strong>Assigned to</strong>
-                        <span class="lead-person-badge" th:text="${lead.assignToName != null and !#strings.isEmpty(lead.assignToName) and !#strings.equalsIgnoreCase(lead.assignToName, 'Unknown') ? #strings.arraySplit(#strings.trim(lead.assignToName), ' ')[0] : ''}"></span>
-                      </div>
-                    </div>
-                    <div class="lead-detail-line lead-details-created"><strong>Date</strong><span th:text="${lead.createdAt != null ? #temporals.format(lead.createdAt, 'MMM dd, yyyy') : '-'}">-</span></div>
                     </div>
                   </div>
                 </td>
-                <td class="py-4 pl-3 pr-3">
-                  <div class="lead-company-details-cell">
-                    <div class="lead-company-contact-stack">
-                      <div class="lead-detail-line"><strong>Email</strong><span th:text="${lead.email ?: lead.officialMailId}"></span></div>
-                      <div class="lead-detail-line"><strong>Phone</strong><span th:text="${lead.phone ?: lead.companyMobile}"></span></div>
-                      <div class="lead-detail-line"><strong>Company Name</strong><span th:text="${lead.companyName}"></span></div>
-                      <div class="lead-detail-line"><strong>Address</strong><span th:text="${lead.address}"></span></div>
-                      <div class="lead-detail-line"><strong>Latest Follow-up</strong><span th:text="${latestFollowups[lead.id] ?: '-'}" th:title="${latestFollowups[lead.id]}"></span></div>
+                                <td class="py-3 px-3">
+                  <div class="lcd-card"
+                       th:with="email=${lead.email != null and !#strings.isEmpty(lead.email) ? lead.email : (lead.officialMailId != null and !#strings.isEmpty(lead.officialMailId) ? lead.officialMailId : null)},
+                                phone=${lead.phone != null and !#strings.isEmpty(lead.phone) ? lead.phone : (lead.companyMobile != null and !#strings.isEmpty(lead.companyMobile) ? lead.companyMobile : null)},
+                                address=${lead.address != null and !#strings.isEmpty(lead.address) ? lead.address : null},
+                                followup=${latestFollowups[lead.id]}">
+
+                    <div class="lcd-company" th:title="${lead.companyName}">
+                      <span class="lcd-ico lcd-ico-company">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2m4 0h-1M9 11h2m4 0h-1M9 15h2m4 0h-1"/></svg>
+                      </span>
+                      <span class="lcd-company-name" th:if="${lead.companyName != null and !#strings.isEmpty(lead.companyName)}" th:text="${lead.companyName}"></span>
+                      <span class="lcd-company-name lcd-empty" th:unless="${lead.companyName != null and !#strings.isEmpty(lead.companyName)}">Not added</span>
                     </div>
+
+                    <button type="button" class="lcd-row lcd-mail" th:attr="onclick=${canLeadEdit ? 'openEditLead(' + lead.id + ')' : ''}" title="Edit lead email" aria-label="Edit lead email" th:disabled="${!canLeadEdit}">
+                      <span class="lcd-ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                      </span>
+                      <span class="lcd-value" th:classappend="${email == null} ? 'lcd-empty'" th:text="${email ?: 'Not added'}"></span>
+                    </button>
+
+                    <button type="button" class="lcd-row lcd-phone" th:attr="onclick=${canLeadEdit ? 'openEditLead(' + lead.id + ')' : ''}" title="Edit lead phone" aria-label="Edit lead phone" th:disabled="${!canLeadEdit}">
+                      <span class="lcd-ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z"/></svg>
+                      </span>
+                      <span class="lcd-value" th:classappend="${phone == null} ? 'lcd-empty'" th:text="${phone ?: 'Not added'}"></span>
+                    </button>
+
+                    <button type="button" class="lcd-row lcd-loc" th:attr="onclick=${canLeadEdit ? 'openEditLead(' + lead.id + ')' : ''}" th:title="${address ?: 'Edit lead address'}" aria-label="Edit lead address" th:disabled="${!canLeadEdit}">
+                      <span class="lcd-ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                      </span>
+                      <span class="lcd-value" th:classappend="${address == null} ? 'lcd-empty'" th:text="${address ?: 'Not added'}"></span>
+                    </button>
+
+                    <button type="button" class="lcd-row lcd-followup"
+                            th:attr="data-lead-id=${lead.id},data-company-name=${lead.companyName},title=${latestFollowups[lead.id] ?: 'Open follow-up history'}"
+                            onclick="openCompanyFollowUpPopup(this)" aria-label="Open company follow-up">
+                      <span class="lcd-ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg>
+                      </span>
+                      <span class="lcd-value" th:classappend="${followup == null} ? 'lcd-empty'" th:text="${followup ?: 'No follow-up yet'}"></span>
+                      <svg class="lcd-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                    </button>
+
                   </div>
                 </td>
               </tr>
               <tr class="leads-table-row" th:if="${leads == null or #lists.isEmpty(leads)}">
-                <td colspan="4" class="py-6 text-center text-[12.5px] text-[#8C8FA3]">No leads found.</td>
+                <td colspan="5" class="py-6 text-center text-[12.5px] text-[#8C8FA3]">No leads found.</td>
               </tr>
             </tbody>
           </table>
@@ -1758,9 +2019,9 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
           </div>
           <div>
             <label class="block text-[11.5px] font-semibold text-[#3A4B63] mb-1.5">Quotation Type</label>
-            <select id="leadQuotationInput" name="quotationType" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
+            <select id="leadQuotationInput" name="certificateTypeId" class="w-full px-3 py-2.5 rounded-xl border border-black/10 text-[13px] text-[#171923] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#8A5CF6]/30 focus:border-[#8A5CF6]">
               <option value="">Select quotation type</option>
-              <option th:each="qt : ${allQuotationTypes}" th:value="${qt}" th:text="${qt}">Quotation Type</option>
+              <option th:each="certificateType : ${certificateTypeLabels}" th:value="${certificateType.key}" th:text="${certificateType.value}">Quotation Type</option>
             </select>
           </div>
           <div>
@@ -1847,6 +2108,82 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     </div>
   </div>
 
+  <div id="meetingReminderModal" role="dialog" aria-modal="true" aria-labelledby="meetingReminderTitle" onclick="closeMeetingReminderPopup(event)">
+    <div class="rm-dialog" onclick="event.stopPropagation()">
+      <header class="rm-header">
+        <span class="rm-header-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </span>
+        <div class="rm-header-text">
+          <p class="rm-eyebrow">Meeting reminder</p>
+          <h3 class="rm-title" id="meetingReminderTitle">Schedule a meeting reminder</h3>
+          <p class="rm-caption">A private alert for your account at the time you choose.</p>
+        </div>
+        <button type="button" class="rm-close" onclick="closeMeetingReminderPopup()" aria-label="Close reminder form">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+
+      <form class="rm-body" onsubmit="scheduleLeadMeetingReminder(event)">
+        <input type="hidden" id="meetingReminderLeadId">
+
+        <section>
+          <p class="rm-section-label">Lead details</p>
+          <div class="rm-lead-grid">
+            <div class="rm-info">
+              <span class="rm-info-icon rm-ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+              <div class="rm-info-body"><span class="rm-info-label">Client</span><span class="rm-info-value" id="meetingReminderClient">-</span></div>
+            </div>
+            <div class="rm-info">
+              <span class="rm-info-icon rm-ic-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2m4 0h-1M9 11h2m4 0h-1M9 15h2m4 0h-1"/></svg></span>
+              <div class="rm-info-body"><span class="rm-info-label">Company</span><span class="rm-info-value" id="meetingReminderCompany">-</span></div>
+            </div>
+            <div class="rm-info">
+              <span class="rm-info-icon rm-ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z"/></svg></span>
+              <div class="rm-info-body"><span class="rm-info-label">Phone</span><span class="rm-info-value" id="meetingReminderPhone">-</span></div>
+            </div>
+            <div class="rm-info">
+              <span class="rm-info-icon rm-ic-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+              <div class="rm-info-body"><span class="rm-info-label">Email</span><span class="rm-info-value" id="meetingReminderEmail">-</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <p class="rm-section-label">When</p>
+          <div class="rm-presets">
+            <button type="button" class="rm-preset" data-preset="30m" onclick="setMeetingReminderPreset('30m')">In 30 min</button>
+            <button type="button" class="rm-preset" data-preset="1h" onclick="setMeetingReminderPreset('1h')">In 1 hour</button>
+            <button type="button" class="rm-preset" data-preset="tom10" onclick="setMeetingReminderPreset('tom10')">Tomorrow 10:00 AM</button>
+            <button type="button" class="rm-preset" data-preset="tom16" onclick="setMeetingReminderPreset('tom16')">Tomorrow 4:00 PM</button>
+          </div>
+          <div class="rm-fields">
+            <label class="rm-field">
+              <span class="rm-field-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4m8-4v4M3 10h18"/></svg>Meeting date</span>
+              <input type="date" id="meetingReminderDate" required oninput="document.querySelectorAll('#meetingReminderModal .rm-preset.active').forEach(function (b) { b.classList.remove('active'); })">
+            </label>
+            <label class="rm-field">
+              <span class="rm-field-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Meeting time</span>
+              <input type="time" id="meetingReminderTime" required oninput="document.querySelectorAll('#meetingReminderModal .rm-preset.active').forEach(function (b) { b.classList.remove('active'); })">
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <label class="rm-field">
+            <span class="rm-field-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>Reminder message</span>
+            <input type="text" id="meetingReminderMessage" maxlength="500" value="Meeting time - urgent reminder" required>
+          </label>
+        </section>
+
+        <div class="rm-footer">
+          <button type="button" class="rm-btn rm-cancel" onclick="closeMeetingReminderPopup()">Cancel</button>
+          <button type="submit" class="rm-btn rm-primary meeting-reminder-save">Schedule reminder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="companyFollowUpModal" class="modal-overlay" onclick="closeModal('companyFollowUpModal')">
     <div class="modal-box followup-note" onclick="event.stopPropagation()">
       <div class="followup-note-header">
@@ -1910,28 +2247,28 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       </div>
       <input type="hidden" id="quotationLeadId" value="">
       <div class="grid grid-cols-3 gap-3">
-        <button type="button" data-type="Electronic EPR" onclick="selectQuotation('Electronic EPR','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Electronic EPR</button>
-        <button type="button" data-type="Plastic EPR" onclick="selectQuotation('Plastic EPR','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Plastic EPR</button>
-        <button type="button" data-type="Battery EPR" onclick="selectQuotation('Battery EPR','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Battery EPR</button>
-        <button type="button" data-type="BIS CRS" onclick="selectQuotation('BIS CRS','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS CRS</button>
-        <button type="button" data-type="LMPC" onclick="selectQuotation('LMPC','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">LMPC</button>
-        <button type="button" data-type="BIS-ISI Certification" onclick="selectQuotation('BIS-ISI Certification','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS-ISI Certification</button>
-        <button type="button" data-type="BEE Certification" onclick="selectQuotation('BEE Certification','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BEE Certification</button>
-        <button type="button" data-type="BIS FMCS" onclick="selectQuotation('BIS FMCS','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS FMCS</button>
-        <button type="button" data-type="WPC" onclick="selectQuotation('WPC','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">WPC</button>
+        <button type="button" data-type="Electronic EPR" data-certificate-type-id="1" onclick="selectQuotation('Electronic EPR',1,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Electronic EPR</button>
+        <button type="button" data-type="Plastic EPR" data-certificate-type-id="2" onclick="selectQuotation('Plastic EPR',2,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Plastic EPR</button>
+        <button type="button" data-type="Battery EPR" data-certificate-type-id="3" onclick="selectQuotation('Battery EPR',3,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Battery EPR</button>
+        <button type="button" data-type="BIS CRS" data-certificate-type-id="4" onclick="selectQuotation('BIS CRS',4,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS CRS</button>
+        <button type="button" data-type="LMPC" data-certificate-type-id="5" onclick="selectQuotation('LMPC',5,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">LMPC</button>
+        <button type="button" data-type="BIS-ISI Certification" data-certificate-type-id="6" onclick="selectQuotation('BIS-ISI Certification',6,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS-ISI Certification</button>
+        <button type="button" data-type="BEE Certification" data-certificate-type-id="9" onclick="selectQuotation('BEE Certification',9,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BEE Certification</button>
+        <button type="button" data-type="BIS FMCS" data-certificate-type-id="7" onclick="selectQuotation('BIS FMCS',7,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">BIS FMCS</button>
+        <button type="button" data-type="WPC" data-certificate-type-id="8" onclick="selectQuotation('WPC',8,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">WPC</button>
 
-        <button type="button" data-type="General Quotation" onclick="selectQuotation('General Quotation','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">General Quotation</button>
-        <button type="button" data-type="Scheme-X Domestic" onclick="selectQuotation('Scheme-X Domestic','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Scheme-X Domestic</button>
-        <button type="button" data-type="Scheme-X Foreign" onclick="selectQuotation('Scheme-X Foreign','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Scheme-X Foreign</button>
-        <button type="button" data-type="RDSO Quotation" onclick="selectQuotation('RDSO Quotation','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">RDSO Quotation</button>
-        <button type="button" data-type="SIT Quotation" onclick="selectQuotation('SIT Quotation','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">SIT Quotation</button>
-        <button type="button" data-type="Drug Quotation" onclick="selectQuotation('Drug Quotation','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Drug Quotation</button>
-        <button type="button" data-type="CDSCO Registration" onclick="selectQuotation('CDSCO Registration','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CDSCO Registration</button>
-        <button type="button" data-type="Cosmetics" onclick="selectQuotation('Cosmetics','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Cosmetics</button>
-        <button type="button" data-type="DPIIT" onclick="selectQuotation('DPIIT','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">DPIIT</button>
-        <button type="button" data-type="CB-ISI Certification" onclick="selectQuotation('CB-ISI Certification','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-ISI Certification</button>
-              <button type="button" data-type="CB-RDSO" onclick="selectQuotation('CB-RDSO','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-RDSO</button> 
-        <button type="button" data-type="CB-FMCS" onclick="selectQuotation('CB-FMCS','#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-FMCS</button>
+          <button type="button" data-type="General Quotation" data-certificate-type-id="21" onclick="selectQuotation('General Quotation',21,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">General Quotation</button>
+          <button type="button" data-type="Scheme-X Domestic" data-certificate-type-id="10" onclick="selectQuotation('Scheme-X Domestic',10,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Scheme-X Domestic</button>
+          <button type="button" data-type="Scheme-X Foreign" data-certificate-type-id="11" onclick="selectQuotation('Scheme-X Foreign',11,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Scheme-X Foreign</button>
+          <button type="button" data-type="RDSO Quotation" data-certificate-type-id="12" onclick="selectQuotation('RDSO Quotation',12,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">RDSO Quotation</button>
+          <button type="button" data-type="SIT Quotation" data-certificate-type-id="13" onclick="selectQuotation('SIT Quotation',13,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">SIT Quotation</button>
+          <button type="button" data-type="Drug Quotation" data-certificate-type-id="14" onclick="selectQuotation('Drug Quotation',14,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Drug Quotation</button>
+          <button type="button" data-type="CDSCO Registration" data-certificate-type-id="15" onclick="selectQuotation('CDSCO Registration',15,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CDSCO Registration</button>
+          <button type="button" data-type="Cosmetics" data-certificate-type-id="16" onclick="selectQuotation('Cosmetics',16,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">Cosmetics</button>
+          <button type="button" data-type="DPIIT" data-certificate-type-id="17" onclick="selectQuotation('DPIIT',17,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">DPIIT</button>
+          <button type="button" data-type="CB-ISI Certification" data-certificate-type-id="18" onclick="selectQuotation('CB-ISI Certification',18,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-ISI Certification</button>
+          <button type="button" data-type="CB-RDSO" data-certificate-type-id="20" onclick="selectQuotation('CB-RDSO',20,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-RDSO</button>
+          <button type="button" data-type="CB-FMCS" data-certificate-type-id="19" onclick="selectQuotation('CB-FMCS',19,'#F3F5F8','#3A4B63')" class="quotation-type-option py-3 px-2 rounded-xl text-[12.5px] font-semibold text-center border border-black/5 hover:bg-[#EAECF1] transition" style="background:#F3F5F8;color:#3A4B63;">CB-FMCS</button>
       </div>
     </div>
   </div>
@@ -2812,8 +3149,12 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       document.getElementById('quotationLeadId').value = leadId;
       const textEl = document.getElementById('quotationText' + leadId);
       const currentType = textEl ? textEl.textContent.trim() : '';
+      const arrowBox = document.getElementById('quotationArrowBox' + leadId);
+      const currentCertificateTypeId = arrowBox ? arrowBox.dataset.certificateTypeId : '';
       document.querySelectorAll('.quotation-type-option').forEach(function (btn) {
-        const isCurrent = currentType && btn.getAttribute('data-type') === currentType;
+        const isCurrent = currentCertificateTypeId
+          ? btn.dataset.certificateTypeId === currentCertificateTypeId
+          : currentType && btn.getAttribute('data-type') === currentType;
         btn.classList.toggle('quotation-type-current', isCurrent);
         btn.style.background = isCurrent ? '#EDE9FF' : '#F3F5F8';
         btn.style.color = isCurrent ? '#5D5FEF' : '#3A4B63';
@@ -2822,13 +3163,13 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       openModal('quotationModal');
     }
 
-    function selectQuotation(type, bgColor, textColor) {
+    function selectQuotation(type, certificateTypeId, bgColor, textColor) {
       const leadId = document.getElementById('quotationLeadId').value;
       closeModal('quotationModal');
 
       const formData = new URLSearchParams();
-      formData.append('field', 'quotationType');
-      formData.append('value', type);
+      formData.append('field', 'certificateTypeId');
+      formData.append('value', certificateTypeId);
 
       const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
       const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
@@ -2853,6 +3194,7 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
               arrowBox.classList.remove('hidden');
               arrowBox.classList.add('flex');
               arrowBox.dataset.quotationType = type;
+              arrowBox.dataset.certificateTypeId = certificateTypeId;
             }
             showLeadToast('"' + type + '" quotation selected successfully');
             window.setTimeout(function () {
@@ -2997,6 +3339,76 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
       openModal('addressPopupModal');
     }
 
+    function openMeetingReminderPopup(button) {
+      const leadId = button.getAttribute('data-lead-id');
+      const now = new Date();
+      now.setMinutes(Math.ceil((now.getMinutes() + 1) / 5) * 5, 0, 0);
+      const localDate = value => value.getFullYear() + '-' + String(value.getMonth() + 1).padStart(2, '0') + '-' + String(value.getDate()).padStart(2, '0');
+      const localTime = value => String(value.getHours()).padStart(2, '0') + ':' + String(value.getMinutes()).padStart(2, '0');
+      const dateInput = document.getElementById('meetingReminderDate');
+      dateInput.min = localDate(new Date());
+      dateInput.value = localDate(now);
+      document.getElementById('meetingReminderTime').value = localTime(now);
+      document.getElementById('meetingReminderLeadId').value = leadId;
+      document.getElementById('meetingReminderClient').textContent = button.dataset.clientName || '-';
+      document.getElementById('meetingReminderCompany').textContent = button.dataset.companyName || '-';
+      document.getElementById('meetingReminderPhone').textContent = button.dataset.phone || '-';
+      document.getElementById('meetingReminderEmail').textContent = button.dataset.email || '-';
+      document.getElementById('meetingReminderMessage').value = 'Meeting time - urgent reminder';
+      document.querySelectorAll('#meetingReminderModal .rm-preset.active').forEach(function (button) { button.classList.remove('active'); });
+      openModal('meetingReminderModal');
+    }
+
+    function setMeetingReminderPreset(kind) {
+      const d = new Date();
+      if (kind === '30m') d.setMinutes(d.getMinutes() + 30);
+      else if (kind === '1h') d.setHours(d.getHours() + 1);
+      else if (kind === 'tom10') { d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); }
+      else if (kind === 'tom16') { d.setDate(d.getDate() + 1); d.setHours(16, 0, 0, 0); }
+      const pad = function (n) { return String(n).padStart(2, '0'); };
+      document.getElementById('meetingReminderDate').value = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      document.getElementById('meetingReminderTime').value = pad(d.getHours()) + ':' + pad(d.getMinutes());
+      document.querySelectorAll('#meetingReminderModal .rm-preset').forEach(function (button) {
+        button.classList.toggle('active', button.dataset.preset === kind);
+      });
+    }
+
+    function closeMeetingReminderPopup(event) {
+      if (event && event.target !== document.getElementById('meetingReminderModal')) return;
+      closeModal('meetingReminderModal');
+    }
+
+    async function scheduleLeadMeetingReminder(event) {
+      event.preventDefault();
+      const leadId = document.getElementById('meetingReminderLeadId').value;
+      const remindAt = document.getElementById('meetingReminderDate').value + 'T' + document.getElementById('meetingReminderTime').value;
+      const message = document.getElementById('meetingReminderMessage').value.trim();
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      const saveButton = document.querySelector('#meetingReminderModal .meeting-reminder-save');
+      saveButton.disabled = true;
+      saveButton.textContent = 'Saving...';
+      try {
+        const response = await fetch('/leads/' + encodeURIComponent(leadId) + '/meeting-reminders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(csrfToken && csrfHeader ? { [csrfHeader]: csrfToken } : {})
+          },
+          body: JSON.stringify({ remindAt: remindAt, message: message })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Could not schedule reminder');
+        closeMeetingReminderPopup();
+        showLeadToast('Private meeting reminder scheduled');
+      } catch (error) {
+        alert(error.message || 'Could not schedule reminder');
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Schedule reminder';
+      }
+    }
+
     function openCompanyFollowUpPopup(btn) {
       const leadId = btn.getAttribute('data-lead-id');
       const row = btn.closest('tr.lead-row');
@@ -3123,7 +3535,13 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
           document.getElementById('leadProductInput').value = lead.productName || '';
           document.getElementById('leadServicesInput').value = lead.servicesId || '';
           setLeadLocationSelectValue(lead.countryId, lead.stateId, lead.cityId);
-          document.getElementById('leadQuotationInput').value = lead.quotationType || '';
+          const quotationSelect = document.getElementById('leadQuotationInput');
+          const legacyQuotationOption = Array.from(document.querySelectorAll('.quotation-type-option')).find(function (option) {
+            return option.dataset.type === lead.quotationType;
+          });
+          quotationSelect.value = lead.certificateTypeId || (legacyQuotationOption ? legacyQuotationOption.dataset.certificateTypeId : '');
+          const quotationTrigger = quotationSelect.closest('.custom-select-wrapper')?.querySelector('.custom-select-trigger');
+          if (quotationTrigger) quotationTrigger.textContent = quotationSelect.options[quotationSelect.selectedIndex]?.textContent || 'Select quotation type';
           document.getElementById('leadSourceInput').value = lead.sourceId || '';
           document.getElementById('leadStatusInput').value = lead.status || '';
           document.getElementById('leadDateInput').value = lead.leadDate || '';
@@ -3268,8 +3686,10 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     })();
 
     function toggleLeadsCharts(show) {
-      localStorage.setItem('leadsChartsVisible', show ? '1' : '0');
-      window.location.reload();
+      document.documentElement.classList.toggle('charts-hidden-init', !show);
+      if (show) {
+        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 60);
+      }
     }
 
     function loadMomentumData(range, startDate, endDate, period) {
@@ -3315,10 +3735,9 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
     }
 
     (function initLeadsChartsToggle() {
-      const saved = localStorage.getItem('leadsChartsVisible');
+      try { localStorage.removeItem('leadsChartsVisible'); } catch (e) {}
       const checkbox = document.getElementById('chartsToggle');
-      if (saved === null || !checkbox) return;
-      checkbox.checked = saved === '1';
+      if (checkbox) checkbox.checked = false;
     })();
 
     const LEADS_PER_PAGE = 15;
@@ -3447,6 +3866,8 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
                 }
               }
               row.classList.toggle('row-converted', value === '4');
+              const statusField = row.querySelector('.lead-reference-field[data-status]');
+              if (statusField) statusField.setAttribute('data-status', value);
             }
           } else {
             alert('Update failed: ' + (data.message || 'Unknown error'));
@@ -3484,6 +3905,49 @@ body.lead-assistant-light-theme .lead-assistant-delete-confirm:hover { backgroun
           alert('Something went wrong while deleting.');
         });
     }
+
+    function updateSelectedLeadDeleteButton() {
+      const button = document.getElementById('deleteSelectedLeadsButton');
+      if (!button) return;
+      const count = document.querySelectorAll('.lead-select-checkbox:checked').length;
+      button.disabled = count === 0;
+      button.title = count ? 'Delete ' + count + (count === 1 ? ' selected lead' : ' selected leads') : 'Select leads to delete';
+    }
+
+    async function deleteSelectedLeads() {
+      const selectedIds = Array.from(document.querySelectorAll('.lead-select-checkbox:checked')).map(function (checkbox) {
+        return checkbox.value;
+      });
+      if (!selectedIds.length) return;
+      const noun = selectedIds.length === 1 ? 'lead' : 'leads';
+      if (!confirm('Delete ' + selectedIds.length + ' selected ' + noun + '? This cannot be undone.')) return;
+
+      const button = document.getElementById('deleteSelectedLeadsButton');
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      button.disabled = true;
+      const failedIds = [];
+      for (const id of selectedIds) {
+        try {
+          const response = await fetch('/leads/' + encodeURIComponent(id) + '/delete-ajax', {
+            method: 'POST',
+            headers: { ...(csrfToken && csrfHeader ? { [csrfHeader]: csrfToken } : {}) }
+          });
+          const result = await response.json();
+          if (!response.ok || !result.success) failedIds.push(id);
+        } catch (error) {
+          failedIds.push(id);
+        }
+      }
+
+      if (failedIds.length) alert('Could not delete ' + failedIds.length + ' selected lead(s). The page will refresh.');
+      window.location.reload();
+    }
+
+    document.addEventListener('change', function (event) {
+      if (event.target.matches('.lead-select-checkbox')) updateSelectedLeadDeleteButton();
+    });
+    updateSelectedLeadDeleteButton();
 
     function renumberLeadRows() {
       const serialCells = document.querySelectorAll('#leadsTableBody .lead-serial');

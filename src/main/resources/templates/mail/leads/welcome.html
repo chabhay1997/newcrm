@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to EVTL INDIA</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#f5f7fa; color:#333;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa; padding:20px 0;">
+    <tr><td align="center">
+        <table role="presentation" width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:10px; overflow:hidden;">
+            <tr><td align="center" style="background-color:#BCD3E5; padding:25px;">
+                <img src="https://crm.evtlindia.com/public/img/evtl-watermark.png" alt="EVTL INDIA" style="width:180px; height:auto; display:block;">
+                <h2 style="color:#000000; margin:10px 0 0; font-size:22px;">Emphatic Vans &amp; Testing Labs.</h2>
+                <p style="color:#000000; margin:5px 0 0; font-size:14px;">Your Trusted Partner for Certification &amp; Compliance</p>
+            </td></tr>
+            <tr><td style="padding:30px;">
+                <h3 style="color:#004aad; margin-top:0;">Warm Greetings<span th:if="${leadName != null and !leadName.isBlank()}" th:text="|, ${leadName}|">, valued customer</span> from EVTL INDIA!</h3>
+                <p style="line-height:1.6; font-size:14px;">We are delighted to welcome you and take this opportunity to introduce our organization. Established in 2014, <strong>EVTL INDIA</strong> is a leading consultancy firm providing end-to-end solutions for certification, testing, and regulatory compliance across India and internationally.</p>
+                <p style="line-height:1.6; font-size:14px;">Over the years, we have proudly partnered with numerous domestic and global companies, helping them achieve smooth and reliable certification approvals for a wide range of products and industries. Our reputation is built on expertise, transparency, and customer satisfaction.</p>
+                <h4 style="color:#004aad; margin-top:25px; margin-bottom:10px;">About EVTL India</h4>
+                <p style="line-height:1.6; font-size:14px;">Our mission is to simplify the certification process and ensure that your products comply with all necessary Indian and international standards. With a team of experienced professionals and a strong technical foundation, we deliver reliable, time-efficient, and cost-effective services to our clients.</p>
+                <h4 style="color:#004aad; margin-top:25px; margin-bottom:10px;">Our Core Services Include:</h4>
+                <ul style="font-size:14px; line-height:1.6; padding-left:20px; margin:0;">
+                    <li><strong>BIS Certification &amp; Registration</strong> - ISI Mark, CRS, Scheme X approvals</li>
+                    <li><strong>EPR Authorizations</strong> - For e-waste, plastic, battery, tyre, and used oil</li>
+                    <li><strong>Legal Metrology (LMPC)</strong> - Importer and manufacturer registration</li>
+                    <li><strong>WMI &amp; WPC Approvals</strong> - Wireless, telecom, and RF equipment compliance</li>
+                    <li><strong>IMEI Registration</strong> - For mobile and telecom devices</li>
+                    <li><strong>Additional Certifications</strong> - ISO, FSSAI, Trademark, and GeM Vendor Registration</li>
+                </ul>
+                <p style="line-height:1.6; font-size:14px; margin-top:15px;">We have attached our company profile for your reference. We encourage you to review it to understand our capabilities and how we can assist your business in achieving complete compliance.</p>
+                <p style="line-height:1.6; font-size:14px;">For more details, please visit our website: <a href="https://www.evtlindia.com/" style="color:#004aad; text-decoration:none;">www.evtlindia.com</a></p>
+                <h4 style="color:#004aad; margin-top:25px; margin-bottom:10px;">Contact Information</h4>
+                <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+                    <tr style="background-color:#f2f6fb;"><th align="left">Director</th><td>Mr. Varun Singh</td><td>+91-9354046392</td><td><a href="mailto:varun@evtlindia.com" style="color:#004aad;">varun@evtlindia.com</a></td></tr>
+                    <tr><th align="left">Marketing Manager</th><td>Mr. Nikhil Singh</td><td>+91-8178824481</td><td><a href="mailto:nikk@evtlindia.com" style="color:#004aad;">nikk@evtlindia.com</a></td></tr>
+                    <tr style="background-color:#f2f6fb;"><th align="left">Marketing Executive</th><td>Ms. Sofia Dhiman</td><td>+91-9319438451</td><td><a href="mailto:sofia.marketing@evtlindia.com" style="color:#004aad;">sofia.marketing@evtlindia.com</a></td></tr>
+                    <tr><th align="left">Country Head</th><td>Mr. Akhil Kumar Singh</td><td>+91-9718430644</td><td><a href="mailto:akhil@evtlindia.com" style="color:#004aad;">akhil@evtlindia.com</a></td></tr>
+                </table>
+                <p style="line-height:1.6; font-size:14px; margin-top:20px;">We sincerely thank you for your time and look forward to a long-term association.<br>Our team is committed to providing you with seamless service and complete satisfaction.</p>
+                <hr style="border:none; border-top:1px solid #ddd; margin:25px 0;">
+                <p style="font-weight:bold; color:#004aad; font-size:14px; margin:0;">Kind Regards,<br><span style="color:#000;">EVTL INDIA Group</span><br>Emphatic Vans &amp; Testing Labs</p>
+                <p style="font-size:13px; margin-top:8px; color:#555;">Corp Office: Plot No. 106, 1st Floor, Block-H, Sector-63, Noida, Gautam Buddha Nagar, Uttar Pradesh, 201301<br>Branches: Ahmedabad | Mumbai | Kerala | Overseas Partners: China | Russia<br>Contact: +91-9560935898, +91-9319438451 | Landline: 011-49872660<br>Website: <a href="https://www.evtlindia.com/" style="color:#004aad; text-decoration:none;">www.evtlindia.com</a></p>
+            </td></tr>
+            <tr><td align="center" style="background-color:#004aad; color:#ffffff; padding:15px; font-size:12px;"><i>BIS Certification | FMCS | WPC Approvals | BEE | BIS-ISI | Plastic EPR | ISO 9001:2015 Certified</i><br>© 2025 | EVTL INDIA | All Rights Reserved.</td></tr>
+        </table>
+    </td></tr>
+</table>
+</body>
+</html>

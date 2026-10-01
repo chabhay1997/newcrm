@@ -1,9 +1,12 @@
 package controller;
 
+import dto.LeadMeetingReminderRequest;
 import model.Lead;
+import model.LeadMeetingReminder;
 import model.User;
 import repository.LeadRepository;
 import repository.LeadFollowUpRepository;
+import repository.LeadMeetingReminderRepository;
 import repository.UserRepository;
 import util.LeadStatus;
 import util.LeadSource;
@@ -26,7 +29,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.time.LocalDateTime;
 
 import model.quotations.BisIsiQuotation;
 import repository.quotations.BisIsiQuotationRepository;
@@ -72,12 +78,14 @@ import repository.quotations.BeeQuotationRepository;
 import repository.quotations.BeeQuotationFeeRepository;
 import repository.quotations.SchemeXForeignQuotationRepository;
 import service.quotation_pdfs.LaravelQuotationPdfClient;
+import service.LeadPermissionService;
 
 @Controller
 public class LeadsController {
 
     private final LeadRepository leadRepository;
     private final LeadFollowUpRepository leadFollowUpRepository;
+    private final LeadMeetingReminderRepository leadMeetingReminderRepository;
     private final UserRepository userRepository;
     private final BisIsiQuotationRepository bisIsiQuotationRepository;
     private final BisFmcsQuotationRepository bisFmcsQuotationRepository;
@@ -102,8 +110,10 @@ public class LeadsController {
     private final BeeQuotationFeeRepository beeQuotationFeeRepository;
     private final SchemeXForeignQuotationRepository schemeXForeignQuotationRepository;
     private final LaravelQuotationPdfClient laravelQuotationPdfClient;
+    private final LeadPermissionService leadPermissionService;
 
-    public LeadsController(LeadRepository leadRepository, LeadFollowUpRepository leadFollowUpRepository, UserRepository userRepository, BisIsiQuotationRepository bisIsiQuotationRepository,
+        public LeadsController(LeadRepository leadRepository, LeadFollowUpRepository leadFollowUpRepository,
+            LeadMeetingReminderRepository leadMeetingReminderRepository, UserRepository userRepository, BisIsiQuotationRepository bisIsiQuotationRepository,
             BisFmcsQuotationRepository bisFmcsQuotationRepository, CdscoQuotationRepository cdscoQuotationRepository,
             BisCrsQuotationRepository bisCrsQuotationRepository, CosmeticsQuotationRepository cosmeticsQuotationRepository,
             BisWpcQuotationRepository bisWpcQuotationRepository, BisSitQuotationRepository bisSitQuotationRepository, BisLmpcQuotationRepository bisLmpcQuotationRepository,
@@ -116,9 +126,11 @@ public class LeadsController {
             BatteryEprQuotationRepository batteryEprQuotationRepository,
             BeeQuotationRepository beeQuotationRepository, BeeQuotationFeeRepository beeQuotationFeeRepository,
             SchemeXForeignQuotationRepository schemeXForeignQuotationRepository,
-            LaravelQuotationPdfClient laravelQuotationPdfClient) {
+            LaravelQuotationPdfClient laravelQuotationPdfClient,
+            LeadPermissionService leadPermissionService) {
         this.leadRepository = leadRepository;
         this.leadFollowUpRepository = leadFollowUpRepository;
+        this.leadMeetingReminderRepository = leadMeetingReminderRepository;
         this.userRepository = userRepository;
         this.bisIsiQuotationRepository = bisIsiQuotationRepository;
         this.bisFmcsQuotationRepository = bisFmcsQuotationRepository;
@@ -143,19 +155,60 @@ public class LeadsController {
         this.beeQuotationFeeRepository = beeQuotationFeeRepository;
         this.schemeXForeignQuotationRepository = schemeXForeignQuotationRepository;
         this.laravelQuotationPdfClient = laravelQuotationPdfClient;
+        this.leadPermissionService = leadPermissionService;
     }
 
-    private static final List<String> ALL_QUOTATION_TYPES = List.of(
+    private static final Map<Long, String> CERTIFICATE_TYPE_LABELS = Map.ofEntries(
+            Map.entry(1L, "Electronic EPR"),
+            Map.entry(2L, "Plastic EPR"),
+            Map.entry(3L, "Battery EPR"),
+            Map.entry(4L, "BIS CRS"),
+            Map.entry(5L, "LMPC"),
+            Map.entry(6L, "BIS-ISI Certification"),
+            Map.entry(7L, "BIS FMCS"),
+            Map.entry(8L, "WPC"),
+            Map.entry(9L, "BEE Certification"),
+            Map.entry(10L, "Scheme-X Domestic"),
+            Map.entry(11L, "Scheme-X Foreign"),
+            Map.entry(12L, "RDSO Quotation"),
+            Map.entry(13L, "SIT Quotation"),
+            Map.entry(14L, "Drug Quotation"),
+            Map.entry(15L, "CDSCO Registration"),
+            Map.entry(16L, "Cosmetics"),
+            Map.entry(17L, "DPIIT"),
+            Map.entry(18L, "CB-ISI Certification"),
+            Map.entry(19L, "CB-FMCS"),
+            Map.entry(20L, "CB-RDSO"),
+            Map.entry(21L, "General Quotation")
+    );
+        private static final List<String> ALL_QUOTATION_TYPES = List.of(
             "Electronic EPR", "Plastic EPR", "Battery EPR", "BIS CRS", "LMPC",
             "BIS-ISI Certification", "BEE Certification", "BIS FMCS", "WPC",
             "General Quotation", "Scheme-X Domestic", "Scheme-X Foreign",
             "RDSO Quotation", "SIT Quotation", "Drug Quotation",
             "CDSCO Registration", "Cosmetics", "DPIIT", "CB-ISI Certification", "CB-FMCS", "CB-RDSO"
-    );
+        );
+
+    private static Long certificateTypeIdForLabel(String label) {
+        if (label == null) return null;
+        String normalized = label.trim().replaceAll("\\s+", " ").toLowerCase();
+        for (Map.Entry<Long, String> entry : CERTIFICATE_TYPE_LABELS.entrySet()) {
+            if (entry.getValue().toLowerCase().equals(normalized)) return entry.getKey();
+        }
+        return switch (normalized) {
+            case "bee registration" -> 9L;
+            case "cosmetics registration" -> 16L;
+            case "cb - isi" -> 18L;
+            case "cb - fmcs" -> 19L;
+            case "cb - rdso" -> 20L;
+            default -> null;
+        };
+    }
 
     @GetMapping("/leads")
     public String showLeads(
             Model model,
+            Authentication authentication,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long sourceId,
             @RequestParam(required = false) List<String> quotationTypes,
@@ -164,6 +217,11 @@ public class LeadsController {
             @RequestParam(required = false) String endDate) {
 
         List<String> quotationTypesFilter = (quotationTypes == null || quotationTypes.isEmpty()) ? null : quotationTypes;
+        List<Long> certificateTypeIdsFilter = quotationTypesFilter == null ? null : quotationTypesFilter.stream()
+            .map(LeadsController::certificateTypeIdForLabel)
+            .filter(java.util.Objects::nonNull)
+            .distinct()
+            .toList();
 
         java.time.LocalDateTime startDateTime = null;
         java.time.LocalDateTime endDateTime = null;
@@ -176,7 +234,41 @@ public class LeadsController {
             }
         } catch (Exception ignored) { }
 
-        List<Lead> leads = leadRepository.findByFilters(status, sourceId, quotationTypesFilter, userId, startDateTime, endDateTime);
+        boolean canLeadRead = leadPermissionService.has(authentication, "all_lead", "read");
+        boolean canLeadEdit = leadPermissionService.has(authentication, "all_lead", "edit");
+        List<Lead> leads = canLeadRead
+            ? leadRepository.findByFilters(status, sourceId, quotationTypesFilter, certificateTypeIdsFilter, userId, startDateTime, endDateTime)
+            : new java.util.ArrayList<>();
+        String currentEmail = authentication == null ? "" : authentication.getName();
+        Integer currentRoleId = userRepository.findByEmailIgnoreCase(currentEmail)
+            .map(User::getRoleId)
+            .orElse(null);
+        List<String> keywordPatterns = List.of(
+            "cdsco", "cos", "md 14", "md 15", "md-15", "diagnostics", "md-13", "md 41",
+            "md-42", "md 42", "md 3", "md 5", "md 12", "md 13", "md 7", "md 9",
+            "md 8", "md 10", "md 4", "md 6", "medical", "cosmetic", "drug");
+
+        if ("shivam@evtlindia.com".equalsIgnoreCase(currentEmail)) {
+            java.time.LocalDate start = java.time.LocalDate.of(2025, 1, 15);
+            java.time.LocalDate end = java.time.LocalDate.of(2025, 2, 15);
+            leads.removeIf(lead -> lead.getCreatedAt() == null
+                || !lead.getCreatedAt().toLocalDate().isAfter(start)
+                || !lead.getCreatedAt().toLocalDate().isBefore(end));
+        }
+
+        if (List.of("anshu@evtlindia.com", "sujata@evtlindia.com", "vinod@evtlindia.in")
+            .stream().anyMatch(email -> email.equalsIgnoreCase(currentEmail))) {
+            leads.removeIf(lead -> !containsAnyLeadKeyword(lead, keywordPatterns));
+        } else if (!Integer.valueOf(1).equals(currentRoleId)) {
+            leads.removeIf(lead -> !containsAnyLeadKeyword(lead, List.of("medical"))
+                && containsAnyLeadKeyword(lead, keywordPatterns));
+        }
+
+        for (Lead lead : leads) {
+            Long certificateTypeId = lead.getCertificateTypeId();
+            String quotationLabel = certificateTypeId == null ? null : CERTIFICATE_TYPE_LABELS.get(certificateTypeId);
+            lead.setSelectedQuotationTypeLabel(quotationLabel != null ? quotationLabel : lead.getQuotationType());
+        }
         Map<Long, String> latestFollowups = new java.util.HashMap<>();
         if (!leads.isEmpty()) {
             List<Long> leadIds = leads.stream().map(Lead::getId).toList();
@@ -185,7 +277,9 @@ public class LeadsController {
                 latestFollowups.put(followup.getLeadId(), followup.getReason());
             }
         }
-        java.util.Set<Long> leadsWithFollowupComments = new java.util.HashSet<>(leadFollowUpRepository.findLeadIdsWithComments());
+        java.util.Set<Long> leadsWithFollowupComments = canLeadRead
+            ? new java.util.HashSet<>(leadFollowUpRepository.findLeadIdsWithComments())
+            : new java.util.HashSet<>();
 
         java.util.Set<Long> creatorIds = new java.util.HashSet<>();
         for (Lead lead : leads) {
@@ -256,10 +350,11 @@ public class LeadsController {
                 ? (thisWeekTotal > 0 ? 100.0 : 0.0)
                 : ((thisWeekTotal - lastWeekTotal) * 100.0) / lastWeekTotal;
 
-        model.addAttribute("momentumDayLabels", List.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
-        model.addAttribute("momentumNewLeads", newLeadsByDay);
-        model.addAttribute("momentumConvertedLeads", convertedLeadsByDay);
-        model.addAttribute("momentumWeekChange", Math.round(weekOverWeekChange * 10.0) / 10.0);
+        boolean canLeadDashboard = leadPermissionService.has(authentication, "leads_dashboard", "read");
+        model.addAttribute("momentumDayLabels", canLeadDashboard ? List.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun") : List.of());
+        model.addAttribute("momentumNewLeads", canLeadDashboard ? newLeadsByDay : new long[0]);
+        model.addAttribute("momentumConvertedLeads", canLeadDashboard ? convertedLeadsByDay : new long[0]);
+        model.addAttribute("momentumWeekChange", canLeadDashboard ? Math.round(weekOverWeekChange * 10.0) / 10.0 : 0.0);
 
         model.addAttribute("activePage", "leads");
         model.addAttribute("totalLeads", (long) leads.size());
@@ -282,18 +377,36 @@ public class LeadsController {
         }
         model.addAttribute("activeFilterLabel", activeFilterLabel);
         model.addAttribute("selectedStatusId", status);
-        model.addAttribute("statusCounts", statusCounts);
-        model.addAttribute("sourceCounts", sourceCounts);
+        model.addAttribute("statusCounts", canLeadDashboard ? statusCounts : Map.of());
+        model.addAttribute("sourceCounts", canLeadDashboard ? sourceCounts : Map.of());
         model.addAttribute("allQuotationTypes", ALL_QUOTATION_TYPES);
+        model.addAttribute("certificateTypeLabels", CERTIFICATE_TYPE_LABELS);
         model.addAttribute("selectedQuotationTypes", quotationTypesFilter);
-        model.addAttribute("salesUsers", userRepository.findByRoleNameContainingIgnoreCase("sales"));
+        model.addAttribute("salesUsers", canLeadEdit ? userRepository.findByRoleNameContainingIgnoreCase("sales") : List.of());
         model.addAttribute("selectedUserId", userId);
         model.addAttribute("selectedStartDate", startDate);
         model.addAttribute("selectedEndDate", endDate);
 
         model.addAttribute("isSuperAdmin", hasSuperAdminAccess());
+        model.addAttribute("canLeadWrite", leadPermissionService.has(authentication, "all_lead", "write"));
+        model.addAttribute("canLeadEdit", canLeadEdit);
+        model.addAttribute("canLeadDelete", leadPermissionService.has(authentication, "all_lead", "delete"));
+        model.addAttribute("canLeadDeleteButton",
+            leadPermissionService.has(authentication, "leads_delete", "delete")
+                || leadPermissionService.has(authentication, "all_lead", "delete"));
+        model.addAttribute("canLeadExcel", leadPermissionService.has(authentication, "all_lead", "excel"));
+        model.addAttribute("canLeadDashboard", canLeadDashboard);
 
         return "leads/leads";
+    }
+
+    private static boolean containsAnyLeadKeyword(Lead lead, List<String> keywords) {
+        String searchableText = String.join(" ",
+                lead.getProductName() == null ? "" : lead.getProductName(),
+                lead.getRequirements() == null ? "" : lead.getRequirements(),
+                lead.getMessage() == null ? "" : lead.getMessage())
+                .toLowerCase(Locale.ROOT);
+        return keywords.stream().anyMatch(searchableText::contains);
     }
 
     @GetMapping("/leads/momentum-data")
@@ -470,6 +583,9 @@ public class LeadsController {
             @RequestParam(name = "companyName", required = false) String companyName) {
         lead.setIsName(clientName);
         lead.setCompanyName(companyName);
+        if (lead.getIsDeleted() == null) {
+            lead.setIsDeleted(false);
+        }
         leadRepository.save(lead);
         return "redirect:/leads";
     }
@@ -493,7 +609,7 @@ public class LeadsController {
         existingLead.setCountryId(lead.getCountryId());
         existingLead.setStateId(lead.getStateId());
         existingLead.setCityId(lead.getCityId());
-        existingLead.setQuotationType(lead.getQuotationType());
+        existingLead.setCertificateTypeId(lead.getCertificateTypeId());
         existingLead.setSourceId(lead.getSourceId());
         existingLead.setStatus(lead.getStatus());
         existingLead.setLeadDate(lead.getLeadDate());
@@ -511,7 +627,11 @@ public class LeadsController {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.FORBIDDEN, "Super Admin access only");
         }
-        leadRepository.deleteById(id);
+        Lead lead = leadRepository.findById(id)
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Lead not found"));
+        lead.setIsDeleted(true);
+        leadRepository.save(lead);
         return "redirect:/leads";
     }
 
@@ -525,7 +645,14 @@ public class LeadsController {
             return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(response);
         }
         try {
-            leadRepository.deleteById(id);
+            Lead lead = leadRepository.findById(id).orElse(null);
+            if (lead == null) {
+                response.put("success", false);
+                response.put("message", "Lead not found");
+                return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND).body(response);
+            }
+            lead.setIsDeleted(true);
+            leadRepository.save(lead);
             response.put("success", true);
         } catch (Exception e) {
             response.put("success", false);
@@ -538,6 +665,91 @@ public class LeadsController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null && auth.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    @PostMapping("/leads/{id}/meeting-reminders")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<?> createMeetingReminder(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestBody LeadMeetingReminderRequest request,
+            Authentication authentication) {
+        Optional<User> user = findAuthenticatedUser(authentication);
+        if (user.isEmpty()) return ResponseEntity.status(401).body(Map.of("message", "Sign in to schedule a reminder"));
+
+        Optional<Lead> lead = leadRepository.findById(id);
+        if (lead.isEmpty()) return ResponseEntity.notFound().build();
+        if (request == null || request.getRemindAt() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Choose a reminder date and time"));
+        }
+        String message = request.getMessage() == null ? "" : request.getMessage().trim();
+        if (message.isEmpty() || message.length() > 500) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Enter a reminder message of up to 500 characters"));
+        }
+
+        LeadMeetingReminder reminder = new LeadMeetingReminder();
+        reminder.setLeadId(id);
+        reminder.setUserId(user.get().getId());
+        reminder.setRemindAt(request.getRemindAt());
+        reminder.setMessage(message);
+        reminder = leadMeetingReminderRepository.save(reminder);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("success", true);
+        response.put("id", reminder.getId());
+        response.put("remindAt", reminder.getRemindAt());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/leads/meeting-reminders/due")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<?> getDueMeetingReminders(Authentication authentication) {
+        Optional<User> user = findAuthenticatedUser(authentication);
+        if (user.isEmpty()) return ResponseEntity.status(401).body(Map.of("message", "Sign in to check reminders"));
+
+        List<Map<String, Object>> dueReminders = leadMeetingReminderRepository
+                .findByUserIdAndDismissedAtIsNullAndRemindAtLessThanEqualOrderByRemindAtAsc(
+                        user.get().getId(), LocalDateTime.now())
+                .stream()
+                .map(reminder -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("id", reminder.getId());
+                    item.put("remindAt", reminder.getRemindAt());
+                    item.put("message", reminder.getMessage());
+                    leadRepository.findById(reminder.getLeadId()).ifPresent(lead -> {
+                        item.put("leadId", lead.getId());
+                        item.put("clientName", lead.getIsName());
+                        item.put("companyName", lead.getCompanyName());
+                        item.put("phone", lead.getPhone() != null ? lead.getPhone() : lead.getCompanyMobile());
+                        item.put("email", lead.getEmail() != null ? lead.getEmail() : lead.getOfficialMailId());
+                    });
+                    return item;
+                }).toList();
+        return ResponseEntity.ok(dueReminders);
+    }
+
+    @PostMapping("/leads/meeting-reminders/{reminderId}/dismiss")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<Map<String, Object>> dismissMeetingReminder(
+            @org.springframework.web.bind.annotation.PathVariable Long reminderId,
+            Authentication authentication) {
+        Optional<User> user = findAuthenticatedUser(authentication);
+        if (user.isEmpty()) return ResponseEntity.status(401).body(Map.of("success", false));
+
+        Optional<LeadMeetingReminder> reminder = leadMeetingReminderRepository
+                .findByIdAndUserIdAndDismissedAtIsNull(reminderId, user.get().getId());
+        if (reminder.isEmpty()) return ResponseEntity.notFound().build();
+
+        reminder.get().setDismissedAt(LocalDateTime.now());
+        leadMeetingReminderRepository.save(reminder.get());
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    private Optional<User> findAuthenticatedUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return Optional.empty();
+        }
+        return userRepository.findByEmailIgnoreCase(authentication.getName());
     }
 
     @GetMapping("/leads/{id}/json")
@@ -1584,8 +1796,14 @@ public class LeadsController {
                 } else {
                     lead.setSourceId(Long.parseLong(value));
                 }
-            } else if ("quotationType".equals(field)) {
-                lead.setQuotationType(value);
+            } else if ("certificateTypeId".equals(field)) {
+                Long certificateTypeId = Long.parseLong(value);
+                if (!CERTIFICATE_TYPE_LABELS.containsKey(certificateTypeId)) {
+                    response.put("success", false);
+                    response.put("message", "Invalid certificate type");
+                    return response;
+                }
+                lead.setCertificateTypeId(certificateTypeId);
             } else if ("followUpNotes".equals(field)) {
                 lead.setReminder(value);
             } else {

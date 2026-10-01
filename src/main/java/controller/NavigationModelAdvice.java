@@ -5,12 +5,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import repository.UserRepository;
+import service.LeadPermissionService;
 
 @ControllerAdvice
 public class NavigationModelAdvice {
     private final UserRepository users;
+    private final LeadPermissionService leadPermissions;
 
-    public NavigationModelAdvice(UserRepository users) { this.users = users; }
+    public NavigationModelAdvice(UserRepository users, LeadPermissionService leadPermissions) {
+        this.users = users;
+        this.leadPermissions = leadPermissions;
+    }
+
+    @ModelAttribute("canAccessLeads")
+    public boolean canAccessLeads(Authentication authentication) {
+        return leadPermissions.has(authentication, "all_lead", "read");
+    }
 
     @ModelAttribute("canAccessOperation")
     public boolean canAccessOperation(Authentication authentication) {

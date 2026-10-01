@@ -248,6 +248,12 @@ public class Lead {
     public String getQuotationType() { return quotationType; }
     public void setQuotationType(String quotationType) { this.quotationType = quotationType; }
 
+    public String getUniqueQueryId() { return uniqueQueryId; }
+    public void setUniqueQueryId(String uniqueQueryId) { this.uniqueQueryId = uniqueQueryId; }
+
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
+
     public Long getCreatedBy() { return createdBy; }
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
 
@@ -264,4 +270,9 @@ public class Lead {
     private String assignToName;
     public String getAssignToName() { return assignToName; }
     public void setAssignToName(String assignToName) { this.assignToName = assignToName; }
+
+    @Transient
+    private String selectedQuotationTypeLabel;
+    public String getSelectedQuotationTypeLabel() { return selectedQuotationTypeLabel; }
+    public void setSelectedQuotationTypeLabel(String selectedQuotationTypeLabel) { this.selectedQuotationTypeLabel = selectedQuotationTypeLabel; }
 }
