@@ -61,6 +61,7 @@ public class SecurityConfig {
                     "/emp-app-form/success",
                     "/emp-application-form/success",
                     "/evtl.webp",
+                    "/evtl.jpeg",
                     "/*.webp",
                     "/favicon.ico",
                     "/api/justdial/lead"
