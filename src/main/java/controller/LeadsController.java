@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -83,6 +84,8 @@ import service.LeadPermissionService;
 @Controller
 public class LeadsController {
 
+    private static final long INDIA_COUNTRY_ID = 101L;
+
     private final LeadRepository leadRepository;
     private final LeadFollowUpRepository leadFollowUpRepository;
     private final LeadMeetingReminderRepository leadMeetingReminderRepository;
@@ -111,6 +114,7 @@ public class LeadsController {
     private final SchemeXForeignQuotationRepository schemeXForeignQuotationRepository;
     private final LaravelQuotationPdfClient laravelQuotationPdfClient;
     private final LeadPermissionService leadPermissionService;
+    private final JdbcTemplate jdbcTemplate;
 
         public LeadsController(LeadRepository leadRepository, LeadFollowUpRepository leadFollowUpRepository,
             LeadMeetingReminderRepository leadMeetingReminderRepository, UserRepository userRepository, BisIsiQuotationRepository bisIsiQuotationRepository,
@@ -127,7 +131,8 @@ public class LeadsController {
             BeeQuotationRepository beeQuotationRepository, BeeQuotationFeeRepository beeQuotationFeeRepository,
             SchemeXForeignQuotationRepository schemeXForeignQuotationRepository,
             LaravelQuotationPdfClient laravelQuotationPdfClient,
-            LeadPermissionService leadPermissionService) {
+            LeadPermissionService leadPermissionService,
+            JdbcTemplate jdbcTemplate) {
         this.leadRepository = leadRepository;
         this.leadFollowUpRepository = leadFollowUpRepository;
         this.leadMeetingReminderRepository = leadMeetingReminderRepository;
@@ -156,6 +161,96 @@ public class LeadsController {
         this.schemeXForeignQuotationRepository = schemeXForeignQuotationRepository;
         this.laravelQuotationPdfClient = laravelQuotationPdfClient;
         this.leadPermissionService = leadPermissionService;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public static boolean matchesLeadLocationFilter(
+            Lead lead,
+            String selectedStateId,
+            String selectedCityId,
+            String selectedStateName,
+            String selectedCityName,
+            Map<String, String> cityStateMap) {
+        if (lead == null) {
+            return false;
+        }
+
+        boolean stateMatches = true;
+        if (selectedStateId != null && !selectedStateId.isBlank()) {
+            String normalizedStateId = selectedStateId.trim();
+            stateMatches = valueMatches(lead.getStateId(), normalizedStateId)
+                    || cityBelongsToState(lead.getCityId(), normalizedStateId, cityStateMap)
+                || textEquals(lead.getStateId(), selectedStateName)
+                || (!hasNumericLocationId(lead.getStateId())
+                    && !hasNumericLocationId(lead.getCityId())
+                    && textContainsAny(selectedStateName, lead.getAddress(), lead.getMessage(), lead.getRequirements(), lead.getRemarks()));
+        }
+
+        boolean cityMatches = true;
+        if (selectedCityId != null && !selectedCityId.isBlank()) {
+            String normalizedCityId = selectedCityId.trim();
+            cityMatches = valueMatches(lead.getCityId(), normalizedCityId)
+                    || textEquals(lead.getCityId(), selectedCityName)
+                    || (!hasNumericLocationId(lead.getCityId())
+                        && textContainsAny(selectedCityName, lead.getAddress(), lead.getMessage(), lead.getRequirements(), lead.getRemarks()));
+        }
+
+        return stateMatches && cityMatches;
+    }
+
+    private static boolean valueMatches(String leadValue, String selectedValue) {
+        return selectedValue != null && !selectedValue.isBlank()
+                && leadValue != null
+                && leadValue.trim().equals(selectedValue.trim());
+    }
+
+    private static boolean cityBelongsToState(String leadCityId, String selectedStateId, Map<String, String> cityStateMap) {
+        if (leadCityId == null || leadCityId.isBlank() || selectedStateId == null || selectedStateId.isBlank()) {
+            return false;
+        }
+        String mappedStateId = cityStateMap == null ? null : cityStateMap.get(leadCityId.trim());
+        if (mappedStateId == null && cityStateMap != null) {
+            mappedStateId = cityStateMap.get("name:" + normalizeText(leadCityId));
+        }
+        return mappedStateId != null && mappedStateId.trim().equals(selectedStateId.trim());
+    }
+
+    private static boolean textEquals(String value, String query) {
+        return value != null && !value.isBlank() && query != null && !query.isBlank()
+                && normalizeText(value).equals(normalizeText(query));
+    }
+
+    private static boolean hasNumericLocationId(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            return Long.parseLong(value.trim()) > 0;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
+    private static boolean textContainsAny(String query, String... values) {
+        if (query == null || query.isBlank()) {
+            return false;
+        }
+        String normalizedQuery = normalizeText(query);
+        for (String value : values) {
+            if (value != null && !value.isBlank() && normalizeText(value).contains(normalizedQuery)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalizeText(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", " ")
+                .trim();
     }
 
     private static final Map<Long, String> CERTIFICATE_TYPE_LABELS = Map.ofEntries(
@@ -213,6 +308,9 @@ public class LeadsController {
             @RequestParam(required = false) Long sourceId,
             @RequestParam(required = false) List<String> quotationTypes,
             @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String countryId,
+            @RequestParam(required = false) String stateId,
+            @RequestParam(required = false) String cityId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
 
@@ -234,10 +332,63 @@ public class LeadsController {
             }
         } catch (Exception ignored) { }
 
+        String filterCountryId = (countryId == null || countryId.isBlank()) ? null : countryId.trim();
+        String filterStateId = (stateId == null || stateId.isBlank()) ? null : stateId.trim();
+        String filterCityId = (cityId == null || cityId.isBlank()) ? null : cityId.trim();
+
+        String selectedStateName = null;
+        String selectedCityName = null;
+        if (filterStateId != null && !filterStateId.isBlank()) {
+            try {
+                selectedStateName = jdbcTemplate.queryForObject("SELECT name FROM states WHERE id = ?", String.class, Long.parseLong(filterStateId));
+            } catch (Exception ignored) {
+                selectedStateName = null;
+            }
+        }
+        if (filterCityId != null && !filterCityId.isBlank()) {
+            try {
+                selectedCityName = jdbcTemplate.queryForObject("SELECT name FROM cities WHERE id = ?", String.class, Long.parseLong(filterCityId));
+            } catch (Exception ignored) {
+                selectedCityName = null;
+            }
+        }
+
+        String effectiveCountryId = (filterCountryId == null || filterCountryId.isBlank()) ? String.valueOf(INDIA_COUNTRY_ID) : filterCountryId;
+        List<Map<String, Object>> countries = jdbcTemplate.queryForList("SELECT id, name FROM countries WHERE id = ? ORDER BY name", INDIA_COUNTRY_ID);
+        List<Map<String, Object>> states = jdbcTemplate.queryForList("SELECT id, name, country_id FROM states WHERE country_id = ? ORDER BY name", INDIA_COUNTRY_ID);
+        List<Map<String, Object>> cities = jdbcTemplate.queryForList(
+                "SELECT c.id, c.name, c.state_id FROM cities c INNER JOIN states s ON s.id = c.state_id WHERE s.country_id = ? ORDER BY c.name",
+                INDIA_COUNTRY_ID);
+
+        Map<String, String> cityStateMap = new LinkedHashMap<>();
+        for (Map<String, Object> city : cities) {
+            Object cityIdValue = city.get("id");
+            Object stateIdValue = city.get("state_id");
+            if (cityIdValue != null && stateIdValue != null) {
+                String mappedStateId = String.valueOf(stateIdValue);
+                cityStateMap.put(String.valueOf(cityIdValue), mappedStateId);
+                Object cityNameValue = city.get("name");
+                if (cityNameValue != null) {
+                    String cityNameKey = "name:" + normalizeText(String.valueOf(cityNameValue));
+                    cityStateMap.merge(cityNameKey, mappedStateId,
+                            (existingStateId, newStateId) -> existingStateId.equals(newStateId) ? existingStateId : "");
+                }
+            }
+        }
+
+        String selectedCountryName = null;
+        if (effectiveCountryId != null && !effectiveCountryId.isBlank()) {
+            try {
+                selectedCountryName = jdbcTemplate.queryForObject("SELECT name FROM countries WHERE id = ?", String.class, Long.parseLong(effectiveCountryId));
+            } catch (Exception ignored) {
+                selectedCountryName = null;
+            }
+        }
+
         boolean canLeadRead = leadPermissionService.has(authentication, "all_lead", "read");
         boolean canLeadEdit = leadPermissionService.has(authentication, "all_lead", "edit");
         List<Lead> leads = canLeadRead
-            ? leadRepository.findByFilters(status, sourceId, quotationTypesFilter, certificateTypeIdsFilter, userId, startDateTime, endDateTime)
+            ? leadRepository.findByFilters(status, sourceId, quotationTypesFilter, certificateTypeIdsFilter, userId, startDateTime, endDateTime, filterCountryId, null, null)
             : new java.util.ArrayList<>();
         String currentEmail = authentication == null ? "" : authentication.getName();
         Integer currentRoleId = userRepository.findByEmailIgnoreCase(currentEmail)
@@ -300,6 +451,12 @@ public class LeadsController {
                 lead.setAssignToName(creatorNames.getOrDefault(lead.getAssignTo(), "Unknown"));
             }
         }
+
+        String locationStateName = selectedStateName;
+        String locationCityName = selectedCityName;
+        leads = leads.stream()
+                .filter(lead -> matchesLeadLocationFilter(lead, filterStateId, filterCityId, locationStateName, locationCityName, cityStateMap))
+                .toList();
 
         // Status counts for pie chart (computed from the filtered lead list)
         Map<String, Long> statusCounts = new LinkedHashMap<>();
@@ -366,6 +523,15 @@ public class LeadsController {
         model.addAttribute("allServices", LeadService.values());
         model.addAttribute("selectedStatus", status);
         model.addAttribute("selectedSourceId", sourceId);
+        model.addAttribute("allCountries", countries);
+        model.addAttribute("allStates", states);
+        model.addAttribute("allCities", cities);
+        model.addAttribute("selectedCountryId", effectiveCountryId);
+        model.addAttribute("selectedCountryName", selectedCountryName);
+        model.addAttribute("selectedStateId", filterStateId);
+        model.addAttribute("selectedStateName", selectedStateName);
+        model.addAttribute("selectedCityId", filterCityId);
+        model.addAttribute("selectedCityName", selectedCityName);
 
         String activeFilterLabel = "All Leads";
         if (status != null && !status.isEmpty()) {
